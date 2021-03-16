@@ -686,15 +686,17 @@ fn group_doc_ops(changes: &[amp::UncompressedChange], actors: &[amp::ActorId]) -
                 );
 
             for pred in &op.pred {
-                by_obj_id
+                if let Some(docop) = by_obj_id
                     .entry(objid.clone())
                     .or_default()
                     .entry(key.clone())
                     .or_default()
                     .get_mut(pred)
-                    .unwrap()
-                    .succ
-                    .push((opid.0, actors.iter().position(|a| a == &opid.1).unwrap()));
+                {
+                    docop
+                        .succ
+                        .push((opid.0, actors.iter().position(|a| a == &opid.1).unwrap()));
+                }
             }
         }
     }
