@@ -66,7 +66,9 @@ impl OpSet {
         for op in ops.drain(..) {
             let obj_id = op.obj;
 
+            println!("op {:#?}", op);
             let pending_diff = self.apply_op(op, actors)?;
+            println!("pending diff {:#?}", pending_diff);
 
             if let Some(diff) = pending_diff {
                 diffs.entry(obj_id).or_default().push(diff);
@@ -152,6 +154,9 @@ impl OpSet {
                         .operation_key()
                         .to_opid()
                         .ok_or(AutomergeError::HeadToOpId)?;
+                    println!("{:#?}", object);
+                    println!("{:?}", id);
+                    println!("{:?}", object.index_of(id));
                     let index = object.index_of(id).unwrap_or(0);
                     tracing::debug!(new_id=?id, index=%index, after=?op.operation_key(), "inserting new element");
                     object.seq.insert_index(index, id);

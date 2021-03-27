@@ -89,6 +89,8 @@ impl Backend {
         }
 
         let op_set = &mut self.op_set;
+        println!("{:#?}", pending_diffs);
+
         let diffs = op_set.finalize_diffs(pending_diffs, &self.actors)?;
         self.make_patch(diffs, actor)
     }
