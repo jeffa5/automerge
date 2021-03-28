@@ -1,13 +1,14 @@
 pub mod error;
 mod serde_impls;
 mod utility_impls;
+use arbitrary::Arbitrary;
 use std::convert::TryFrom;
 use std::fmt;
 
 use serde::{ser::SerializeMap, Deserialize, Serialize, Serializer};
 use std::collections::HashMap;
 
-#[derive(Eq, PartialEq, Hash, Clone, PartialOrd, Ord)]
+#[derive(Eq, PartialEq, Hash, Clone, PartialOrd, Ord, Arbitrary)]
 pub struct ActorId(Vec<u8>);
 
 impl fmt::Debug for ActorId {
@@ -69,7 +70,7 @@ impl ObjType {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Copy, Hash)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Copy, Hash, Arbitrary)]
 #[serde(rename_all = "camelCase")]
 pub enum MapType {
     Map,
@@ -83,7 +84,7 @@ pub enum SequenceType {
     Text,
 }
 
-#[derive(Eq, PartialEq, Hash, Clone)]
+#[derive(Eq, PartialEq, Hash, Clone, Arbitrary)]
 pub struct OpId(pub u64, pub ActorId);
 
 impl OpId {
@@ -96,7 +97,7 @@ impl OpId {
     }
 }
 
-#[derive(Eq, PartialEq, Debug, Hash, Clone)]
+#[derive(Eq, PartialEq, Debug, Hash, Clone, Arbitrary)]
 pub enum ObjectId {
     Id(OpId),
     Root,

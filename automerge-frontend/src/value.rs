@@ -1,3 +1,4 @@
+use arbitrary::Arbitrary;
 use automerge_protocol as amp;
 use serde::Serialize;
 use std::{borrow::Borrow, collections::HashMap};
@@ -11,7 +12,7 @@ impl From<HashMap<amp::OpId, Value>> for Conflicts {
     }
 }
 
-#[derive(Serialize, Clone, Debug, PartialEq)]
+#[derive(Serialize, Clone, Debug, PartialEq, Arbitrary)]
 #[serde(untagged)]
 pub enum Value {
     Map(HashMap<String, Value>, amp::MapType),
@@ -21,7 +22,7 @@ pub enum Value {
     Primitive(Primitive),
 }
 
-#[derive(Serialize, Clone, Debug, PartialEq)]
+#[derive(Serialize, Clone, Debug, PartialEq, Arbitrary)]
 pub enum Primitive {
     Str(String),
     Int(i64),
@@ -35,7 +36,7 @@ pub enum Primitive {
     Null,
 }
 
-#[derive(Serialize, Clone, Debug, PartialEq)]
+#[derive(Serialize, Clone, Debug, PartialEq, Arbitrary)]
 pub struct Cursor {
     pub index: u32,
     pub(crate) object: amp::ObjectId,
@@ -168,7 +169,8 @@ impl Value {
             Value::Text(graphemes) => serde_json::Value::String(graphemes.join("")),
             Value::Primitive(v) => match v {
                 Primitive::F64(n) => serde_json::Value::Number(
-                    serde_json::Number::from_f64(*n).unwrap_or_else(|| serde_json::Number::from(0)),
+                    serde_json::Number::from_f64(*n)
+                        .unwrap_or_else(|| serde_json::Number::from(0)),
                 ),
                 Primitive::F32(n) => serde_json::Value::Number(
                     serde_json::Number::from_f64(f64::from(*n))
