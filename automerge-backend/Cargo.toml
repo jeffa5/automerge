@@ -28,3 +28,5 @@ features = [
   "console",
 ]
 
+[dev-dependencies]
+uuid = { version = "^0.8.2", features=["v4"] }
