@@ -5,6 +5,7 @@ extern crate maplit;
 extern crate rand;
 extern crate web_sys;
 
+#[cfg(target_arch = "wasm32")]
 #[allow(unused_macros)]
 macro_rules! log {
     ( $( $t:tt )* ) => {

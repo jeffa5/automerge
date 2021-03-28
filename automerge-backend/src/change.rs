@@ -450,6 +450,7 @@ fn group_doc_change_and_doc_ops(
     let mut change_actors = HashMap::new();
     let mut actor_max = HashMap::new();
 
+    #[cfg(target_arch = "wasm32")]
     log!("{:?} {:?} {:?}", changes, ops, actors);
     for (i, change) in changes.iter().enumerate() {
         if change.seq != *actor_max.get(&change.actor).unwrap_or(&1) {
