@@ -661,7 +661,6 @@ impl StateTreeMap {
         self.props.get(key.as_ref())
     }
 
-    #[tracing::instrument(skip(self, prop_diffs))]
     fn apply_diff<K>(
         &self,
         prop_diffs: &DiffToApply<K, &HashMap<String, HashMap<amp::OpId, amp::Diff>>>,
