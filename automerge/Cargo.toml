@@ -34,3 +34,7 @@ unicode-segmentation = "1.7.1"
 [[bench]]
 name = "crdt_benchmarks"
 harness = false
+
+[[bench]]
+name = "frontend_creation"
+harness = false
