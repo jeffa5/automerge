@@ -83,7 +83,6 @@ impl OpSet {
         deps
     }
 
-    #[instrument(skip(self))]
     fn apply_op(
         &mut self,
         op: OpHandle,

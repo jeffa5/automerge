@@ -63,6 +63,7 @@ impl FrontendState {
     /// Apply a patch received from the backend to this frontend state,
     /// returns the updated cached value (if it has changed) and a new
     /// `FrontendState` which replaces this one
+    #[tracing::instrument(skip(self, self_actor, patch))]
     fn apply_remote_patch(self, self_actor: &ActorId, patch: &Patch) -> Result<Self, InvalidPatch> {
         match self {
             FrontendState::WaitingForInFlightRequests {
@@ -136,6 +137,7 @@ impl FrontendState {
         self.resolve_path(path).map(|r| r.default_value())
     }
 
+    #[tracing::instrument(skip(self, path))]
     fn resolve_path(&self, path: &Path) -> Option<ResolvedPath> {
         let root = match self {
             FrontendState::WaitingForInFlightRequests {
@@ -151,6 +153,7 @@ impl FrontendState {
     /// which it can use to query the document state and make changes. It
     /// can also throw an error of type `E`. If an error is thrown in the
     /// closure no chnages are made and the error is returned.
+    #[tracing::instrument(skip(self, actor, change_closure, seq))]
     pub fn optimistically_apply_change<F, E>(
         self,
         actor: &ActorId,

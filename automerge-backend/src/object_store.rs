@@ -50,7 +50,6 @@ impl ObjState {
         self.following.get(parent).cloned().unwrap_or_default()
     }
 
-    #[tracing::instrument(skip(self))]
     pub fn index_of(&self, id: OpId) -> Option<usize> {
         let mut prev_id = id.into();
         let mut index = None;
