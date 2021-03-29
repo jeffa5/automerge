@@ -175,6 +175,7 @@ impl Change {
         &self.actors[0]
     }
 
+    #[tracing::instrument(skip(bytes), fields(bytes_len = bytes.len()))]
     pub fn load_document(bytes: &[u8]) -> Result<Vec<Change>, AutomergeError> {
         load_blocks(bytes)
     }
@@ -386,6 +387,7 @@ fn decode_columns(
     ops
 }
 
+#[tracing::instrument(skip(bytes, changes))]
 fn decode_block(bytes: &[u8], changes: &mut Vec<Change>) -> Result<(), AutomergeError> {
     match bytes[PREAMBLE_BYTES] {
         BLOCK_TYPE_DOC => {
@@ -566,6 +568,7 @@ fn doc_changes_to_uncompressed_changes(
         .collect()
 }
 
+#[tracing::instrument(skip(bytes))]
 fn load_blocks(bytes: &[u8]) -> Result<Vec<Change>, AutomergeError> {
     let mut changes = Vec::new();
     for slice in split_blocks(bytes).into_iter() {
@@ -574,6 +577,7 @@ fn load_blocks(bytes: &[u8]) -> Result<Vec<Change>, AutomergeError> {
     Ok(changes)
 }
 
+#[tracing::instrument(skip(bytes))]
 fn split_blocks(bytes: &[u8]) -> Vec<&[u8]> {
     // split off all valid blocks - ignore the rest if its corrupted or truncated
     let mut blocks = Vec::new();

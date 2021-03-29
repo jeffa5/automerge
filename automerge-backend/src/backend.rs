@@ -35,6 +35,7 @@ impl Backend {
         }
     }
 
+    #[tracing::instrument(skip(self, diffs, actor_seq))]
     fn make_patch(
         &self,
         diffs: Option<amp::Diff>,
@@ -66,7 +67,7 @@ impl Backend {
         })
     }
 
-    #[tracing::instrument(skip(self, changes))]
+    #[tracing::instrument(skip(self, changes), fields(changes_cound = changes.len()))]
     pub fn load_changes(&mut self, mut changes: Vec<Change>) -> Result<(), AutomergeError> {
         let changes = changes.drain(0..).map(Rc::new).collect();
         self.apply(changes, None)?;
@@ -86,6 +87,7 @@ impl Backend {
         self.op_set.heads()
     }
 
+    #[tracing::instrument(skip(self, changes, actor))]
     fn apply(
         &mut self,
         mut changes: Vec<Rc<Change>>,
@@ -149,6 +151,7 @@ impl Backend {
         Ok(())
     }
 
+    #[tracing::instrument(skip(self, change, local, diffs))]
     fn add_change(
         &mut self,
         change: Rc<Change>,

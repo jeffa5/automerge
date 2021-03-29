@@ -310,6 +310,7 @@ impl OpSet {
 
     // this recursively walks through all the objects touched by the changes
     // to generate a diff in a single pass
+    #[tracing::instrument(skip(self, pending, actors))]
     pub fn finalize_diffs(
         &mut self,
         mut pending: HashMap<ObjectId, Vec<PendingDiff>>,
