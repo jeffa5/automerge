@@ -279,6 +279,7 @@ impl Default for Frontend {
 }
 
 impl Frontend {
+    #[tracing::instrument]
     #[cfg(feature = "std")]
     pub fn new() -> Self {
         let system_time = || {
@@ -379,6 +380,7 @@ impl Frontend {
         }
     }
 
+    #[tracing::instrument(skip(self, change_closure))]
     pub fn change<F, E>(
         &mut self,
         message: Option<String>,
@@ -416,6 +418,7 @@ impl Frontend {
         }
     }
 
+    #[tracing::instrument(skip(self, patch))]
     pub fn apply_patch(&mut self, patch: Patch) -> Result<(), InvalidPatch> {
         // TODO this leaves the `state` as `None` if there's an error, it shouldn't
         self.cached_value = None;
@@ -453,11 +456,13 @@ impl Frontend {
             .map(|o| o.values())
     }
 
+    #[tracing::instrument(skip(self))]
     pub fn get_value(&self, path: &Path) -> Option<Value> {
         self.state.as_ref().and_then(|s| s.get_value(path))
     }
 
     /// Returns the value given by path, if it exists
+    #[tracing::instrument(skip(self))]
     pub fn value_at_path(&self, path: &Path) -> Option<Value> {
         self.state
             .as_ref()

@@ -22,6 +22,7 @@ pub struct Backend {
 }
 
 impl Backend {
+    #[tracing::instrument]
     pub fn init() -> Backend {
         let op_set = Rc::new(OpSet::init());
         Backend {
@@ -65,12 +66,14 @@ impl Backend {
         })
     }
 
+    #[tracing::instrument(skip(self, changes))]
     pub fn load_changes(&mut self, mut changes: Vec<Change>) -> Result<(), AutomergeError> {
         let changes = changes.drain(0..).map(Rc::new).collect();
         self.apply(changes, None)?;
         Ok(())
     }
 
+    #[tracing::instrument(skip(self, changes))]
     pub fn apply_changes(
         &mut self,
         mut changes: Vec<Change>,
@@ -107,6 +110,7 @@ impl Backend {
             .ok_or(AutomergeError::InvalidSeq(seq))
     }
 
+    #[tracing::instrument(skip(self, change))]
     pub fn apply_local_change(
         &mut self,
         mut change: amp::UncompressedChange,
@@ -217,6 +221,7 @@ impl Backend {
         None
     }
 
+    #[tracing::instrument(skip(self))]
     pub fn get_patch(&self) -> Result<amp::Patch, AutomergeError> {
         let diffs = self
             .op_set
@@ -252,6 +257,7 @@ impl Backend {
             .collect()
     }
 
+    #[tracing::instrument(skip(self))]
     pub fn save(&self) -> Result<Vec<u8>, AutomergeError> {
         let changes: Vec<amp::UncompressedChange> = self
             .history
@@ -262,6 +268,7 @@ impl Backend {
         encode_document(changes)
     }
 
+    #[tracing::instrument(skip(data))]
     pub fn load(data: Vec<u8>) -> Result<Self, AutomergeError> {
         let changes = Change::load_document(&data)?;
         let mut backend = Self::init();
