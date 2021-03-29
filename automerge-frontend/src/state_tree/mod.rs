@@ -54,6 +54,7 @@ impl StateTree {
         }
     }
 
+    #[tracing::instrument(skip(self, diff))]
     pub fn apply_diff(&self, diff: &amp::Diff) -> Result<StateTree, error::InvalidPatch> {
         match diff {
             amp::Diff::Map(mapdiff) => {
@@ -78,6 +79,7 @@ impl StateTree {
         }
     }
 
+    #[tracing::instrument(skip(self, diff))]
     fn apply_map_diff(&self, diff: &amp::MapDiff) -> Result<StateTree, error::InvalidPatch> {
         match self.objects.get(&diff.object_id) {
             Some(StateTreeComposite::Map(m)) => {
@@ -659,6 +661,7 @@ impl StateTreeMap {
         self.props.get(key.as_ref())
     }
 
+    #[tracing::instrument(skip(self, prop_diffs))]
     fn apply_diff<K>(
         &self,
         prop_diffs: &DiffToApply<K, &HashMap<String, HashMap<amp::OpId, amp::Diff>>>,
