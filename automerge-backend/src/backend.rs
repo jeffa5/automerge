@@ -85,11 +85,11 @@ impl Backend {
         let mut pending_diffs = HashMap::new();
 
         for change in changes.into_iter() {
+            println!("change {:#?}", change.decode());
             self.add_change(change, actor.is_some(), &mut pending_diffs)?;
         }
 
         let op_set = &mut self.op_set;
-        println!("{:#?}", pending_diffs);
 
         let diffs = op_set.finalize_diffs(pending_diffs, &self.actors)?;
         self.make_patch(diffs, actor)

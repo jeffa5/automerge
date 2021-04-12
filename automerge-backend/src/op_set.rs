@@ -66,9 +66,8 @@ impl OpSet {
         for op in ops.drain(..) {
             let obj_id = op.obj;
 
-            println!("op {:#?}", op);
+            dbg!(&op);
             let pending_diff = self.apply_op(op, actors)?;
-            println!("pending diff {:#?}", pending_diff);
 
             if let Some(diff) = pending_diff {
                 diffs.entry(obj_id).or_default().push(diff);
@@ -122,7 +121,9 @@ impl OpSet {
         let object = self.get_obj_mut(&object_id)?;
 
         let (diff, overwritten) = if object.is_seq() {
+            println!("is_seq");
             if op.insert {
+                println!("is insert {:?}", op.key.as_element_id());
                 object.insert_after(
                     op.key.as_element_id().ok_or(AutomergeError::MapKeyInSeq)?,
                     op.clone(),
@@ -130,6 +131,7 @@ impl OpSet {
                 );
             }
 
+            dbg!(&object.props);
             let ops = object.props.entry(op.operation_key()).or_default();
             let before = !ops.is_empty();
             let overwritten_ops = ops.incorporate_new_op(&op)?;
@@ -137,10 +139,12 @@ impl OpSet {
 
             let diff = match (before, after) {
                 (true, true) => {
+                    println!("tt");
                     tracing::debug!("updating existing element");
                     Some(PendingDiff::Set(op.clone()))
                 }
                 (true, false) => {
+                    println!("tf");
                     let opid = op
                         .operation_key()
                         .to_opid()
@@ -150,15 +154,17 @@ impl OpSet {
                     Some(PendingDiff::SeqRemove(op.clone(), index))
                 }
                 (false, true) => {
+                    println!("ft");
                     let id = op
                         .operation_key()
                         .to_opid()
                         .ok_or(AutomergeError::HeadToOpId)?;
-                    println!("{:#?}", object);
-                    println!("{:?}", id);
-                    println!("{:?}", object.index_of(id));
+                    dbg!(&id);
+                    dbg!(&object);
                     let index = object.index_of(id).unwrap_or(0);
+                    dbg!(&index);
                     tracing::debug!(new_id=?id, index=%index, after=?op.operation_key(), "inserting new element");
+                    println!("insert index {:?} {:?}", index, id);
                     object.seq.insert_index(index, id);
                     Some(PendingDiff::SeqInsert(op.clone(), index, op.id))
                 }
@@ -184,6 +190,7 @@ impl OpSet {
             }
         };
 
+        dbg!(&overwritten);
         for op in overwritten {
             if let InternalOpType::Set(amp::ScalarValue::Cursor(ref oid)) = op.op.action {
                 if let Some(opids) = self.cursors.get_mut(&op.op.obj) {

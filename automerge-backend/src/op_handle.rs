@@ -1,4 +1,3 @@
-use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 
@@ -7,7 +6,7 @@ use crate::internal::{InternalOp, InternalOpType, Key, ObjectId, OpId};
 use crate::Change;
 use automerge_protocol as amp;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct OpHandle {
     pub id: OpId,
     pub op: InternalOp,
@@ -63,17 +62,6 @@ impl OpHandle {
                 }
             }
         }
-    }
-}
-
-impl fmt::Debug for OpHandle {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("OpHandle")
-            .field("id", &self.id)
-            .field("action", &self.action)
-            .field("obj", &self.obj)
-            .field("key", &self.key)
-            .finish()
     }
 }
 

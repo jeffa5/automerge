@@ -24,8 +24,6 @@ fn broken_reordering_of_values() {
     let (mut frontend, change) =
         Frontend::new_with_initial_state(Value::Map(hm, MapType::Map)).unwrap();
 
-    println!("change1 {:?}", change);
-
     // get patch and apply
     let (patch, _) = backend.apply_local_change(change).unwrap();
     frontend.apply_patch(patch).unwrap();
@@ -56,21 +54,20 @@ fn broken_reordering_of_values() {
             Value::Primitive(Primitive::Boolean(false)),
         ]),
     );
-    let expected = Value::Map(ehm.clone(), MapType::Map);
+    let expected = Value::Map(ehm, MapType::Map);
 
     // ok, sequence has int then bool
     assert_eq!(expected, frontend.get_value(&Path::root()).unwrap());
 
     // now apply the change to the backend and bring the patch back to the frontend
     if let Some(c) = c {
-        println!("change2 {:?}", c);
+        println!("change2 {:#?}", c);
         let (p, _) = backend.apply_local_change(c).unwrap();
         println!("patch {:#?}", p);
         frontend.apply_patch(p).unwrap();
     }
     let v = frontend.get_value(&Path::root()).unwrap();
 
-    let expected = Value::Map(ehm, MapType::Map);
     // not ok! sequence has bool then int
     assert_eq!(expected, v);
 }

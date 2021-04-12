@@ -523,6 +523,7 @@ impl ResolvedList {
         index: u32,
         payload: SetOrInsertPayload<&Value>,
     ) -> Result<LocalOperationResult, error::MissingIndexError> {
+        println!("SET INDEX {}", index);
         let (current_elemid, _) = self.value.elem_at(index.try_into().unwrap())?;
         let newvalue = MultiValue::new_from_value_2(NewValueRequest {
             actor: payload.actor,

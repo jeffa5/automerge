@@ -62,7 +62,9 @@ impl ObjState {
             match prev_id {
                 ElementId::Id(id) => {
                     // FIXME maybe I can speed this up with self.props.get before looking for
+                    dbg!(id);
                     index = self.seq.index_of(&id);
+                    dbg!(index);
                 }
                 ElementId::Head => return None,
             }
@@ -71,15 +73,19 @@ impl ObjState {
     }
 
     fn get_previous(&self, element: &ElementId) -> Option<ElementId> {
+        dbg!(element);
         let parent_id = match self.get_parent(element) {
             Some(p) => p,
             None => return None,
         };
+        dbg!(&parent_id);
         let children = self.insertions_after(&parent_id);
+        dbg!(&children);
         let pos = match children.iter().position(|k| k == element) {
             Some(p) => p,
             None => return None,
         };
+        dbg!(pos);
         if pos == 0 {
             Some(parent_id)
         } else {
