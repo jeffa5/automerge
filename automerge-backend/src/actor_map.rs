@@ -1,15 +1,21 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, collections::HashMap};
 
 use automerge_protocol as amp;
 
 use crate::internal::{ActorId, ElementId, InternalOp, InternalOpType, Key, ObjectId, OpId};
 
 #[derive(PartialEq, Debug, Clone)]
-pub(crate) struct ActorMap(Vec<amp::ActorId>);
+pub(crate) struct ActorMap {
+    id_to_index: HashMap<amp::ActorId, usize>,
+    index_to_id: HashMap<usize, amp::ActorId>,
+}
 
 impl ActorMap {
     pub fn new() -> ActorMap {
-        ActorMap(Vec::new())
+        ActorMap {
+            id_to_index: HashMap::new(),
+            index_to_id: HashMap::new(),
+        }
     }
 
     pub fn import_key(&mut self, key: &amp::Key) -> Key {
@@ -20,11 +26,13 @@ impl ActorMap {
     }
 
     pub fn import_actor(&mut self, actor: &amp::ActorId) -> ActorId {
-        if let Some(idx) = self.0.iter().position(|a| a == actor) {
-            ActorId(idx)
+        if let Some(idx) = self.id_to_index.get(actor) {
+            ActorId(*idx)
         } else {
-            self.0.push(actor.clone());
-            ActorId(self.0.len() - 1)
+            let index = self.id_to_index.len();
+            self.id_to_index.insert(actor.clone(), index);
+            self.index_to_id.insert(index, actor.clone());
+            ActorId(index)
         }
     }
 
@@ -70,7 +78,7 @@ impl ActorMap {
     }
 
     pub fn export_actor(&self, actor: ActorId) -> amp::ActorId {
-        self.0[actor.0].clone()
+        self.index_to_id[&actor.0].clone()
     }
 
     pub fn export_opid(&self, opid: &OpId) -> amp::OpId {
@@ -82,20 +90,6 @@ impl ActorMap {
             ObjectId::Root => amp::ObjectId::Root,
             ObjectId::Id(opid) => amp::ObjectId::Id(self.export_opid(opid)),
         }
-    }
-
-    #[allow(dead_code)]
-    pub fn index_of(&mut self, actor: &amp::ActorId) -> usize {
-        if let Some(index) = self.0.iter().position(|a| a == actor) {
-            return index;
-        }
-        self.0.push(actor.clone());
-        self.0.len() - 1
-    }
-
-    #[allow(dead_code)]
-    pub fn actor_for(&self, index: usize) -> Option<&amp::ActorId> {
-        self.0.get(index)
     }
 
     pub fn cmp(&self, eid1: &ElementId, eid2: &ElementId) -> Ordering {
@@ -127,8 +121,8 @@ impl ActorMap {
 
     fn cmp_opid(&self, op1: &OpId, op2: &OpId) -> Ordering {
         if op1.0 == op2.0 {
-            let actor1 = &self.0[(op1.1).0];
-            let actor2 = &self.0[(op2.1).0];
+            let actor1 = &self.index_to_id[&(op1.1).0];
+            let actor2 = &self.index_to_id[&(op2.1).0];
             actor1.cmp(actor2)
             //op1.1.cmp(&op2.1)
         } else {
