@@ -10,7 +10,7 @@ use std::{
 use automerge_protocol as amp;
 use flate2::{bufread::DeflateEncoder, Compression};
 
-use crate::{columnar::COLUMN_TYPE_DEFLATE, error::AutomergeError};
+use crate::{actor_map::ActorMap, columnar::COLUMN_TYPE_DEFLATE, error::AutomergeError};
 
 pub(crate) const DEFLATE_MIN_SIZE: usize = 256;
 
@@ -567,7 +567,7 @@ impl Decodable for amp::ActorId {
 }
 
 pub(crate) trait Encodable {
-    fn encode_with_actors_to_vec(&self, actors: &mut Vec<amp::ActorId>) -> io::Result<Vec<u8>> {
+    fn encode_with_actors_to_vec(&self, actors: &mut ActorMap) -> io::Result<Vec<u8>> {
         let mut buf = Vec::new();
         self.encode_with_actors(&mut buf, actors)?;
         Ok(buf)
@@ -576,7 +576,7 @@ pub(crate) trait Encodable {
     fn encode_with_actors<R: Write>(
         &self,
         buf: &mut R,
-        _actors: &mut Vec<amp::ActorId>,
+        _actors: &mut ActorMap,
     ) -> io::Result<usize> {
         self.encode(buf)
     }

@@ -17,6 +17,7 @@ use itertools::Itertools;
 use sha2::{Digest, Sha256};
 
 use crate::{
+    actor_map::ActorMap,
     columnar::{
         ChangeEncoder, ChangeIterator, ColumnEncoder, DocChange, DocOp, DocOpEncoder,
         DocOpIterator, OperationIterator, COLUMN_TYPE_DEFLATE,
@@ -137,7 +138,9 @@ fn encode_chunk(
     }
 
     // encode first actor
-    let mut actors = vec![uncompressed_change.actor_id.clone()];
+    let mut actor_map = ActorMap::new();
+    actor_map.get_or_insert(&uncompressed_change.actor_id);
+    let mut actor_map = actor_map;
     uncompressed_change
         .actor_id
         .to_bytes()
@@ -154,9 +157,10 @@ fn encode_chunk(
 
     // encode ops into a side buffer - collect all other actors
     let (ops_buf, mut ops) =
-        ColumnEncoder::encode_ops(uncompressed_change.operations.iter(), &mut actors);
+        ColumnEncoder::encode_ops(uncompressed_change.operations.iter(), &mut actor_map);
 
     // encode all other actors
+    let actors = actor_map.to_vec();
     actors[1..].encode(&mut bytes).unwrap();
 
     // now we know how many bytes ops are offset by so we can adjust the ranges
@@ -736,7 +740,7 @@ fn compress_doc_changes(
     Some(changes)
 }
 
-fn group_doc_ops(changes: &[amp::UncompressedChange], actors: &[amp::ActorId]) -> Vec<DocOp> {
+fn group_doc_ops(changes: &[amp::UncompressedChange], actors: &ActorMap) -> Vec<DocOp> {
     let mut by_obj_id = HashMap::<amp::ObjectId, HashMap<amp::Key, HashMap<amp::OpId, _>>>::new();
     let mut by_ref = HashMap::<amp::ObjectId, HashMap<amp::Key, Vec<amp::OpId>>>::new();
     let mut is_seq = HashSet::<amp::ObjectId>::new();
@@ -770,7 +774,7 @@ fn group_doc_ops(changes: &[amp::UncompressedChange], actors: &[amp::ActorId]) -
                 .insert(
                     opid.clone(),
                     DocOp {
-                        actor: actors.iter().position(|a| a == &opid.1).unwrap(),
+                        actor: actors.get_index(&opid.1).unwrap(),
                         ctr: opid.0,
                         action: op.action.clone(),
                         obj: op.obj.clone(),
@@ -790,7 +794,7 @@ fn group_doc_ops(changes: &[amp::UncompressedChange], actors: &[amp::ActorId]) -
                     .get_mut(pred)
                     .unwrap()
                     .succ
-                    .push((opid.0, actors.iter().position(|a| a == &opid.1).unwrap()));
+                    .push((opid.0, actors.get_index(&opid.1).unwrap()));
             }
         }
     }
@@ -858,19 +862,19 @@ pub(crate) fn encode_document(
 
     // this assumes that all actor_ids referenced are seen in changes.actor_id which is true
     // so long as we have a full history
-    let mut actors: Vec<_> = changes
-        .iter()
-        .map(|c| &c.actor_id)
-        .unique()
-        .sorted()
-        .cloned()
-        .collect();
+    let mut actor_map = changes.iter().map(|c| &c.actor_id).unique().sorted().fold(
+        ActorMap::new(),
+        |mut map, actor| {
+            map.import_actor(actor);
+            map
+        },
+    );
 
-    let (change_bytes, change_info) = ChangeEncoder::encode_changes(changes, &actors);
+    let (change_bytes, change_info) = ChangeEncoder::encode_changes(changes, &actor_map);
 
-    let doc_ops = group_doc_ops(changes, &actors);
+    let doc_ops = group_doc_ops(changes, &actor_map);
 
-    let (ops_bytes, ops_info) = DocOpEncoder::encode_doc_ops(&doc_ops, &mut actors);
+    let (ops_bytes, ops_info) = DocOpEncoder::encode_doc_ops(&doc_ops, &mut actor_map);
 
     bytes.extend(&MAGIC_BYTES);
     bytes.extend(vec![0, 0, 0, 0]); // we dont know the hash yet so fill in a fake
@@ -878,6 +882,7 @@ pub(crate) fn encode_document(
 
     let mut chunk = Vec::new();
 
+    let actors = actor_map.to_vec();
     actors.len().encode(&mut chunk)?;
 
     for a in &actors {

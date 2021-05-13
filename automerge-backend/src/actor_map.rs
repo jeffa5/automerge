@@ -7,14 +7,14 @@ use crate::internal::{ActorId, ElementId, InternalOp, InternalOpType, Key, Objec
 #[derive(PartialEq, Debug, Clone)]
 pub(crate) struct ActorMap {
     id_to_index: HashMap<amp::ActorId, usize>,
-    index_to_id: HashMap<usize, amp::ActorId>,
+    ids: Vec<amp::ActorId>,
 }
 
 impl ActorMap {
     pub fn new() -> ActorMap {
         ActorMap {
             id_to_index: HashMap::new(),
-            index_to_id: HashMap::new(),
+            ids: Vec::new(),
         }
     }
 
@@ -26,14 +26,7 @@ impl ActorMap {
     }
 
     pub fn import_actor(&mut self, actor: &amp::ActorId) -> ActorId {
-        if let Some(idx) = self.id_to_index.get(actor) {
-            ActorId(*idx)
-        } else {
-            let index = self.id_to_index.len();
-            self.id_to_index.insert(actor.clone(), index);
-            self.index_to_id.insert(index, actor.clone());
-            ActorId(index)
-        }
+        ActorId(self.get_or_insert(actor))
     }
 
     pub fn import_opid(&mut self, opid: &amp::OpId) -> OpId {
@@ -78,7 +71,7 @@ impl ActorMap {
     }
 
     pub fn export_actor(&self, actor: ActorId) -> amp::ActorId {
-        self.index_to_id[&actor.0].clone()
+        self.ids[actor.0].clone()
     }
 
     pub fn export_opid(&self, opid: &OpId) -> amp::OpId {
@@ -121,12 +114,30 @@ impl ActorMap {
 
     fn cmp_opid(&self, op1: &OpId, op2: &OpId) -> Ordering {
         if op1.0 == op2.0 {
-            let actor1 = &self.index_to_id[&(op1.1).0];
-            let actor2 = &self.index_to_id[&(op2.1).0];
+            let actor1 = &self.ids[(op1.1).0];
+            let actor2 = &self.ids[(op2.1).0];
             actor1.cmp(actor2)
-            //op1.1.cmp(&op2.1)
         } else {
             op1.0.cmp(&op2.0)
+        }
+    }
+
+    pub fn to_vec(&self) -> Vec<amp::ActorId> {
+        self.ids.clone()
+    }
+
+    pub fn get_index(&self, actor: &amp::ActorId) -> Option<usize> {
+        self.id_to_index.get(actor).map(|u| *u)
+    }
+
+    pub fn get_or_insert(&mut self, actor: &amp::ActorId) -> usize {
+        if let Some(idx) = self.id_to_index.get(actor) {
+            *idx
+        } else {
+            let index = self.ids.len();
+            self.ids.push(actor.clone());
+            self.id_to_index.insert(actor.clone(), index);
+            index
         }
     }
 }

@@ -12,9 +12,12 @@ use std::{
 use automerge_protocol as amp;
 use flate2::bufread::DeflateDecoder;
 
-use crate::encoding::{
-    BooleanDecoder, BooleanEncoder, ColData, Decodable, Decoder, DeltaDecoder, DeltaEncoder,
-    Encodable, RleDecoder, RleEncoder,
+use crate::{
+    actor_map::ActorMap,
+    encoding::{
+        BooleanDecoder, BooleanEncoder, ColData, Decodable, Decoder, DeltaDecoder, DeltaEncoder,
+        Encodable, RleDecoder, RleEncoder,
+    },
 };
 
 impl Encodable for Action {
@@ -33,22 +36,13 @@ impl Encodable for [amp::ActorId] {
     }
 }
 
-fn map_actor(actor: &amp::ActorId, actors: &mut Vec<amp::ActorId>) -> usize {
-    if let Some(pos) = actors.iter().position(|a| a == actor) {
-        pos
-    } else {
-        actors.push(actor.clone());
-        actors.len() - 1
-    }
-}
-
 impl Encodable for amp::ActorId {
     fn encode_with_actors<R: Write>(
         &self,
         buf: &mut R,
-        actors: &mut Vec<amp::ActorId>,
+        actors: &mut ActorMap,
     ) -> io::Result<usize> {
-        map_actor(self, actors).encode(buf)
+        actors.get_index(self).unwrap().encode(buf)
     }
 
     fn encode<R: Write>(&self, _buf: &mut R) -> io::Result<usize> {
@@ -558,7 +552,7 @@ impl ValEncoder {
         }
     }
 
-    fn append_value(&mut self, val: &amp::ScalarValue, actors: &mut Vec<amp::ActorId>) {
+    fn append_value(&mut self, val: &amp::ScalarValue, actors: &mut ActorMap) {
         // It may seem weird to have two consecutive matches on the same value. The reason is so
         // that we don't have to repeat the `append_null` calls on ref_actor and ref_counter in
         // every arm of the next match
@@ -603,7 +597,7 @@ impl ValEncoder {
             amp::ScalarValue::Cursor(opid) => {
                 // the cursor opid are encoded in DocOpEncoder::encode and ColumnEncoder::encode
                 self.len.append_value(VALUE_TYPE_CURSOR);
-                let actor_index = map_actor(&opid.1, actors);
+                let actor_index = actors.get_or_insert(&opid.1);
                 self.ref_actor.append_value(actor_index);
                 self.ref_counter.append_value(opid.0);
             }
@@ -641,7 +635,7 @@ impl KeyEncoder {
         }
     }
 
-    fn append(&mut self, key: &amp::Key, actors: &mut Vec<amp::ActorId>) {
+    fn append(&mut self, key: &amp::Key, actors: &mut ActorMap) {
         match &key {
             amp::Key::Map(s) => {
                 self.actor.append_null();
@@ -654,7 +648,7 @@ impl KeyEncoder {
                 self.str.append_null();
             }
             amp::Key::Seq(amp::ElementId::Id(amp::OpId(ctr, actor))) => {
-                self.actor.append_value(map_actor(actor, actors));
+                self.actor.append_value(actors.get_or_insert(actor));
                 self.ctr.append_value(*ctr);
                 self.str.append_null();
             }
@@ -717,11 +711,11 @@ impl PredEncoder {
         }
     }
 
-    fn append(&mut self, pred: &[amp::OpId], actors: &mut Vec<amp::ActorId>) {
+    fn append(&mut self, pred: &[amp::OpId], actors: &mut ActorMap) {
         self.num.append_value(pred.len());
         for p in pred.iter() {
             self.ctr.append_value(p.0);
-            self.actor.append_value(map_actor(&p.1, actors));
+            self.actor.append_value(actors.get_or_insert(&p.1));
         }
     }
 
@@ -747,14 +741,14 @@ impl ObjEncoder {
         }
     }
 
-    fn append(&mut self, obj: &amp::ObjectId, actors: &mut Vec<amp::ActorId>) {
+    fn append(&mut self, obj: &amp::ObjectId, actors: &mut ActorMap) {
         match obj {
             amp::ObjectId::Root => {
                 self.actor.append_null();
                 self.ctr.append_null();
             }
             amp::ObjectId::Id(amp::OpId(ctr, actor)) => {
-                self.actor.append_value(map_actor(actor, actors));
+                self.actor.append_value(actors.get_or_insert(actor));
                 self.ctr.append_value(*ctr);
             }
         }
@@ -781,7 +775,7 @@ pub(crate) struct ChangeEncoder {
 }
 
 impl ChangeEncoder {
-    pub fn encode_changes<'a, 'b, I>(changes: I, actors: &'a [amp::ActorId]) -> (Vec<u8>, Vec<u8>)
+    pub fn encode_changes<'a, 'b, I>(changes: I, actors: &'a ActorMap) -> (Vec<u8>, Vec<u8>)
     where
         I: IntoIterator<Item = &'b amp::UncompressedChange>,
     {
@@ -804,7 +798,7 @@ impl ChangeEncoder {
         }
     }
 
-    fn encode<'a, 'b, 'c, I>(&'a mut self, changes: I, actors: &'b [amp::ActorId])
+    fn encode<'a, 'b, 'c, I>(&'a mut self, changes: I, actors: &'b ActorMap)
     where
         I: IntoIterator<Item = &'c amp::UncompressedChange>,
     {
@@ -814,7 +808,7 @@ impl ChangeEncoder {
                 index_by_hash.insert(hash, index);
             }
             self.actor
-                .append_value(actors.iter().position(|a| a == &change.actor_id).unwrap());
+                .append_value(actors.get_index(&change.actor_id).unwrap());
             self.seq.append_value(change.seq);
             self.max_op
                 .append_value(change.start_op + change.operations.len() as u64 - 1);
@@ -885,10 +879,7 @@ pub(crate) struct DocOpEncoder {
 // FIXME - actors should not be mut here
 
 impl DocOpEncoder {
-    pub(crate) fn encode_doc_ops<'a, 'b, I>(
-        ops: I,
-        actors: &'a mut Vec<amp::ActorId>,
-    ) -> (Vec<u8>, Vec<u8>)
+    pub(crate) fn encode_doc_ops<'a, 'b, I>(ops: I, actors: &'a mut ActorMap) -> (Vec<u8>, Vec<u8>)
     where
         I: IntoIterator<Item = &'b DocOp>,
     {
@@ -910,7 +901,7 @@ impl DocOpEncoder {
         }
     }
 
-    fn encode<'a, 'b, 'c, I>(&'a mut self, ops: I, actors: &'b mut Vec<amp::ActorId>)
+    fn encode<'a, 'b, 'c, I>(&'a mut self, ops: I, actors: &'b mut ActorMap)
     where
         I: IntoIterator<Item = &'c DocOp>,
     {
@@ -995,7 +986,7 @@ pub(crate) struct ColumnEncoder {
 impl ColumnEncoder {
     pub fn encode_ops<'a, 'b, I>(
         ops: I,
-        actors: &'a mut Vec<amp::ActorId>,
+        actors: &'a mut ActorMap,
     ) -> (Vec<u8>, HashMap<u32, Range<usize>>)
     where
         I: IntoIterator<Item = &'b amp::Op>,
@@ -1016,7 +1007,7 @@ impl ColumnEncoder {
         }
     }
 
-    fn encode<'a, 'b, 'c, I>(&'a mut self, ops: I, actors: &'b mut Vec<amp::ActorId>)
+    fn encode<'a, 'b, 'c, I>(&'a mut self, ops: I, actors: &'b mut ActorMap)
     where
         I: IntoIterator<Item = &'c amp::Op>,
     {
@@ -1025,7 +1016,7 @@ impl ColumnEncoder {
         }
     }
 
-    fn append(&mut self, op: &amp::Op, actors: &mut Vec<amp::ActorId>) {
+    fn append(&mut self, op: &amp::Op, actors: &mut ActorMap) {
         self.obj.append(&op.obj, actors);
         self.key.append(&op.key, actors);
         self.insert.append(op.insert);
