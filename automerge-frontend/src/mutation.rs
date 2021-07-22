@@ -10,7 +10,7 @@ use crate::{
     },
     value::{Cursor, Primitive, Value},
     value_ref::RootRef,
-    Path,
+    Path, Primitive,
 };
 
 pub trait MutableDocument {
@@ -151,8 +151,8 @@ impl<'a> MutationTracker<'a> {
         self.state.value()
     }
 
-    pub fn value_ref(&self) -> RootRef {
-        self.state.value_ref()
+    pub fn cancel(self) {
+        self.state.rollback_operations(self.copies_for_rollback)
     }
 
     /// If the `value` is a map, individually assign each k,v in it to a key in
