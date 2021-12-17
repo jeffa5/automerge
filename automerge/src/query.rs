@@ -76,7 +76,6 @@ pub(crate) enum QueryResult {
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Index {
     pub visible: HashMap<ObjId, HashMap<ElemId, usize, FxBuildHasher>, FxBuildHasher>,
-    pub lens: HashMap<ObjId, usize, FxBuildHasher>,
     pub ops: HashSet<OpId, FxBuildHasher>,
 }
 
@@ -84,9 +83,12 @@ impl Index {
     pub fn new() -> Self {
         Index {
             visible: Default::default(),
-            lens: Default::default(),
             ops: Default::default(),
         }
+    }
+
+    pub fn length_of(&self, object: &ObjId) -> Option<usize> {
+        self.visible.get(object).map(|obj| obj.len())
     }
 
     pub fn has(&self, obj: &ObjId, e: &Option<ElemId>) -> bool {
@@ -106,7 +108,6 @@ impl Index {
                 match sub.get(&elem).copied() {
                     None => {
                         sub.insert(elem, 1);
-                        self.lens.entry(op.obj).and_modify(|n| *n += 1).or_insert(1);
                     }
                     Some(n) => {
                         sub.insert(elem, n + 1);
@@ -121,21 +122,19 @@ impl Index {
         if op.succ.is_empty() {
             let mut sub_empty = false;
             if let Some(elem) = op.elemid() {
-                if let Some(c) = self.visible.get_mut(&op.obj) {
-                    if let Some(d) = c.get(&elem).copied() {
+                if let Some(sub) = self.visible.get_mut(&op.obj) {
+                    if let Some(d) = sub.get(&elem).copied() {
                         if d == 1 {
-                            c.remove(&elem);
-                            self.lens.entry(op.obj).and_modify(|n| *n -= 1);
-                            sub_empty = c.is_empty();
+                            sub.remove(&elem);
+                            sub_empty = sub.is_empty();
                         } else {
-                            c.insert(elem, d - 1);
+                            sub.insert(elem, d - 1);
                         }
                     }
                 }
             }
             if sub_empty {
                 self.visible.remove(&op.obj);
-                self.lens.remove(&op.obj);
             }
         }
     }
@@ -150,7 +149,6 @@ impl Index {
                 match local_obj.get(elem).cloned() {
                     None => {
                         local_obj.insert(*elem, 1);
-                        self.lens.entry(*obj).and_modify(|o| *o += 1).or_insert(1);
                     }
                     Some(m) => {
                         local_obj.insert(*elem, m + n);

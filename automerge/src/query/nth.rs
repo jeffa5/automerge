@@ -49,7 +49,7 @@ impl<const B: usize> Nth<B> {
 
 impl<const B: usize> TreeQuery<B> for Nth<B> {
     fn query_node(&mut self, child: &OpTreeNode<B>) -> QueryResult {
-        if let Some(mut num_vis) = child.index.lens.get(&self.obj).copied() {
+        if let Some(mut num_vis) = child.index.length_of(&self.obj) {
             // num vis is the number of keys in the index
             // minus one if we're counting last_seen
             // let mut num_vis = s.keys().count();

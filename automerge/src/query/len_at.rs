@@ -20,7 +20,7 @@ impl<const B: usize> LenAt<B> {
 
 impl<const B: usize> TreeQuery<B> for LenAt<B> {
     fn query_node(&mut self, child: &OpTreeNode<B>) -> QueryResult {
-        self.len = child.index.lens.get(&self.obj).copied().unwrap_or(0);
+        self.len = child.index.length_of(&self.obj).unwrap_or(0);
         //QueryResult::Finish
         unimplemented!();
     }
