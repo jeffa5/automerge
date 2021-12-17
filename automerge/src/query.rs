@@ -69,13 +69,13 @@ pub(crate) trait TreeQuery<const B: usize> {
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum QueryResult {
     Next,
-    Decend,
+    Descend,
     Finish,
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Index {
-    pub visible: HashMap<ObjId, HashMap<ElemId, usize, FxBuildHasher>, FxBuildHasher>,
+    visible: HashMap<ObjId, HashMap<ElemId, usize, FxBuildHasher>, FxBuildHasher>,
     ops: HashSet<OpId, FxBuildHasher>,
 }
 
@@ -85,6 +85,14 @@ impl Index {
             visible: Default::default(),
             ops: Default::default(),
         }
+    }
+
+    pub fn visible_keys(&self) -> impl Iterator<Item = &ObjId> {
+        self.visible.keys()
+    }
+
+    pub fn get_visible(&self, obj: &ObjId) -> Option<&HashMap<ElemId, usize, FxBuildHasher>> {
+        self.visible.get(obj)
     }
 
     pub fn contains(&self, opid: &OpId) -> bool {

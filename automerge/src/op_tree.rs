@@ -98,7 +98,7 @@ impl<const B: usize> OpTreeInternal<B> {
         self.root_node
             .as_ref()
             .map(|root| match query.query_node_with_metadata(root, &self.m) {
-                QueryResult::Decend => root.search(&mut query, &self.m),
+                QueryResult::Descend => root.search(&mut query, &self.m),
                 _ => true,
             });
         query
@@ -281,7 +281,7 @@ impl<const B: usize> OpTreeNode<B> {
         } else {
             for (child_index, child) in self.children.iter().enumerate() {
                 match query.query_node_with_metadata(child, m) {
-                    QueryResult::Decend => {
+                    QueryResult::Descend => {
                         if child.search(query, m) {
                             return true;
                         }
@@ -308,15 +308,14 @@ impl<const B: usize> OpTreeNode<B> {
         self.reindex();
         if old != self.index {
             let mut objs: Vec<_> = old
-                .visible
-                .keys()
-                .chain(self.index.visible.keys())
+                .visible_keys()
+                .chain(self.index.visible_keys())
                 .collect();
             objs.sort();
             objs.dedup();
             for o in objs {
-                let a = old.visible.get(o).cloned().unwrap_or_default();
-                let b = self.index.visible.get(o).cloned().unwrap_or_default();
+                let a = old.get_visible(o).cloned().unwrap_or_default();
+                let b = self.index.get_visible(o).cloned().unwrap_or_default();
                 let mut keys: Vec<_> = a.keys().chain(b.keys()).collect();
                 keys.sort();
                 keys.dedup();
