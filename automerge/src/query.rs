@@ -76,7 +76,7 @@ pub(crate) enum QueryResult {
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Index {
     pub visible: HashMap<ObjId, HashMap<ElemId, usize, FxBuildHasher>, FxBuildHasher>,
-    pub ops: HashSet<OpId, FxBuildHasher>,
+    ops: HashSet<OpId, FxBuildHasher>,
 }
 
 impl Index {
@@ -85,6 +85,10 @@ impl Index {
             visible: Default::default(),
             ops: Default::default(),
         }
+    }
+
+    pub fn contains(&self, opid: &OpId) -> bool {
+        self.ops.contains(opid)
     }
 
     pub fn length_of(&self, object: &ObjId) -> Option<usize> {

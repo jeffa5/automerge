@@ -80,7 +80,7 @@ impl<const B: usize> TreeQuery<B> for SeekOp<B> {
                 QueryResult::Finish
             }
             Key::Seq(e) => {
-                if self.found || child.index.ops.contains(&e.0) {
+                if self.found || child.index.contains(&e.0) {
                     QueryResult::Decend
                 } else {
                     self.pos += child.len();

@@ -29,7 +29,7 @@ impl OpIdQuery {
 
 impl<const B: usize> TreeQuery<B> for OpIdQuery {
     fn query_node(&mut self, child: &OpTreeNode<B>) -> QueryResult {
-        if child.index.ops.contains(&self.target) {
+        if child.index.contains(&self.target) {
             QueryResult::Decend
         } else {
             self.index += child.len();
