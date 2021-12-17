@@ -117,14 +117,8 @@ impl Index {
         if op.succ.is_empty() {
             if let Some(elem) = op.elemid() {
                 let sub = self.visible.entry(op.obj).or_default();
-                match sub.get(&elem).copied() {
-                    None => {
-                        sub.insert(elem, 1);
-                    }
-                    Some(n) => {
-                        sub.insert(elem, n + 1);
-                    }
-                }
+                let n = sub.entry(elem).or_default();
+                *n += 1;
             }
         }
     }
