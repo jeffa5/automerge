@@ -10,7 +10,7 @@ use crate::{rle_set::RleSet, types::OpId};
 pub(crate) struct OpIdSet {
     map: HashMap<usize, RleSet, FxBuildHasher>,
     #[cfg(debug_assertions)]
-    set: HashSet<OpId>,
+    reference_set: HashSet<OpId>,
 }
 
 impl OpIdSet {
@@ -21,8 +21,8 @@ impl OpIdSet {
             .insert(opid.counter());
         #[cfg(debug_assertions)]
         {
-            self.set.insert(opid);
-            assert_eq!(self.set, self.iter().collect());
+            self.reference_set.insert(opid);
+            assert_eq!(self.reference_set, self.iter().collect());
         }
     }
 
@@ -38,8 +38,8 @@ impl OpIdSet {
         }
         #[cfg(debug_assertions)]
         {
-            self.set.remove(opid);
-            assert_eq!(self.set, self.iter().collect());
+            self.reference_set.remove(opid);
+            assert_eq!(self.reference_set, self.iter().collect());
         }
         present
     }
@@ -51,7 +51,7 @@ impl OpIdSet {
             .map_or(false, |set| set.contains(opid.counter()));
         #[cfg(debug_assertions)]
         {
-            assert_eq!(b, self.set.contains(opid), "{:?}", self);
+            assert_eq!(b, self.reference_set.contains(opid), "{:?}", self);
         }
         b
     }

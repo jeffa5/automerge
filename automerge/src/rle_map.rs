@@ -7,7 +7,7 @@ pub struct RleMap {
     /// mapping from start of range to end of the range
     map: BTreeMap<u64, Vec<usize>>,
     #[cfg(debug_assertions)]
-    set: HashMap<u64, usize>,
+    reference_map: HashMap<u64, usize>,
 }
 
 impl RleMap {
@@ -73,8 +73,8 @@ impl RleMap {
         }
         #[cfg(debug_assertions)]
         {
-            self.set.insert(counter, value);
-            assert_eq!(self.set, self.iter().collect());
+            self.reference_map.insert(counter, value);
+            assert_eq!(self.reference_map, self.iter().collect());
         }
     }
 
@@ -108,8 +108,8 @@ impl RleMap {
         }
         #[cfg(debug_assertions)]
         {
-            self.set.remove(&counter);
-            assert_eq!(self.set, self.iter().collect());
+            self.reference_map.remove(&counter);
+            assert_eq!(self.reference_map, self.iter().collect());
         }
     }
 

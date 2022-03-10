@@ -7,7 +7,7 @@ pub struct RleSet {
     /// mapping from start of range to end of the range
     map: BTreeMap<u64, u64>,
     #[cfg(debug_assertions)]
-    set: HashSet<u64>,
+    reference_set: HashSet<u64>,
 }
 
 impl RleSet {
@@ -50,8 +50,8 @@ impl RleSet {
         }
         #[cfg(debug_assertions)]
         {
-            self.set.insert(value);
-            assert_eq!(self.set, self.iter().collect());
+            self.reference_set.insert(value);
+            assert_eq!(self.reference_set, self.iter().collect());
         }
     }
 
@@ -75,8 +75,8 @@ impl RleSet {
         }
         #[cfg(debug_assertions)]
         {
-            self.set.remove(value);
-            assert_eq!(self.set, self.iter().collect());
+            self.reference_set.remove(value);
+            assert_eq!(self.reference_set, self.iter().collect());
         }
     }
 

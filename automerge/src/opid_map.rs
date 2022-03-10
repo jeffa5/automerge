@@ -15,7 +15,7 @@ pub(crate) struct VisibleElemIdMap {
     // a value that is not the default (1) gets put in the map instead of the set
     map: HashMap<usize, RleMap, FxBuildHasher>,
     #[cfg(debug_assertions)]
-    set: HashMap<ElemId, usize>,
+    reference_map: HashMap<ElemId, usize>,
 }
 
 impl VisibleElemIdMap {
@@ -40,13 +40,8 @@ impl VisibleElemIdMap {
         }
         #[cfg(debug_assertions)]
         {
-            self.set.insert(opid, value);
-            assert_eq!(self.set, self.iter().collect());
-            println!(
-                "ourmap: {}, hashmap: {}",
-                self.map.iter().map(|(_, v)| v.num_keys()).sum::<usize>(),
-                self.set.len()
-            );
+            self.reference_map.insert(opid, value);
+            assert_eq!(self.reference_map, self.iter().collect());
         }
     }
 
@@ -61,8 +56,8 @@ impl VisibleElemIdMap {
         }
         #[cfg(debug_assertions)]
         {
-            self.set.remove(opid);
-            assert_eq!(self.set, self.iter().collect());
+            self.reference_map.remove(opid);
+            assert_eq!(self.reference_map, self.iter().collect());
         }
     }
 
@@ -74,7 +69,7 @@ impl VisibleElemIdMap {
                 .map_or(false, |set| set.contains_key(opid.0.counter()));
         #[cfg(debug_assertions)]
         {
-            assert_eq!(b, self.set.contains_key(opid), "{:?}", self);
+            assert_eq!(b, self.reference_map.contains_key(opid), "{:?}", self);
         }
         b
     }
