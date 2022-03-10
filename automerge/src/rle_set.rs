@@ -52,7 +52,16 @@ impl RleSet {
         {
             self.reference_set.insert(value);
             assert_eq!(self.reference_set, self.iter().collect());
+            // println!("rleset space: {:?}", self.space_comparison());
         }
+    }
+
+    #[cfg(debug_assertions)]
+    pub fn space_comparison(&self) -> (usize, usize, f64) {
+        use std::mem::size_of;
+        let map_size = size_of::<BTreeMap<u64, u64>>() + (size_of::<u64>() * self.map.len() * 2);
+        let set_size = size_of::<HashSet<u64>>() + (size_of::<u64>() * self.reference_set.len());
+        (map_size, set_size, map_size as f64 / set_size as f64)
     }
 
     pub fn remove(&mut self, value: &u64) {

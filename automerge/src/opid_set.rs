@@ -23,7 +23,21 @@ impl OpIdSet {
         {
             self.reference_set.insert(opid);
             assert_eq!(self.reference_set, self.iter().collect());
+            // println!("opidset space: {:?}", self.space_comparison());
         }
+    }
+
+    #[cfg(debug_assertions)]
+    pub fn space_comparison(&self) -> (usize, usize, f64) {
+        use std::mem::size_of;
+        let map_size = size_of::<HashMap<usize, RleSet, FxBuildHasher>>()
+            + (self
+                .map
+                .iter()
+                .map(|(_, set)| (size_of::<usize>() + set.space_comparison().0))
+                .sum::<usize>());
+        let set_size = size_of::<HashSet<OpId>>() + (size_of::<OpId>() * self.reference_set.len());
+        (map_size, set_size, map_size as f64 / set_size as f64)
     }
 
     /// Remove an opid from this set, returns whether it was present.
