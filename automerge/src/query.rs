@@ -1,4 +1,5 @@
 use crate::op_tree::{OpSetMetadata, OpTreeNode};
+use crate::opid_set::OpIdSet;
 use crate::types::{Clock, Counter, ElemId, Op, OpId, OpType, ScalarValue};
 use fxhash::FxBuildHasher;
 use std::cmp::Ordering;
@@ -77,7 +78,7 @@ pub(crate) struct Index {
     /// The map of visible elements to the number of operations targetting them.
     pub visible: HashMap<ElemId, usize, FxBuildHasher>,
     /// Set of opids found in this node and below.
-    pub ops: HashSet<OpId, FxBuildHasher>,
+    pub ops: OpIdSet,
 }
 
 impl Index {
@@ -151,8 +152,8 @@ impl Index {
     }
 
     pub fn merge(&mut self, other: &Index) {
-        for id in &other.ops {
-            self.ops.insert(*id);
+        for id in other.ops.iter() {
+            self.ops.insert(id);
         }
         for (elem, n) in other.visible.iter() {
             *self.visible.entry(*elem).or_default() += n;
