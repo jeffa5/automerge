@@ -45,13 +45,19 @@ impl RleMap {
                 self.map.insert(counter, v);
             }
             (Some((k, v_len)), None) => {
-                if k + v_len as u64 == counter {
-                    // extend the existing range
-                    let v = self.map.get_mut(&k).unwrap();
-                    v.insert((counter - k) as usize, value);
-                } else if (k + v_len as u64) < counter {
-                    // can't extend the existing range so just add our own
-                    self.map.insert(counter, vec![value]);
+                match (k + v_len as u64).cmp(&counter) {
+                    std::cmp::Ordering::Less => {
+                        // can't extend the existing range so just add our own
+                        self.map.insert(counter, vec![value]);
+                    }
+                    std::cmp::Ordering::Equal => {
+                        // extend the existing range
+                        let v = self.map.get_mut(&k).unwrap();
+                        v.insert((counter - k) as usize, value);
+                    }
+                    std::cmp::Ordering::Greater => {
+                        // already in the range
+                    }
                 }
             }
             (Some((lk, lv_len)), Some(mut rv)) => {
@@ -82,27 +88,22 @@ impl RleMap {
             .range(..=counter)
             .last()
             .map(|(a, b)| (*a, b.len()));
-        match left {
-            Some((k, v_len)) => {
-                if k == counter {
-                    // start of the range
-                    let mut v = self.map.remove(&k).unwrap();
-                    v.remove(0);
-                    self.map.insert(counter + 1, v);
-                } else if k + v_len as u64 - 1 == counter {
-                    // end of the range
-                    let v = self.map.get_mut(&k).unwrap();
-                    v.remove(v.len() - 1);
-                } else if k + v_len as u64 >= counter {
-                    // middle of the range
-                    let v = self.map.get_mut(&k).unwrap();
-                    let right = v.split_off((counter - k + 1).try_into().unwrap());
-                    v.remove(v.len() - 1);
-                    self.map.insert(counter + 1, right);
-                }
-            }
-            None => {
-                // nothing to delete
+        if let Some((k, v_len)) = left {
+            if k == counter {
+                // start of the range
+                let mut v = self.map.remove(&k).unwrap();
+                v.remove(0);
+                self.map.insert(counter + 1, v);
+            } else if k + v_len as u64 - 1 == counter {
+                // end of the range
+                let v = self.map.get_mut(&k).unwrap();
+                v.remove(v.len() - 1);
+            } else if k + v_len as u64 >= counter {
+                // middle of the range
+                let v = self.map.get_mut(&k).unwrap();
+                let right = v.split_off((counter - k + 1).try_into().unwrap());
+                v.remove(v.len() - 1);
+                self.map.insert(counter + 1, right);
             }
         }
         #[cfg(debug_assertions)]

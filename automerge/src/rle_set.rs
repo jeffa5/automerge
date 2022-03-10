@@ -26,12 +26,18 @@ impl RleSet {
                 self.map.insert(value, v + 1);
             }
             (Some((k, v)), None) => {
-                if k + v == value {
-                    // extend the existing range
-                    self.map.insert(k, v + 1);
-                } else if k + v < value {
-                    // can't extend the existing range so just add our own
-                    self.map.insert(value, 1);
+                match (k + v).cmp(&value) {
+                    std::cmp::Ordering::Less => {
+                        // can't extend the existing range so just add our own
+                        self.map.insert(value, 1);
+                    }
+                    std::cmp::Ordering::Equal => {
+                        // extend the existing range
+                        self.map.insert(k, v + 1);
+                    }
+                    std::cmp::Ordering::Greater => {
+                        // already included in the range
+                    }
                 }
             }
             (Some((lk, lv)), Some(rv)) => {
@@ -49,42 +55,36 @@ impl RleSet {
         }
     }
 
-    pub fn remove(&mut self, value: u64) {
+    pub fn remove(&mut self, value: &u64) {
         let left = self.map.range(..=value).last().map(|(a, b)| (*a, *b));
-        match left {
-            Some((k, v)) => {
-                if k == value {
-                    // start of the range
-                    self.map.remove(&k);
-                    self.map.insert(value + 1, v - 1);
-                } else if k + v - 1 == value {
-                    // end of the range
-                    self.map.insert(k, v - 1);
-                } else if k + v >= value {
-                    // middle of the range
-                    let left = value - k;
-                    let right = k + v - 1 - value;
-                    self.map.insert(k, left);
-                    self.map.insert(value + 1, right);
-                }
-            }
-            None => {
-                // nothing to delete
+        if let Some((k, v)) = left {
+            if k == *value {
+                // start of the range
+                self.map.remove(&k);
+                self.map.insert(value + 1, v - 1);
+            } else if k + v - 1 == *value {
+                // end of the range
+                self.map.insert(k, v - 1);
+            } else if k + v >= *value {
+                // middle of the range
+                let left = value - k;
+                let right = k + v - 1 - value;
+                self.map.insert(k, left);
+                self.map.insert(value + 1, right);
             }
         }
         #[cfg(debug_assertions)]
         {
-            self.set.remove(&value);
+            self.set.remove(value);
             assert_eq!(self.set, self.iter().collect());
         }
     }
 
     pub fn contains(&self, value: u64) -> bool {
-        let left = self.map.range(..=value).last().map(|(a, b)| (*a, *b));
-        match left {
-            Some((k, v)) => k + v > value,
-            None => false,
-        }
+        self.map
+            .range(..=value)
+            .last()
+            .map_or(false, |(k, v)| k + v > value)
     }
 
     pub fn is_empty(&self) -> bool {

@@ -31,7 +31,7 @@ impl OpIdSet {
         let mut present = false;
         if let Some(set) = self.map.get_mut(&opid.actor()) {
             present = true;
-            set.remove(opid.counter());
+            set.remove(&opid.counter());
             if set.is_empty() {
                 self.map.remove(&opid.actor());
             }
