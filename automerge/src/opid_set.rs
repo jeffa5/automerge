@@ -26,8 +26,11 @@ impl OpIdSet {
         }
     }
 
-    pub fn remove(&mut self, opid: &OpId) {
+    /// Remove an opid from this set, returns whether it was present.
+    pub fn remove(&mut self, opid: &OpId) -> bool {
+        let mut present = false;
         if let Some(set) = self.map.get_mut(&opid.actor()) {
+            present = true;
             set.remove(opid.counter());
             if set.is_empty() {
                 self.map.remove(&opid.actor());
@@ -38,6 +41,7 @@ impl OpIdSet {
             self.set.remove(opid);
             assert_eq!(self.set, self.iter().collect());
         }
+        present
     }
 
     pub fn contains(&self, opid: &OpId) -> bool {

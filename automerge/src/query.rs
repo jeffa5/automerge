@@ -1,7 +1,7 @@
 use crate::op_tree::{OpSetMetadata, OpTreeNode};
+use crate::opid_map::VisibleElemIdMap;
 use crate::opid_set::OpIdSet;
 use crate::types::{Clock, Counter, ElemId, Op, OpId, OpType, ScalarValue};
-use fxhash::FxBuildHasher;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
@@ -76,7 +76,7 @@ pub(crate) enum QueryResult {
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Index {
     /// The map of visible elements to the number of operations targetting them.
-    pub visible: HashMap<ElemId, usize, FxBuildHasher>,
+    pub visible: VisibleElemIdMap,
     /// Set of opids found in this node and below.
     pub ops: OpIdSet,
 }
@@ -156,7 +156,19 @@ impl Index {
             self.ops.insert(id);
         }
         for (elem, n) in other.visible.iter() {
+<<<<<<< HEAD
             *self.visible.entry(*elem).or_default() += n;
+=======
+            match self.visible.get(&elem).cloned() {
+                None => {
+                    self.visible.insert(elem, 1);
+                    self.len += 1;
+                }
+                Some(m) => {
+                    self.visible.insert(elem, m + n);
+                }
+            }
+>>>>>>> 923026b83 (Add OpIdMap)
         }
     }
 }

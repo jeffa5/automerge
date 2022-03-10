@@ -14,7 +14,7 @@ impl RleSet {
     pub fn insert(&mut self, value: u64) {
         // get iterator at point of this value
         let right = self.map.remove(&(value + 1));
-        let left = self.map.range(0..=value).last().map(|(a, b)| (*a, *b));
+        let left = self.map.range(..=value).last().map(|(a, b)| (*a, *b));
 
         match (left, right) {
             (None, None) => {
@@ -50,7 +50,7 @@ impl RleSet {
     }
 
     pub fn remove(&mut self, value: u64) {
-        let left = self.map.range(0..=value).last().map(|(a, b)| (*a, *b));
+        let left = self.map.range(..=value).last().map(|(a, b)| (*a, *b));
         match left {
             Some((k, v)) => {
                 if k == value {
@@ -80,7 +80,7 @@ impl RleSet {
     }
 
     pub fn contains(&self, value: u64) -> bool {
-        let left = self.map.range(0..=value).last().map(|(a, b)| (*a, *b));
+        let left = self.map.range(..=value).last().map(|(a, b)| (*a, *b));
         match left {
             Some((k, v)) => k + v > value,
             None => false,
