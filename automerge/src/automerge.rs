@@ -178,7 +178,7 @@ impl Automerge {
         f
     }
 
-    fn insert_op(&mut self, obj: &ObjId, op: Op) -> Op {
+    fn insert_op(&mut self, obj: &ObjId, op: Op) {
         let q = self.ops.search(obj, query::SeekOp::new(&op));
 
         for i in q.succ {
@@ -186,9 +186,8 @@ impl Automerge {
         }
 
         if !op.is_del() {
-            self.ops.insert(q.pos, obj, op.clone());
+            self.ops.insert(q.pos, obj, op);
         }
-        op
     }
 
     // KeysAt::()
