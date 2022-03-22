@@ -8,7 +8,7 @@ use crate::{rle_set::RleSet, types::OpId};
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub(crate) struct OpIdSet {
-    map: HashMap<usize, RleSet, FxBuildHasher>,
+    map: HashMap<usize, RleSet<u64>, FxBuildHasher>,
     #[cfg(debug_assertions)]
     reference_set: HashSet<OpId>,
 }
@@ -30,7 +30,7 @@ impl OpIdSet {
     #[cfg(debug_assertions)]
     pub fn space_comparison(&self) -> (usize, usize, f64) {
         use std::mem::size_of;
-        let map_size = size_of::<HashMap<usize, RleSet, FxBuildHasher>>()
+        let map_size = size_of::<HashMap<usize, RleSet<u64>, FxBuildHasher>>()
             + (self
                 .map
                 .iter()

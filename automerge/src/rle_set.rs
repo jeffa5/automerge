@@ -1,20 +1,95 @@
-use std::collections::BTreeMap;
+use std::cmp::Ordering;
 #[cfg(debug_assertions)]
 use std::collections::HashSet;
+use std::{collections::BTreeMap, fmt::Debug, hash::Hash};
 
-#[derive(Debug, Clone, Default, PartialEq)]
-pub struct RleSet {
-    /// mapping from start of range to end of the range
-    map: BTreeMap<u64, u64>,
-    #[cfg(debug_assertions)]
-    reference_set: HashSet<u64>,
+use crate::types::OpId;
+
+pub trait Runnable {
+    fn next(&self) -> Self;
+
+    fn at(&self, index: u64) -> Self;
+
+    fn sub(&self, other: &Self) -> u64;
 }
 
-impl RleSet {
-    pub fn insert(&mut self, value: u64) {
+impl Runnable for u64 {
+    fn next(&self) -> Self {
+        self + 1
+    }
+
+    fn at(&self, index: u64) -> Self {
+        self + index
+    }
+
+    fn sub(&self, other: &Self) -> u64 {
+        self - other
+    }
+}
+
+#[derive(PartialEq)]
+pub struct RunnableOpId(OpId);
+
+impl PartialOrd for RunnableOpId {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.0.actor().partial_cmp(&other.0.actor()).and_then(|o| {
+            if Ordering::Equal == o {
+                self.0.counter().partial_cmp(&other.0.counter())
+            } else {
+                Some(o)
+            }
+        })
+    }
+}
+
+impl Runnable for RunnableOpId {
+    fn next(&self) -> Self {
+        RunnableOpId(OpId(self.0.counter() + 1, self.0.actor()))
+    }
+
+    fn at(&self, index: u64) -> Self {
+        RunnableOpId(OpId(self.0.counter() + index, self.0.actor()))
+    }
+
+    fn sub(&self, other: &Self) -> u64 {
+        self.0.counter() - other.0.counter()
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct RleSet<T> {
+    /// mapping from start of range to end of the range
+    map: BTreeMap<T, u64>,
+    #[cfg(debug_assertions)]
+    reference_set: HashSet<T>,
+}
+
+impl<T> PartialEq for RleSet<T>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.map == other.map
+    }
+}
+
+impl<T> RleSet<T>
+where
+    T: Ord + Runnable + Hash + PartialEq + Debug + Clone,
+{
+    pub fn insert(&mut self, value: T) {
         // get iterator at point of this value
-        let right = self.map.remove(&(value + 1));
-        let left = self.map.range(..=value).last().map(|(a, b)| (*a, *b));
+        let right = self.map.remove(&(value.next()));
+        let left = self
+            .map
+            .range(..=&value)
+            .last()
+            .map(|(a, b)| (a.clone(), *b));
+
+        #[cfg(debug_assertions)]
+        {
+            self.reference_set.insert(value.clone());
+        }
 
         match (left, right) {
             (None, None) => {
@@ -26,7 +101,7 @@ impl RleSet {
                 self.map.insert(value, v + 1);
             }
             (Some((k, v)), None) => {
-                match (k + v).cmp(&value) {
+                match (k.at(v)).cmp(&value) {
                     std::cmp::Ordering::Less => {
                         // can't extend the existing range so just add our own
                         self.map.insert(value, 1);
@@ -41,7 +116,7 @@ impl RleSet {
                 }
             }
             (Some((lk, lv)), Some(rv)) => {
-                if lk + lv == value {
+                if lk.at(lv) == value {
                     self.map.insert(lk, lv + 1 + rv);
                 } else {
                     self.map.insert(value, 1 + rv);
@@ -50,7 +125,6 @@ impl RleSet {
         }
         #[cfg(debug_assertions)]
         {
-            self.reference_set.insert(value);
             assert_eq!(self.reference_set, self.iter().collect());
             // println!("rleset space: {:?}", self.space_comparison());
         }
@@ -64,22 +138,26 @@ impl RleSet {
         (map_size, set_size, map_size as f64 / set_size as f64)
     }
 
-    pub fn remove(&mut self, value: &u64) {
-        let left = self.map.range(..=value).last().map(|(a, b)| (*a, *b));
+    pub fn remove(&mut self, value: &T) {
+        let left = self
+            .map
+            .range(..=value)
+            .last()
+            .map(|(a, b)| (a.clone(), *b));
         if let Some((k, v)) = left {
             if k == *value {
                 // start of the range
                 self.map.remove(&k);
-                self.map.insert(value + 1, v - 1);
-            } else if k + v - 1 == *value {
+                self.map.insert(value.next(), v - 1);
+            } else if k.at(v - 1) == *value {
                 // end of the range
                 self.map.insert(k, v - 1);
-            } else if k + v >= *value {
+            } else if k.at(v) >= *value {
                 // middle of the range
-                let left = value - k;
-                let right = k + v - 1 - value;
+                let left = value.sub(&k);
+                let right = k.at(v - 1).sub(value);
                 self.map.insert(k, left);
-                self.map.insert(value + 1, right);
+                self.map.insert(value.next(), right);
             }
         }
         #[cfg(debug_assertions)]
@@ -89,21 +167,21 @@ impl RleSet {
         }
     }
 
-    pub fn contains(&self, value: u64) -> bool {
+    pub fn contains(&self, value: T) -> bool {
         self.map
-            .range(..=value)
+            .range(..=&value)
             .last()
-            .map_or(false, |(k, v)| k + v > value)
+            .map_or(false, |(k, v)| k.at(*v) > value)
     }
 
     pub fn is_empty(&self) -> bool {
         self.map.is_empty()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = u64> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = T> + '_ {
         self.map
             .iter()
-            .map(|(start, length)| (*start..(start + length)))
+            .map(|(start, length)| (0..*length).map(|t| start.at(t)))
             .flatten()
     }
 }
@@ -200,16 +278,16 @@ mod tests {
         map.insert(5, 4);
         assert_eq!(s.map, map);
 
-        s.remove(6);
+        s.remove(&6);
         map.insert(5, 1);
         map.insert(7, 2);
         assert_eq!(s.map, map);
 
-        s.remove(3);
+        s.remove(&3);
         map.insert(1, 2);
         assert_eq!(s.map, map);
 
-        s.remove(1);
+        s.remove(&1);
         map.insert(2, 1);
         map.remove(&1);
         assert_eq!(s.map, map);
