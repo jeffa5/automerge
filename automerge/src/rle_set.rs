@@ -124,9 +124,64 @@ where
         }
     }
 
+    // TODO: test that this is the same as doing individual inserts
     fn insert_run(&mut self, value: T, length: u64) {
-        for i in 0..length {
-            self.insert(value.at(i))
+        let right = self
+            .map
+            .range(&value..=&(value.at(length)))
+            .map(|(a, b)| (a.clone(), *b))
+            .collect::<Vec<_>>();
+        let mut last_right = None;
+        for (range, count) in right {
+            self.map.remove(&range);
+            last_right = Some((range, count));
+        }
+
+        let left = self
+            .map
+            .range(..=&value)
+            .last()
+            .map(|(a, b)| (a.clone(), *b));
+
+        match (left, last_right) {
+            (None, None) => {
+                // nothing found so just insert ourselves
+                self.map.insert(value, length);
+            }
+            (None, Some((v, c))) => {
+                // so right that we can extend so merge that with our new value
+                self.map
+                    .insert(value.clone(), c + length - (v.sub(&value.at(length))));
+            }
+            (Some((k, v)), None) => {
+                match (k.at(v)).cmp(&value) {
+                    std::cmp::Ordering::Less => {
+                        // can't extend the existing range so just add our own
+                        self.map.insert(value, length);
+                    }
+                    std::cmp::Ordering::Equal => {
+                        // extend the existing range
+                        self.map.insert(k, v + length);
+                    }
+                    std::cmp::Ordering::Greater => {
+                        // may already included in the range
+                        self.map
+                            .insert(value.clone(), v + length - (k.sub(&value.at(length))));
+                    }
+                }
+            }
+            (Some((lk, lv)), Some((rk, rv))) => {
+                if lk.at(lv) >= value {
+                    self.map.insert(
+                        lk.clone(),
+                        lv + length + rv
+                            - (lk.sub(&value.at(length)))
+                            - (rk.sub(&value.at(length))),
+                    );
+                } else {
+                    self.map.insert(value, length + rv);
+                }
+            }
         }
     }
 
