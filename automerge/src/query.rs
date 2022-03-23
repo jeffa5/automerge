@@ -152,9 +152,7 @@ impl Index {
     }
 
     pub fn merge(&mut self, other: &Index) {
-        for id in other.ops.iter() {
-            self.ops.insert(id);
-        }
+        self.ops.merge(&other.ops);
         for (elem, n) in other.visible.iter() {
 <<<<<<< HEAD
             *self.visible.entry(*elem).or_default() += n;

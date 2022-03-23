@@ -124,6 +124,12 @@ where
         }
     }
 
+    fn insert_run(&mut self, value: T, length: u64) {
+        for i in 0..length {
+            self.insert(value.at(i))
+        }
+    }
+
     #[cfg(debug_assertions)]
     pub fn space_comparison(&self) -> (usize, usize, f64) {
         use std::mem::size_of;
@@ -177,6 +183,16 @@ where
             .iter()
             .map(|(start, length)| (0..*length).map(|t| start.at(t)))
             .flatten()
+    }
+
+    pub fn merge(&mut self, other: &Self) {
+        if self.is_empty() {
+            *self = other.clone();
+        } else {
+            for (value, length) in &other.map {
+                self.insert_run(value.clone(), *length);
+            }
+        }
     }
 }
 

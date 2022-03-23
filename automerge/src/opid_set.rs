@@ -76,4 +76,14 @@ impl OpIdSet {
             .map(|(actor, set)| set.iter().map(|counter| OpId(counter, *actor)))
             .flatten()
     }
+
+    pub fn merge(&mut self, other: &Self) {
+        for (actor, other_rleset) in other.map.iter() {
+            if let Some(our_rleset) = self.map.get_mut(actor) {
+                our_rleset.merge(other_rleset);
+            } else {
+                self.map.insert(*actor, other_rleset.clone());
+            }
+        }
+    }
 }
