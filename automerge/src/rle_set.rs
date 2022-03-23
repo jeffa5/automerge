@@ -71,7 +71,7 @@ impl<T> RleSet<T>
 where
     T: Ord + Runnable + Hash + PartialEq + Debug + Clone,
 {
-    pub fn insert(&mut self, value: T) {
+    pub fn insert(&mut self, value: T) -> bool {
         // get iterator at point of this value
         let right = self.map.remove(&(value.next()));
         let left = self
@@ -85,43 +85,51 @@ where
             self.reference_set.insert(value.clone());
         }
 
-        match (left, right) {
+        let b = match (left, right) {
             (None, None) => {
                 // nothing found so just insert ourselves
                 self.map.insert(value, 1);
+                true
             }
             (None, Some(v)) => {
                 // so right that we can extend so merge that with our new value
                 self.map.insert(value, v + 1);
+                true
             }
             (Some((k, v)), None) => {
                 match (k.at(v)).cmp(&value) {
                     std::cmp::Ordering::Less => {
                         // can't extend the existing range so just add our own
                         self.map.insert(value, 1);
+                        true
                     }
                     std::cmp::Ordering::Equal => {
                         // extend the existing range
                         self.map.insert(k, v + 1);
+                        true
                     }
                     std::cmp::Ordering::Greater => {
                         // already included in the range
+                        false
                     }
                 }
             }
             (Some((lk, lv)), Some(rv)) => {
                 if lk.at(lv) == value {
                     self.map.insert(lk, lv + 1 + rv);
+                    true
                 } else {
                     self.map.insert(value, 1 + rv);
+                    true
                 }
             }
-        }
+        };
         #[cfg(debug_assertions)]
         {
             assert_eq!(self.reference_set, self.iter().collect());
             // println!("rleset space: {:?}", self.space_comparison());
         }
+        b
     }
 
     // TODO: test that this is the same as doing individual inserts

@@ -14,8 +14,9 @@ pub(crate) struct OpIdSet {
 }
 
 impl OpIdSet {
-    pub fn insert(&mut self, opid: OpId) {
-        self.map
+    pub fn insert(&mut self, opid: OpId) -> bool {
+        let b = self
+            .map
             .entry(opid.actor())
             .or_default()
             .insert(opid.counter());
@@ -25,6 +26,7 @@ impl OpIdSet {
             assert_eq!(self.reference_set, self.iter().collect());
             // println!("opidset space: {:?}", self.space_comparison());
         }
+        b
     }
 
     #[cfg(debug_assertions)]
