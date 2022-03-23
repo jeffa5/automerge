@@ -5,8 +5,10 @@ use std::{collections::BTreeMap, fmt::Debug, hash::Hash};
 
 use crate::types::OpId;
 
-pub trait Runnable {
-    fn next(&self) -> Self;
+pub trait Runnable: Sized {
+    fn next(&self) -> Self {
+        self.at(1)
+    }
 
     fn at(&self, index: u64) -> Self;
 
@@ -14,10 +16,6 @@ pub trait Runnable {
 }
 
 impl Runnable for u64 {
-    fn next(&self) -> Self {
-        self + 1
-    }
-
     fn at(&self, index: u64) -> Self {
         self + index
     }
@@ -43,10 +41,6 @@ impl PartialOrd for RunnableOpId {
 }
 
 impl Runnable for RunnableOpId {
-    fn next(&self) -> Self {
-        RunnableOpId(OpId(self.0.counter() + 1, self.0.actor()))
-    }
-
     fn at(&self, index: u64) -> Self {
         RunnableOpId(OpId(self.0.counter() + index, self.0.actor()))
     }
