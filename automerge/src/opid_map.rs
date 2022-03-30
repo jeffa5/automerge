@@ -74,6 +74,10 @@ impl VisibleElemIdMap {
         b
     }
 
+    pub fn len(&self) -> usize {
+        self.opset.len() + self.map.values().map(|rlemap| rlemap.len()).sum::<usize>()
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = (ElemId, usize)> + '_ {
         self.opset.iter().map(|opid| (ElemId(opid), 1)).chain(
             self.map

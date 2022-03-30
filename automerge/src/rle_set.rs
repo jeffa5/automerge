@@ -71,6 +71,7 @@ impl<T> RleSet<T>
 where
     T: Ord + Runnable + Hash + PartialEq + Debug + Clone,
 {
+    /// Insert the value into the set, returning true if it wasn't already in the set.
     pub fn insert(&mut self, value: T) -> bool {
         // get iterator at point of this value
         let right = self.map.remove(&(value.next()));
@@ -132,8 +133,13 @@ where
         b
     }
 
+    pub fn len(&self) -> usize {
+        self.map.values().map(|v| *v as usize).sum()
+    }
+
     // TODO: test that this is the same as doing individual inserts
-    fn insert_run(&mut self, value: T, length: u64) {
+    /// Returns the number of insertions
+    fn insert_run(&mut self, value: T, length: u64) -> usize {
         let right = self
             .map
             .range(&value..=&(value.at(length)))
@@ -155,26 +161,31 @@ where
             (None, None) => {
                 // nothing found so just insert ourselves
                 self.map.insert(value, length);
+                length as usize
             }
             (None, Some((v, c))) => {
                 // so right that we can extend so merge that with our new value
                 self.map
                     .insert(value.clone(), c + length - (v.sub(&value.at(length))));
+                length as usize // FIXME
             }
             (Some((k, v)), None) => {
                 match (k.at(v)).cmp(&value) {
                     std::cmp::Ordering::Less => {
                         // can't extend the existing range so just add our own
                         self.map.insert(value, length);
+                        length as usize // FIXME
                     }
                     std::cmp::Ordering::Equal => {
                         // extend the existing range
                         self.map.insert(k, v + length);
+                        length as usize // FIXME
                     }
                     std::cmp::Ordering::Greater => {
                         // may already included in the range
                         self.map
                             .insert(value.clone(), v + length - (k.sub(&value.at(length))));
+                        length as usize // FIXME
                     }
                 }
             }
@@ -186,8 +197,10 @@ where
                             - (lk.sub(&value.at(length)))
                             - (rk.sub(&value.at(length))),
                     );
+                    length as usize // FIXME
                 } else {
                     self.map.insert(value, length + rv);
+                    length as usize // FIXME
                 }
             }
         }
@@ -248,13 +261,17 @@ where
             .flatten()
     }
 
-    pub fn merge(&mut self, other: &Self) {
+    /// Merges the other set into this one, returning the number of new items inserted.
+    pub fn merge(&mut self, other: &Self) -> usize {
         if self.is_empty() {
             *self = other.clone();
+            other.len()
         } else {
+            let mut count = 0;
             for (value, length) in &other.map {
-                self.insert_run(value.clone(), *length);
+                count += self.insert_run(value.clone(), *length);
             }
+            count
         }
     }
 }

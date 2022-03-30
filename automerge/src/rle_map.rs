@@ -121,6 +121,10 @@ impl RleMap {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.map.values().map(|v| v.len()).sum()
+    }
+
     pub fn is_empty(&self) -> bool {
         self.map.is_empty()
     }

@@ -120,7 +120,13 @@ impl Index {
                 }
                 None => panic!("remove overun in index"),
             },
-            (true, false, Some(elem)) => *self.visible.entry(elem).or_default() += 1,
+            (true, false, Some(elem)) => {
+                if let Some(v) = self.visible.get(&elem).copied() {
+                    self.visible.insert(elem, v + 1);
+                } else {
+                    self.visible.insert(elem, 1);
+                }
+            }
             _ => {}
         }
     }
@@ -129,7 +135,11 @@ impl Index {
         self.ops.insert(op.id);
         if op.visible() {
             if let Some(elem) = op.elemid() {
-                *self.visible.entry(elem).or_default() += 1;
+                if let Some(v) = self.visible.get(&elem).copied() {
+                    self.visible.insert(elem, v + 1);
+                } else {
+                    self.visible.insert(elem, 1);
+                }
             }
         }
     }
@@ -154,19 +164,11 @@ impl Index {
     pub fn merge(&mut self, other: &Index) {
         self.ops.merge(&other.ops);
         for (elem, n) in other.visible.iter() {
-<<<<<<< HEAD
-            *self.visible.entry(*elem).or_default() += n;
-=======
-            match self.visible.get(&elem).cloned() {
-                None => {
-                    self.visible.insert(elem, 1);
-                    self.len += 1;
-                }
-                Some(m) => {
-                    self.visible.insert(elem, m + n);
-                }
+            if let Some(m) = self.visible.get(&elem).copied() {
+                self.visible.insert(elem, m + n)
+            } else {
+                self.visible.insert(elem, n)
             }
->>>>>>> 923026b83 (Add OpIdMap)
         }
     }
 }

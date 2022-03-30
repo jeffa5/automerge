@@ -8,6 +8,7 @@ use crate::{rle_set::RleSet, types::OpId};
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub(crate) struct OpIdSet {
+    length: usize,
     map: HashMap<usize, RleSet<u64>, FxBuildHasher>,
     #[cfg(debug_assertions)]
     reference_set: HashSet<OpId>,
@@ -20,6 +21,9 @@ impl OpIdSet {
             .entry(opid.actor())
             .or_default()
             .insert(opid.counter());
+        if b {
+            self.length += 1;
+        }
         #[cfg(debug_assertions)]
         {
             self.reference_set.insert(opid);
@@ -52,6 +56,9 @@ impl OpIdSet {
                 self.map.remove(&opid.actor());
             }
         }
+        if present {
+            self.length -= 1;
+        }
         #[cfg(debug_assertions)]
         {
             self.reference_set.remove(opid);
@@ -72,6 +79,15 @@ impl OpIdSet {
         b
     }
 
+    pub fn len(&self) -> usize {
+        let v = self.length;
+        #[cfg(debug_assertions)]
+        {
+            assert_eq!(v, self.reference_set.len(), "{:?}", self);
+        }
+        v
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = OpId> + '_ {
         self.map
             .iter()
@@ -82,9 +98,11 @@ impl OpIdSet {
     pub fn merge(&mut self, other: &Self) {
         for (actor, other_rleset) in other.map.iter() {
             if let Some(our_rleset) = self.map.get_mut(actor) {
-                our_rleset.merge(other_rleset);
+                let count = our_rleset.merge(other_rleset);
+                self.length += count;
             } else {
                 self.map.insert(*actor, other_rleset.clone());
+                self.length += other_rleset.len();
             }
         }
     }
