@@ -75,11 +75,7 @@ where
     pub fn insert(&mut self, value: T) -> bool {
         // get iterator at point of this value
         let right = self.map.remove(&(value.next()));
-        let left = self
-            .map
-            .range(..=&value)
-            .last()
-            .map(|(a, b)| (a.clone(), *b));
+        let left = self.map.range_mut(..=&value).last().map(|(a, b)| (a, b));
 
         #[cfg(debug_assertions)]
         {
@@ -98,7 +94,7 @@ where
                 true
             }
             (Some((k, v)), None) => {
-                match (k.at(v)).cmp(&value) {
+                match (k.at(*v)).cmp(&value) {
                     std::cmp::Ordering::Less => {
                         // can't extend the existing range so just add our own
                         self.map.insert(value, 1);
@@ -106,7 +102,7 @@ where
                     }
                     std::cmp::Ordering::Equal => {
                         // extend the existing range
-                        self.map.insert(k, v + 1);
+                        *v += 1;
                         true
                     }
                     std::cmp::Ordering::Greater => {
@@ -116,8 +112,8 @@ where
                 }
             }
             (Some((lk, lv)), Some(rv)) => {
-                if lk.at(lv) == value {
-                    self.map.insert(lk, lv + 1 + rv);
+                if lk.at(*lv) == value {
+                    *lv += 1 + rv;
                     true
                 } else {
                     self.map.insert(value, 1 + rv);
