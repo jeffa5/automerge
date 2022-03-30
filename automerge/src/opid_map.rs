@@ -31,7 +31,7 @@ impl VisibleElemIdMap {
 
     pub fn insert(&mut self, opid: ElemId, value: usize) {
         if value == 1 {
-            self.opset.insert(opid.0)
+            self.opset.insert(opid.0);
         } else {
             self.map
                 .entry(opid.0.actor())
