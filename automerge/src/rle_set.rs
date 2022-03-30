@@ -75,7 +75,7 @@ where
     pub fn insert(&mut self, value: T) -> bool {
         // get iterator at point of this value
         let right = self.map.remove(&(value.next()));
-        let left = self.map.range_mut(..=&value).last().map(|(a, b)| (a, b));
+        let left = self.map.range_mut(..=&value).last();
 
         #[cfg(debug_assertions)]
         {
@@ -211,24 +211,22 @@ where
     }
 
     pub fn remove(&mut self, value: &T) {
-        let left = self
-            .map
-            .range(..=value)
-            .last()
-            .map(|(a, b)| (a.clone(), *b));
+        let left = self.map.range_mut(..=value).last();
         if let Some((k, v)) = left {
-            if k == *value {
+            if k == value {
                 // start of the range
-                self.map.remove(&k);
+                let k = k.clone();
+                let v = *v;
                 self.map.insert(value.next(), v - 1);
-            } else if k.at(v - 1) == *value {
+                self.map.remove(&k);
+            } else if k.at(*v - 1) == *value {
                 // end of the range
-                self.map.insert(k, v - 1);
-            } else if k.at(v) >= *value {
+                *v -= 1;
+            } else if k.at(*v) >= *value {
                 // middle of the range
                 let left = value.sub(&k);
-                let right = k.at(v - 1).sub(value);
-                self.map.insert(k, left);
+                let right = k.at(*v - 1).sub(value);
+                *v = left;
                 self.map.insert(value.next(), right);
             }
         }
