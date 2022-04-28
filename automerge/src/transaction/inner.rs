@@ -254,7 +254,7 @@ impl TransactionInner {
         }
 
         let id = self.next_id();
-        let prop_index = doc.ops.m.props.cache(prop);
+        let prop_index = doc.ops.m.props.cache(prop.clone());
         let query = doc.ops.search(&obj, query::InsertProp::new(prop_index));
 
         // no key present to delete
