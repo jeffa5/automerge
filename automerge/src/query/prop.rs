@@ -1,7 +1,6 @@
 use crate::op_tree::{OpSetMetadata, OpTreeNode};
 use crate::query::{binary_search_by, QueryResult, TreeQuery};
 use crate::types::{Key, Op};
-use std::fmt::Debug;
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Prop<'a> {
@@ -25,6 +24,20 @@ impl<'a> Prop<'a> {
 }
 
 impl<'a> TreeQuery<'a> for Prop<'a> {
+    fn cache_lookup_map(&mut self, cache: &crate::object_data::MapOpsCache) -> bool {
+        if let Some((last_key, last_pos)) = cache.last {
+            if last_key == self.key {
+                self.start = Some(last_pos);
+            }
+        }
+        // don't have all of the result yet
+        false
+    }
+
+    fn cache_update_map(&self, cache: &mut crate::object_data::MapOpsCache) {
+        cache.last = self.start.map(|start| (self.key, start));
+    }
+
     fn query_node_with_metadata(
         &mut self,
         child: &'a OpTreeNode,

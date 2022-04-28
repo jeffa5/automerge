@@ -1,3 +1,4 @@
+use crate::object_data::{MapOpsCache, SeqOpsCache};
 use crate::op_tree::{OpSetMetadata, OpTreeNode};
 use crate::types::{Clock, Counter, Key, Op, OpId, OpType, ScalarValue};
 use fxhash::FxBuildHasher;
@@ -7,6 +8,7 @@ use std::fmt::Debug;
 
 mod elem_id_pos;
 mod insert;
+mod insert_prop;
 mod keys;
 mod keys_at;
 mod len;
@@ -27,6 +29,7 @@ mod seek_op_with_patch;
 
 pub(crate) use elem_id_pos::ElemIdPos;
 pub(crate) use insert::InsertNth;
+pub(crate) use insert_prop::InsertProp;
 pub(crate) use keys::Keys;
 pub(crate) use keys_at::KeysAt;
 pub(crate) use len::Len;
@@ -64,6 +67,24 @@ pub(crate) struct CounterData {
 }
 
 pub(crate) trait TreeQuery<'a> {
+    fn cache_lookup_map(&mut self, _cache: &MapOpsCache) -> bool {
+        // by default we haven't found something in the cache
+        false
+    }
+
+    fn cache_update_map(&self, _cache: &mut MapOpsCache) {
+        // by default we don't have anything to update in the cache
+    }
+
+    fn cache_lookup_seq(&mut self, _cache: &SeqOpsCache) -> bool {
+        // by default we haven't found something in the cache
+        false
+    }
+
+    fn cache_update_seq(&self, _cache: &mut SeqOpsCache) {
+        // by default we don't have anything to update in the cache
+    }
+
     #[inline(always)]
     fn query_node_with_metadata(
         &mut self,

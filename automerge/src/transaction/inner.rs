@@ -210,7 +210,7 @@ impl TransactionInner {
     ) -> Result<OpId, AutomergeError> {
         let id = self.next_id();
 
-        let query = doc.ops.search(&obj, query::InsertNth::new(index));
+        let query = doc.ops.search(&obj, query::InsertNth::new(index, id));
 
         let key = query.key()?;
 
@@ -255,7 +255,7 @@ impl TransactionInner {
 
         let id = self.next_id();
         let prop_index = doc.ops.m.props.cache(prop.clone());
-        let query = doc.ops.search(&obj, query::Prop::new(prop_index));
+        let query = doc.ops.search(&obj, query::InsertProp::new(prop_index));
 
         // no key present to delete
         if query.ops.is_empty() && action == OpType::Delete {
