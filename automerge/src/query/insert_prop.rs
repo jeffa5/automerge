@@ -38,7 +38,8 @@ impl<'a> TreeQuery<'a> for InsertProp<'a> {
     }
 
     fn cache_update_map(&self, cache: &mut crate::object_data::MapOpsCache) {
-        cache.last = None
+        // cache.last = None
+        cache.last = self.start.map(|start| (self.key, start));
     }
 
     fn query_node_with_metadata(

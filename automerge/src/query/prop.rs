@@ -37,9 +37,9 @@ impl<'a> TreeQuery<'a> for Prop<'a> {
     }
 
     fn cache_update_map(&self, cache: &mut crate::object_data::MapOpsCache) {
-        // cache.last = self.start.map(|start| (self.key, start));
-        // FIXME: should be able to cache things
-        cache.last = None
+        cache.last = self.start.map(|start| (self.key, start));
+        // // FIXME: should be able to cache things
+        // cache.last = None
     }
 
     fn query_node_with_metadata(
