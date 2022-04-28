@@ -30,13 +30,14 @@ where
     }
 
     pub(crate) fn cache(&mut self, item: T) -> usize {
-        if let Some(n) = self.lookup.get(&item) {
-            *n
-        } else {
-            let n = self.cache.len();
-            self.cache.push(item.clone());
-            self.lookup.insert(item, n);
-            n
+        match self.lookup.entry(item.clone()) {
+            std::collections::hash_map::Entry::Occupied(e) => *e.get(),
+            std::collections::hash_map::Entry::Vacant(e) => {
+                let n = self.cache.len();
+                self.cache.push(item);
+                e.insert(n);
+                n
+            }
         }
     }
 
