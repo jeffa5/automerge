@@ -10,6 +10,7 @@ pub(crate) struct InsertProp<'a> {
     pub(crate) ops_pos: Vec<usize>,
     pub(crate) pos: usize,
     start: Option<usize>,
+    done_root: bool,
 }
 
 impl<'a> InsertProp<'a> {
@@ -20,6 +21,7 @@ impl<'a> InsertProp<'a> {
             ops_pos: vec![],
             pos: 0,
             start: None,
+            done_root: false,
         }
     }
 }
@@ -44,25 +46,46 @@ impl<'a> TreeQuery<'a> for InsertProp<'a> {
         child: &'a OpTreeNode,
         m: &OpSetMetadata,
     ) -> QueryResult {
-        let start = if let Some(start) = self.start {
-            debug_assert!(binary_search_by(child, |op| m.key_cmp(&op.key, &self.key)) >= start);
-            start
+        if self.done_root {
+            if self.pos + child.len() >= self.start.expect("should have generated start by now") {
+                // skip empty nodes
+                if child.index.visible_len() == 0 {
+                    self.pos += child.len();
+                    QueryResult::Next
+                } else {
+                    QueryResult::Descend
+                }
+            } else {
+                self.pos += child.len();
+                QueryResult::Next
+            }
         } else {
-            binary_search_by(child, |op| m.key_cmp(&op.key, &self.key))
-        };
-        self.start = Some(start);
-        self.pos = start;
-        for pos in start..child.len() {
-            let op = child.get(pos).unwrap();
-            if op.key != self.key {
-                break;
-            }
-            if op.visible() {
-                self.ops.push(op);
-                self.ops_pos.push(pos);
-            }
-            self.pos += 1;
+            self.done_root = true;
+
+            // in the root node find the first op position for the key
+            let start = if let Some(start) = self.start {
+                // using cached start value
+                start
+            } else {
+                // no valid cached start so find it again
+                binary_search_by(child, |op| m.key_cmp(&op.key, &self.key))
+            };
+            self.start = Some(start);
+            self.pos = start;
+            QueryResult::Skip(start)
         }
-        QueryResult::Finish
+    }
+
+    fn query_element(&mut self, op: &'a Op) -> QueryResult {
+        // don't bother looking at things past our key
+        if op.key != self.key {
+            return QueryResult::Finish;
+        }
+        if op.visible() {
+            self.ops.push(op);
+            self.ops_pos.push(self.pos);
+        }
+        self.pos += 1;
+        QueryResult::Next
     }
 }
