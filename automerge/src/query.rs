@@ -72,8 +72,9 @@ pub(crate) trait TreeQuery<'a> {
         false
     }
 
-    fn cache_update_map(&self, _cache: &mut MapOpsCache) {
-        // by default we don't have anything to update in the cache
+    fn cache_update_map(&self, cache: &mut MapOpsCache) {
+        // by default we don't want to corrupt the cache so clear it
+        cache.last = None
     }
 
     fn cache_lookup_seq(&mut self, _cache: &SeqOpsCache) -> bool {
@@ -81,8 +82,9 @@ pub(crate) trait TreeQuery<'a> {
         false
     }
 
-    fn cache_update_seq(&self, _cache: &mut SeqOpsCache) {
-        // by default we don't have anything to update in the cache
+    fn cache_update_seq(&self, cache: &mut SeqOpsCache) {
+        // by default we don't want to corrupt the cache so clear it
+        cache.last = None
     }
 
     #[inline(always)]
