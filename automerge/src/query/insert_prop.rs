@@ -1,5 +1,5 @@
 use crate::op_tree::{OpSetMetadata, OpTreeNode};
-use crate::query::{binary_search_by, QueryResult, TreeQuery};
+use crate::query::{binary_search_by, binary_search_by_in, QueryResult, TreeQuery};
 use crate::types::{Key, Op};
 use std::fmt::Debug;
 
@@ -11,6 +11,7 @@ pub(crate) struct InsertProp<'a> {
     pub(crate) pos: usize,
     start: Option<usize>,
     done_root: bool,
+    cached_value: Option<(Key, usize)>,
 }
 
 impl<'a> InsertProp<'a> {
@@ -22,17 +23,14 @@ impl<'a> InsertProp<'a> {
             pos: 0,
             start: None,
             done_root: false,
+            cached_value: None,
         }
     }
 }
 
 impl<'a> TreeQuery<'a> for InsertProp<'a> {
     fn cache_lookup_map(&mut self, cache: &crate::object_data::MapOpsCache) -> bool {
-        if let Some((last_key, last_pos)) = cache.last {
-            if last_key == self.key {
-                self.start = Some(last_pos);
-            }
-        }
+        self.cached_value = cache.last;
         // don't have all of the result yet
         false
     }
@@ -64,9 +62,24 @@ impl<'a> TreeQuery<'a> for InsertProp<'a> {
             self.done_root = true;
 
             // in the root node find the first op position for the key
-            let start = if let Some(start) = self.start {
+            let start = if let Some((key, index)) = self.cached_value {
                 // using cached start value
-                start
+                match m.key_cmp(&key, &self.key) {
+                    std::cmp::Ordering::Less => {
+                        // cached value was for something less, use as lower bound
+                        binary_search_by_in(
+                            child,
+                            |op| m.key_cmp(&op.key, &self.key),
+                            index,
+                            child.len(),
+                        )
+                    }
+                    std::cmp::Ordering::Equal => index,
+                    std::cmp::Ordering::Greater => {
+                        // cached value was for something greater, use as upper bound
+                        binary_search_by_in(child, |op| m.key_cmp(&op.key, &self.key), 0, index)
+                    }
+                }
             } else {
                 // no valid cached start so find it again
                 binary_search_by(child, |op| m.key_cmp(&op.key, &self.key))

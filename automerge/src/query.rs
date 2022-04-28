@@ -280,8 +280,15 @@ pub(crate) fn binary_search_by<F>(node: &OpTreeNode, f: F) -> usize
 where
     F: Fn(&Op) -> Ordering,
 {
-    let mut right = node.len();
-    let mut left = 0;
+    binary_search_by_in(node, f, 0, node.len())
+}
+
+pub(crate) fn binary_search_by_in<F>(node: &OpTreeNode, f: F, left: usize, right: usize) -> usize
+where
+    F: Fn(&Op) -> Ordering,
+{
+    let mut right = right;
+    let mut left = left;
     while left < right {
         let seq = (left + right) / 2;
         if f(node.get(seq).unwrap()) == Ordering::Less {
