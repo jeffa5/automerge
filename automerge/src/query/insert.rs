@@ -67,7 +67,7 @@ impl<'a> TreeQuery<'a> for InsertNth {
         if let Some((last_target_index, last_tree_index, insert, last_id)) = cache.last {
             if insert && last_target_index + 1 == self.target {
                 // we can use the cached value
-                let key = ElemId(last_id);
+                let key = Key::Seq(ElemId(last_id));
                 self.last_valid_insert = Some(key);
                 self.n = last_tree_index + 1;
                 return true;
