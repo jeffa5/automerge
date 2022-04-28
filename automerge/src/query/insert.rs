@@ -77,7 +77,9 @@ impl<'a> TreeQuery<'a> for InsertNth {
     }
 
     fn cache_update_seq(&self, cache: &mut crate::object_data::SeqOpsCache) {
-        cache.last = Some((self.target, self.pos(), true, self.id));
+        // cache.last = Some((self.target, self.pos(), true, self.id));
+        // FIXME: we should be able to do some caching
+        cache.last = None
     }
 
     fn query_node(&mut self, child: &OpTreeNode) -> QueryResult {
