@@ -11,17 +11,23 @@ pub(crate) struct Nth<'a> {
     /// last_seen is the target elemid of the last `seen` operation.
     /// It is used to avoid double counting visible elements (which arise through conflicts) that are split across nodes.
     last_seen: Option<Key>,
+    single: bool,
+    pub(crate) op: Option<&'a Op>,
+    pub(crate) op_pos: Option<usize>,
     pub(crate) ops: Vec<&'a Op>,
     pub(crate) ops_pos: Vec<usize>,
     pub(crate) pos: usize,
 }
 
 impl<'a> Nth<'a> {
-    pub(crate) fn new(target: usize) -> Self {
+    pub(crate) fn new(target: usize, single: bool) -> Self {
         Nth {
             target,
             seen: 0,
             last_seen: None,
+            single,
+            op: None,
+            op_pos: None,
             ops: vec![],
             ops_pos: vec![],
             pos: 0,
@@ -92,8 +98,13 @@ impl<'a> TreeQuery<'a> for Nth<'a> {
             self.last_seen = Some(element.elemid_or_key())
         }
         if self.seen == self.target + 1 && visible {
-            self.ops.push(element);
-            self.ops_pos.push(self.pos);
+            if self.single {
+                self.op = Some(element);
+                self.op_pos = Some(self.pos);
+            } else {
+                self.ops.push(element);
+                self.ops_pos.push(self.pos);
+            }
         }
         self.pos += 1;
         QueryResult::Next

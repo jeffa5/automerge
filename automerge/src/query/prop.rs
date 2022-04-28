@@ -5,6 +5,9 @@ use crate::types::{Key, Op};
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Prop<'a> {
     key: Key,
+    single: bool,
+    pub(crate) op: Option<&'a Op>,
+    pub(crate) op_pos: Option<usize>,
     pub(crate) ops: Vec<&'a Op>,
     pub(crate) ops_pos: Vec<usize>,
     pub(crate) pos: usize,
@@ -14,9 +17,12 @@ pub(crate) struct Prop<'a> {
 }
 
 impl<'a> Prop<'a> {
-    pub(crate) fn new(prop: usize) -> Self {
+    pub(crate) fn new(prop: usize, single: bool) -> Self {
         Prop {
             key: Key::Map(prop),
+            single,
+            op: None,
+            op_pos: None,
             ops: vec![],
             ops_pos: vec![],
             pos: 0,
@@ -95,8 +101,13 @@ impl<'a> TreeQuery<'a> for Prop<'a> {
             return QueryResult::Finish;
         }
         if op.visible() {
-            self.ops.push(op);
-            self.ops_pos.push(self.pos);
+            if self.single {
+                self.op = Some(op);
+                self.op_pos = Some(self.pos);
+            } else {
+                self.ops.push(op);
+                self.ops_pos.push(self.pos);
+            }
         }
         self.pos += 1;
         QueryResult::Next

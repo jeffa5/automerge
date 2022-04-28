@@ -479,7 +479,26 @@ impl Automerge {
         obj: O,
         prop: P,
     ) -> Result<Option<(Value<'_>, ExId)>, AutomergeError> {
-        Ok(self.get_all(obj, prop.into())?.last().cloned())
+        let obj = self.exid_to_obj(obj.as_ref())?;
+        let result = match prop.into() {
+            Prop::Map(p) => {
+                let prop = self.ops.m.props.lookup(&p);
+                if let Some(p) = prop {
+                    self.ops
+                        .search(&obj, query::Prop::new(p, true))
+                        .op
+                        .map(|o| (o.value(), self.id_to_exid(o.id)))
+                } else {
+                    None
+                }
+            }
+            Prop::Seq(n) => self
+                .ops
+                .search(&obj, query::Nth::new(n, true))
+                .op
+                .map(|o| (o.value(), self.id_to_exid(o.id))),
+        };
+        Ok(result)
     }
 
     /// Historical version of [`get`](Self::get).
@@ -507,7 +526,7 @@ impl Automerge {
                 let prop = self.ops.m.props.lookup(&p);
                 if let Some(p) = prop {
                     self.ops
-                        .search(&obj, query::Prop::new(p))
+                        .search(&obj, query::Prop::new(p, false))
                         .ops
                         .into_iter()
                         .map(|o| (o.value(), self.id_to_exid(o.id)))
@@ -518,7 +537,7 @@ impl Automerge {
             }
             Prop::Seq(n) => self
                 .ops
-                .search(&obj, query::Nth::new(n))
+                .search(&obj, query::Nth::new(n, false))
                 .ops
                 .into_iter()
                 .map(|o| (o.value(), self.id_to_exid(o.id)))

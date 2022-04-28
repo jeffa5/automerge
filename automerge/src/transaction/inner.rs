@@ -297,7 +297,7 @@ impl TransactionInner {
         index: usize,
         action: OpType,
     ) -> Result<Option<OpId>, AutomergeError> {
-        let query = doc.ops.search(&obj, query::Nth::new(index));
+        let query = doc.ops.search(&obj, query::Nth::new(index, false));
 
         let id = self.next_id();
         let pred = query.ops.iter().map(|op| op.id).collect();
