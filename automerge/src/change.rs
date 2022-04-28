@@ -106,19 +106,20 @@ pub(crate) fn encode_document<'a, 'b>(
 /// actors (i.e. those referenced in object IDs in the target of an operation or in the `pred` of
 /// an operation) lexicographically ordered following the change author.
 fn actor_ids_in_change(change: &amp::Change) -> Vec<amp::ActorId> {
-    let mut other_ids: Vec<&amp::ActorId> = change
-        .operations
-        .iter()
-        .flat_map(opids_in_operation)
-        .filter(|a| *a != &change.actor_id)
-        .unique()
+    let mut ids: Vec<amp::ActorId> = std::iter::once(change.actor_id.clone())
+        .chain(
+            change
+                .operations
+                .iter()
+                .flat_map(opids_in_operation)
+                .filter(|a| *a != &change.actor_id)
+                .unique()
+                .cloned(),
+        )
         .collect();
-    other_ids.sort();
-    // Now prepend the change actor
-    std::iter::once(&change.actor_id)
-        .chain(other_ids.into_iter())
-        .cloned()
-        .collect()
+    let other_ids = &mut ids[1..];
+    other_ids.sort_unstable();
+    ids
 }
 
 fn opids_in_operation(op: &amp::Op) -> impl Iterator<Item = &amp::ActorId> {
