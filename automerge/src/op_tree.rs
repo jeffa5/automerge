@@ -30,20 +30,6 @@ pub(crate) struct OpTree {
     pub(crate) parent: Option<ObjId>,
 }
 
-impl OpTree {
-    pub(crate) fn new() -> Self {
-        Self {
-            internal: Default::default(),
-            objtype: ObjType::Map,
-            parent: None,
-        }
-    }
-
-    pub(crate) fn iter(&self) -> OpTreeIter<'_> {
-        self.internal.iter()
-    }
-}
-
 #[derive(Clone, Debug)]
 pub(crate) struct OpTreeInternal {
     pub(crate) root_node: Option<OpTreeNode>,

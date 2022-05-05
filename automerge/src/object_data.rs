@@ -2,7 +2,7 @@ use std::ops::RangeBounds;
 use std::sync::{Arc, Mutex};
 
 use crate::clock::Clock;
-use crate::op_tree::{OpSetMetadata, OpTreeInternal};
+use crate::op_tree::{OpSetMetadata, OpTreeInternal, OpTreeIter};
 use crate::query::{self, TreeQuery};
 use crate::types::{Key, ObjId};
 use crate::types::{Op, OpId};
@@ -94,6 +94,10 @@ impl ObjectData {
         }
     }
 
+    pub(crate) fn iter(&self) -> OpTreeIter<'_> {
+        self.ops.iter()
+    }
+
     pub(crate) fn keys(&self) -> Option<Keys<'_>> {
         self.ops.keys()
     }
@@ -102,21 +106,36 @@ impl ObjectData {
         self.ops.keys_at(clock)
     }
 
-    pub(crate) fn range<'a, R: RangeBounds<String>>(
+    pub(crate) fn map_range<'a, R: RangeBounds<String>>(
         &'a self,
         range: R,
         meta: &'a OpSetMetadata,
-    ) -> Option<query::Range<'a, R>> {
+    ) -> Option<query::MapRange<'a, R>> {
         self.ops.range(range, meta)
     }
 
-    pub(crate) fn range_at<'a, R: RangeBounds<String>>(
+    pub(crate) fn map_range_at<'a, R: RangeBounds<String>>(
         &'a self,
         range: R,
         meta: &'a OpSetMetadata,
         clock: Clock,
-    ) -> Option<query::RangeAt<'a, R>> {
+    ) -> Option<query::MapRangeAt<'a, R>> {
         self.ops.range_at(range, meta, clock)
+    }
+
+    pub(crate) fn list_range<R: RangeBounds<usize>>(
+        &self,
+        range: R,
+    ) -> Option<query::ListRange<'_, R>> {
+        self.ops.list_range(range)
+    }
+
+    pub(crate) fn list_range_at<R: RangeBounds<usize>>(
+        &self,
+        range: R,
+        clock: Clock,
+    ) -> Option<query::ListRangeAt<'_, R>> {
+        self.ops.list_range_at(range, clock)
     }
 
     pub(crate) fn search<'a, 'b: 'a, Q>(&'b self, mut query: Q, metadata: &OpSetMetadata) -> Q
@@ -168,9 +187,5 @@ impl ObjectData {
 
     pub(crate) fn typ(&self) -> ObjType {
         self.typ
-    }
-
-    pub(crate) fn get(&self, index: usize) -> Option<&Op> {
-        self.ops.get(index)
     }
 }

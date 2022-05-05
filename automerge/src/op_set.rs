@@ -2,7 +2,7 @@ use crate::clock::Clock;
 use crate::exid::ExId;
 use crate::indexed_cache::IndexedCache;
 use crate::object_data::ObjectData;
-use crate::op_tree::{self, OpTree};
+use crate::op_tree;
 use crate::query::{self, OpIdSearch, TreeQuery};
 use crate::types::{self, ActorId, Key, ObjId, Op, OpId, OpType};
 use crate::{ObjType, OpObserver};
@@ -82,7 +82,7 @@ impl OpSetInternal {
         range: R,
     ) -> Option<query::MapRange<'_, R>> {
         if let Some(tree) = self.objects.get(&obj) {
-            tree.range(range, &self.m)
+            tree.map_range(range, &self.m)
         } else {
             None
         }
@@ -95,7 +95,7 @@ impl OpSetInternal {
         clock: Clock,
     ) -> Option<query::MapRangeAt<'_, R>> {
         if let Some(tree) = self.objects.get(&obj) {
-            tree.range_at(range, &self.m, clock)
+            tree.map_range_at(range, &self.m, clock)
         } else {
             None
         }
@@ -106,8 +106,8 @@ impl OpSetInternal {
         obj: ObjId,
         range: R,
     ) -> Option<query::ListRange<'_, R>> {
-        if let Some(tree) = self.trees.get(&obj) {
-            tree.internal.list_range(range)
+        if let Some(tree) = self.objects.get(&obj) {
+            tree.list_range(range)
         } else {
             None
         }
@@ -119,8 +119,8 @@ impl OpSetInternal {
         range: R,
         clock: Clock,
     ) -> Option<query::ListRangeAt<'_, R>> {
-        if let Some(tree) = self.trees.get(&obj) {
-            tree.internal.list_range_at(range, clock)
+        if let Some(tree) = self.objects.get(&obj) {
+            tree.list_range_at(range, clock)
         } else {
             None
         }
@@ -291,7 +291,7 @@ impl<'a> IntoIterator for &'a OpSetInternal {
 
 #[derive(Clone)]
 pub(crate) struct Iter<'a> {
-    trees: std::vec::IntoIter<(&'a ObjId, &'a op_tree::OpTree)>,
+    trees: std::vec::IntoIter<(&'a ObjId, &'a ObjectData)>,
     current: Option<(&'a ObjId, op_tree::OpTreeIter<'a>)>,
 }
 impl<'a> Iterator for Iter<'a> {
