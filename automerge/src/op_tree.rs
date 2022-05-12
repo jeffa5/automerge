@@ -9,6 +9,7 @@ pub(crate) use crate::op_set::OpSetMetadata;
 use crate::{
     clock::Clock,
     query::{self, Index, QueryResult, ReplaceArgs, TreeQuery},
+    OpType,
 };
 use crate::{
     types::{ObjId, Op, OpId},
@@ -136,6 +137,37 @@ impl OpTreeInternal {
         iter::OpTreeIter::new(self)
     }
 
+    fn dump(&self) {
+        log!(
+            "  {:12} {:12} {:12} {:12} {:12}",
+            "id",
+            "key",
+            "value",
+            "pred",
+            "succ"
+        );
+        for op in self.iter() {
+            let id = op.id;
+            let key = op.key;
+            let value: String = match &op.action {
+                OpType::Put(value) => format!("{}", value),
+                OpType::Make(obj) => format!("make({})", obj),
+                OpType::Increment(obj) => format!("inc({})", obj),
+                OpType::Delete => format!("del{}", 0),
+            };
+            let pred: Vec<_> = op.pred.clone();
+            let succ: Vec<_> = op.succ.clone();
+            log!(
+                "  {:12?} {:12?} {:12} {:12?} {:12?}",
+                id,
+                key,
+                value,
+                pred,
+                succ
+            );
+        }
+    }
+
     /// Insert the `element` into the sequence at `index`.
     ///
     /// # Panics
@@ -144,9 +176,10 @@ impl OpTreeInternal {
     pub(crate) fn insert(&mut self, index: usize, element: Op) {
         assert!(
             index <= self.len(),
-            "tried to insert at {} but len is {}",
+            "tried to insert at {} but len is {} \n{:?}",
             index,
-            self.len()
+            self.len(),
+            self.dump(),
         );
 
         let old_len = self.len();
