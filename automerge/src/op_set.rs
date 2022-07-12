@@ -138,10 +138,10 @@ impl OpSetInternal {
 
     pub(crate) fn replace<F>(&mut self, obj: &ObjId, index: usize, f: F)
     where
-        F: FnMut(&mut Op),
+        F: FnMut(&mut Op, &OpSetMetadata),
     {
         if let Some(tree) = self.trees.get_mut(obj) {
-            tree.internal.update(index, f)
+            tree.internal.update(index, &self.m, f)
         }
     }
 
@@ -186,7 +186,7 @@ impl OpSetInternal {
         let pos = q.pos;
 
         for i in succ {
-            self.replace(obj, i, |old_op| old_op.add_succ(&op));
+            self.replace(obj, i, |old_op, meta| old_op.add_succ(&op, meta));
         }
 
         if !op.is_delete() {
@@ -256,7 +256,7 @@ impl OpSetInternal {
         }
 
         for i in succ {
-            self.replace(obj, i, |old_op| old_op.add_succ(&op));
+            self.replace(obj, i, |old_op, meta| old_op.add_succ(&op, meta));
         }
 
         if !op.is_delete() {

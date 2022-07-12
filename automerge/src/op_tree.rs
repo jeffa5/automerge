@@ -196,12 +196,12 @@ impl OpTreeInternal {
     }
 
     // this replaces get_mut() because it allows the indexes to update correctly
-    pub(crate) fn update<F>(&mut self, index: usize, f: F)
+    pub(crate) fn update<F>(&mut self, index: usize, meta: &OpSetMetadata, f: F)
     where
-        F: FnMut(&mut Op),
+        F: FnMut(&mut Op, &OpSetMetadata),
     {
         if self.len() > index {
-            self.root_node.as_mut().unwrap().update(index, f);
+            self.root_node.as_mut().unwrap().update(index, meta, f);
         }
     }
 
@@ -614,15 +614,15 @@ impl OpTreeNode {
     /// Update the operation at the given index using the provided function.
     ///
     /// This handles updating the indices after the update.
-    pub(crate) fn update<F>(&mut self, index: usize, f: F) -> ReplaceArgs
+    pub(crate) fn update<F>(&mut self, index: usize, meta: &OpSetMetadata, f: F) -> ReplaceArgs
     where
-        F: FnOnce(&mut Op),
+        F: FnOnce(&mut Op, &OpSetMetadata),
     {
         if self.is_leaf() {
             let new_element = self.elements.get_mut(index).unwrap();
             let old_id = new_element.id;
             let old_visible = new_element.visible();
-            f(new_element);
+            f(new_element, meta);
             let replace_args = ReplaceArgs {
                 old_id,
                 new_id: new_element.id,
@@ -644,7 +644,7 @@ impl OpTreeNode {
                         let new_element = self.elements.get_mut(child_index).unwrap();
                         let old_id = new_element.id;
                         let old_visible = new_element.visible();
-                        f(new_element);
+                        f(new_element, meta);
                         let replace_args = ReplaceArgs {
                             old_id,
                             new_id: new_element.id,
@@ -656,7 +656,7 @@ impl OpTreeNode {
                         return replace_args;
                     }
                     Ordering::Greater => {
-                        let replace_args = child.update(index - cumulative_len, f);
+                        let replace_args = child.update(index - cumulative_len, meta, f);
                         self.index.replace(&replace_args);
                         return replace_args;
                     }

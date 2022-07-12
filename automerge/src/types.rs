@@ -1,5 +1,6 @@
 use crate::error;
 use crate::legacy as amp;
+use crate::op_tree::OpSetMetadata;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::cmp::Eq;
@@ -385,8 +386,9 @@ pub(crate) struct Op {
 }
 
 impl Op {
-    pub(crate) fn add_succ(&mut self, op: &Op) {
+    pub(crate) fn add_succ(&mut self, op: &Op, meta: &OpSetMetadata) {
         self.succ.push(op.id);
+        self.succ.sort_by(|a, b| meta.lamport_cmp(*a, *b));
         if let OpType::Put(ScalarValue::Counter(Counter {
             current,
             increments,

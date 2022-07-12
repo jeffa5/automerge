@@ -78,7 +78,7 @@ impl TransactionInner {
         for (obj, _prop, op) in self.operations.into_iter().rev() {
             for pred_id in &op.pred {
                 if let Some(p) = doc.ops.search(&obj, OpIdSearch::new(*pred_id)).index() {
-                    doc.ops.replace(&obj, p, |o| o.remove_succ(&op));
+                    doc.ops.replace(&obj, p, |o, _meta| o.remove_succ(&op));
                 }
             }
             if let Some(pos) = doc.ops.search(&obj, OpIdSearch::new(op.id)).index() {
@@ -163,8 +163,8 @@ impl TransactionInner {
         succ_pos: &[usize],
     ) {
         for succ in succ_pos {
-            doc.ops.replace(&obj, *succ, |old_op| {
-                old_op.add_succ(&op);
+            doc.ops.replace(&obj, *succ, |old_op, meta| {
+                old_op.add_succ(&op, meta);
             });
         }
 
