@@ -1058,8 +1058,8 @@ impl Automerge {
                 observer.expose(self, ex_obj, key, value, conflict);
             } else if had_value_before {
                 match key {
-                    Prop::Map(k) => observer.delete_map(self, ex_obj, &k),
-                    Prop::Seq(index) => observer.delete_seq(self, ex_obj, index, last_width),
+                    Prop::Map(k) => observer.delete_map(self, ex_obj, &k, self.ops.id_to_exid(op.id)),
+                    Prop::Seq(index) => observer.delete_seq(self, ex_obj, index, last_width, vec![self.ops.id_to_exid(op.id)]),
                 }
             }
         } else if let Some(value) = op.get_increment_value() {

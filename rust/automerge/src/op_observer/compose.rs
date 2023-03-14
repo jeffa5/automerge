@@ -1,3 +1,5 @@
+use crate::exid::ExId;
+
 use super::OpObserver;
 
 pub fn compose<'a, O1: OpObserver, O2: OpObserver>(
@@ -84,9 +86,15 @@ impl<'a, O1: OpObserver, O2: OpObserver> OpObserver for ComposeObservers<'a, O1,
         self.obs2.increment(doc, objid, prop, tagged_value);
     }
 
-    fn delete_map<R: crate::ReadDoc>(&mut self, doc: &R, objid: crate::ObjId, key: &str) {
-        self.obs1.delete_map(doc, objid.clone(), key);
-        self.obs2.delete_map(doc, objid, key);
+    fn delete_map<R: crate::ReadDoc>(
+        &mut self,
+        doc: &R,
+        objid: crate::ObjId,
+        key: &str,
+        opid: ExId,
+    ) {
+        self.obs1.delete_map(doc, objid.clone(), key, opid.clone());
+        self.obs2.delete_map(doc, objid, key, opid);
     }
 
     fn delete_seq<R: crate::ReadDoc>(
@@ -95,8 +103,9 @@ impl<'a, O1: OpObserver, O2: OpObserver> OpObserver for ComposeObservers<'a, O1,
         objid: crate::ObjId,
         index: usize,
         num: usize,
+        opids: Vec<ExId>,
     ) {
-        self.obs2.delete_seq(doc, objid.clone(), index, num);
-        self.obs2.delete_seq(doc, objid, index, num);
+        self.obs2.delete_seq(doc, objid.clone(), index, num, opids.clone());
+        self.obs2.delete_seq(doc, objid, index, num, opids);
     }
 }

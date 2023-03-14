@@ -184,7 +184,14 @@ impl OpObserver for Observer {
         }
     }
 
-    fn delete_seq<R: ReadDoc>(&mut self, doc: &R, obj: ObjId, index: usize, length: usize) {
+    fn delete_seq<R: ReadDoc>(
+        &mut self,
+        doc: &R,
+        obj: ObjId,
+        index: usize,
+        length: usize,
+        _opids: Vec<ObjId>,
+    ) {
         if self.enabled {
             match self.patches.last_mut() {
                 Some(Patch::SpliceText {
@@ -246,7 +253,7 @@ impl OpObserver for Observer {
         }
     }
 
-    fn delete_map<R: ReadDoc>(&mut self, doc: &R, obj: ObjId, key: &str) {
+    fn delete_map<R: ReadDoc>(&mut self, doc: &R, obj: ObjId, key: &str, _opid: ObjId) {
         if self.enabled {
             if let Some(path) = self.get_path(doc, &obj) {
                 let patch = Patch::DeleteMap {

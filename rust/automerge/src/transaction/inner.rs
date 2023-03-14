@@ -567,6 +567,7 @@ impl TransactionInner {
         let encoding = splice_type.encoding();
         // delete `del` items - performing the query for each one
         let mut deleted = 0;
+        let mut delete_opids = Vec::new();
         while deleted < del {
             // TODO: could do this with a single custom query
             let query = doc.ops().search(&obj, query::Nth::new(index, encoding));
@@ -590,6 +591,8 @@ impl TransactionInner {
             let ops_pos = query.ops_pos;
             doc.ops_mut().add_succ(&obj, &ops_pos, &op);
 
+            delete_opids.push(doc.ops().id_to_exid(op.id));
+
             self.operations.push((obj, op));
 
             deleted += step;
@@ -597,7 +600,7 @@ impl TransactionInner {
 
         if deleted > 0 {
             if let Some(obs) = op_observer.as_mut() {
-                obs.delete_seq(doc, ex_obj.clone(), index, deleted);
+                obs.delete_seq(doc, ex_obj.clone(), index, deleted, delete_opids);
             }
         }
 
@@ -679,7 +682,7 @@ impl TransactionInner {
                     _ => {}
                 }
             } else if op.is_delete() {
-                op_observer.delete(doc, ex_obj, prop);
+                op_observer.delete(doc, ex_obj, prop, vec![doc.ops().id_to_exid(op.id)]);
             } else if let Some(value) = op.get_increment_value() {
                 op_observer.increment(doc, ex_obj, prop, (value, doc.ops().id_to_exid(op.id)));
             } else {

@@ -89,10 +89,10 @@ pub trait OpObserver {
     /// - `doc`: a handle to the doc after the op has been inserted, can be used to query information
     /// - `objid`: the object that has been deleted in.
     /// - `prop`: the prop to be deleted
-    fn delete<R: ReadDoc>(&mut self, doc: &R, objid: ExId, prop: Prop) {
+    fn delete<R: ReadDoc>(&mut self, doc: &R, objid: ExId, prop: Prop, opids: Vec<ExId>) {
         match prop {
-            Prop::Map(k) => self.delete_map(doc, objid, &k),
-            Prop::Seq(i) => self.delete_seq(doc, objid, i, 1),
+            Prop::Map(k) => self.delete_map(doc, objid, &k, opids.into_iter().next().unwrap()),
+            Prop::Seq(i) => self.delete_seq(doc, objid, i, 1, opids),
         }
     }
 
@@ -101,7 +101,7 @@ pub trait OpObserver {
     /// - `doc`: a handle to the doc after the op has been inserted, can be used to query information
     /// - `objid`: the object that has been deleted in.
     /// - `key`: the map key to be deleted
-    fn delete_map<R: ReadDoc>(&mut self, doc: &R, objid: ExId, key: &str);
+    fn delete_map<R: ReadDoc>(&mut self, doc: &R, objid: ExId, key: &str, opid: ExId);
 
     /// A one or more list values have beeen deleted.
     ///
@@ -109,7 +109,7 @@ pub trait OpObserver {
     /// - `objid`: the object that has been deleted in.
     /// - `index`: the index of the deletion
     /// - `num`: the number of sequential elements deleted
-    fn delete_seq<R: ReadDoc>(&mut self, doc: &R, objid: ExId, index: usize, num: usize);
+    fn delete_seq<R: ReadDoc>(&mut self, doc: &R, objid: ExId, index: usize, num: usize, opids: Vec<ExId>);
 
     /// Whether to call sequence methods or `splice_text` when encountering changes in text
     ///
@@ -180,9 +180,9 @@ impl OpObserver for () {
     ) {
     }
 
-    fn delete_map<R: ReadDoc>(&mut self, _doc: &R, _objid: ExId, _key: &str) {}
+    fn delete_map<R: ReadDoc>(&mut self, _doc: &R, _objid: ExId, _key: &str, _opid: ExId) {}
 
-    fn delete_seq<R: ReadDoc>(&mut self, _doc: &R, _objid: ExId, _index: usize, _num: usize) {}
+    fn delete_seq<R: ReadDoc>(&mut self, _doc: &R, _objid: ExId, _index: usize, _num: usize, _opids: Vec<ExId>) {}
 }
 
 impl BranchableObserver for () {
@@ -282,24 +282,26 @@ impl OpObserver for VecOpObserver {
         }
     }
 
-    fn delete_map<R: ReadDoc>(&mut self, doc: &R, obj: ExId, key: &str) {
+    fn delete_map<R: ReadDoc>(&mut self, doc: &R, obj: ExId, key: &str, opid: ExId) {
         if let Ok(p) = doc.parents(&obj) {
             self.patches.push(Patch::Delete {
                 obj,
                 path: p.path(),
                 prop: Prop::Map(key.to_owned()),
                 num: 1,
+                opids: vec![opid],
             })
         }
     }
 
-    fn delete_seq<R: ReadDoc>(&mut self, doc: &R, obj: ExId, index: usize, num: usize) {
+    fn delete_seq<R: ReadDoc>(&mut self, doc: &R, obj: ExId, index: usize, num: usize, opids: Vec<ExId>) {
         if let Ok(p) = doc.parents(&obj) {
             self.patches.push(Patch::Delete {
                 obj,
                 path: p.path(),
                 prop: Prop::Seq(index),
                 num,
+                opids,
             })
         }
     }
@@ -388,5 +390,7 @@ pub enum Patch {
         prop: Prop,
         /// number of items deleted (for seq)
         num: usize,
+        /// OpIds for the delete operations.
+        opids: Vec<ExId>,
     },
 }
