@@ -1,5 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `automerge/src/query/seek_mark.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>seek_mark.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https:///raw.githubusercontent.com/automerge/automerge/main/img/favicon.ico"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../automerge/index.html">
-                        <img src="https://raw.githubusercontent.com/automerge/automerge/main/img/brandmark.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `automerge/src/query/seek_mark.rs`."><title>seek_mark.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-be46fdc453a55015.css"><script src="../../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https:///raw.githubusercontent.com/automerge/automerge/main/img/favicon.ico"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../automerge/index.html">
+                        <img src="https://raw.githubusercontent.com/automerge/automerge/main/img/brandmark.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -111,22 +111,10 @@
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
-<a href="#113" id="113">113</a>
-<a href="#114" id="114">114</a>
-<a href="#115" id="115">115</a>
-<a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::marks::Mark;
 <span class="kw">use </span><span class="kw">crate</span>::op_tree::OpSetMetadata;
-<span class="kw">use </span><span class="kw">crate</span>::query::{QueryResult, TreeQuery};
-<span class="kw">use </span><span class="kw">crate</span>::types::{Key, ListEncoding, Op, OpId, OpType};
+<span class="kw">use </span><span class="kw">crate</span>::query::{ListState, OpTreeNode, QueryResult, TreeQuery};
+<span class="kw">use </span><span class="kw">crate</span>::types::{ListEncoding, Op, OpId, OpType};
 <span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::fmt::Debug;
@@ -134,15 +122,12 @@
 <span class="attr">#[derive(Debug, Clone, PartialEq)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>SeekMark&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="doccomment">/// the mark we are looking for
-    </span>id: OpId,
+    </span>idx: ListState,
+    id: OpId,
     end: usize,
-    encoding: ListEncoding,
     found: bool,
     mark_name: smol_str::SmolStr,
     next_mark: <span class="prelude-ty">Option</span>&lt;Mark&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    pos: usize,
-    seen: usize,
-    last_seen: <span class="prelude-ty">Option</span>&lt;Key&gt;,
     super_marks: HashMap&lt;OpId, smol_str::SmolStr&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) marks: Vec&lt;Mark&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
 }
@@ -150,32 +135,24 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SeekMark&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(id: OpId, end: usize, encoding: ListEncoding) -&gt; <span class="self">Self </span>{
         SeekMark {
+            idx: ListState::new(encoding, usize::MAX),
             id,
-            encoding,
             end,
             found: <span class="bool-val">false</span>,
             next_mark: <span class="prelude-val">None</span>,
             mark_name: <span class="string">&quot;&quot;</span>.into(),
-            pos: <span class="number">0</span>,
-            seen: <span class="number">0</span>,
-            last_seen: <span class="prelude-val">None</span>,
             super_marks: Default::default(),
             marks: Default::default(),
-        }
-    }
-
-    <span class="kw">fn </span>count_visible(<span class="kw-2">&amp;mut </span><span class="self">self</span>, e: <span class="kw-2">&amp;</span>Op) {
-        <span class="kw">if </span>e.insert {
-            <span class="self">self</span>.last_seen = <span class="prelude-val">None
-        </span>}
-        <span class="kw">if </span>e.visible() &amp;&amp; <span class="self">self</span>.last_seen.is_none() {
-            <span class="self">self</span>.seen += e.width(<span class="self">self</span>.encoding);
-            <span class="self">self</span>.last_seen = <span class="prelude-val">Some</span>(e.elemid_or_key())
         }
     }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TreeQuery&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SeekMark&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>query_node(<span class="kw-2">&amp;mut </span><span class="self">self</span>, child: <span class="kw-2">&amp;</span>OpTreeNode, _ops: <span class="kw-2">&amp;</span>[Op]) -&gt; QueryResult {
+        <span class="self">self</span>.idx.check_if_node_is_clean(child);
+        QueryResult::Descend
+    }
+
     <span class="kw">fn </span>query_element_with_metadata(<span class="kw-2">&amp;mut </span><span class="self">self</span>, op: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Op, m: <span class="kw-2">&amp;</span>OpSetMetadata) -&gt; QueryResult {
         <span class="kw">match </span><span class="kw-2">&amp;</span>op.action {
             OpType::MarkBegin(<span class="kw">_</span>, data) <span class="kw">if </span>op.id == <span class="self">self</span>.id =&gt; {
@@ -185,7 +162,7 @@
                 <span class="self">self</span>.found = <span class="bool-val">true</span>;
                 <span class="self">self</span>.mark_name = data.name.clone();
                 <span class="comment">// retain the name and the value
-                </span><span class="self">self</span>.next_mark = <span class="prelude-val">Some</span>(Mark::from_data(<span class="self">self</span>.seen, <span class="self">self</span>.seen, data));
+                </span><span class="self">self</span>.next_mark = <span class="prelude-val">Some</span>(Mark::from_data(<span class="self">self</span>.idx.index(), <span class="self">self</span>.idx.index(), data));
                 <span class="comment">// change id to the end id
                 </span><span class="self">self</span>.id = <span class="self">self</span>.id.next();
                 <span class="comment">// remove all marks that dont match
@@ -199,7 +176,7 @@
                             <span class="self">self</span>.super_marks.insert(op.id.next(), mark.name.clone());
                             <span class="kw">if </span><span class="self">self</span>.super_marks.len() == <span class="number">1 </span>{
                                 <span class="comment">// complete a mark
-                                </span>next_mark.end = <span class="self">self</span>.seen;
+                                </span>next_mark.end = <span class="self">self</span>.idx.index();
                                 <span class="self">self</span>.marks.push(next_mark.clone());
                             }
                         }
@@ -209,11 +186,11 @@
                     }
                 }
             }
-            OpType::MarkEnd(<span class="kw">_</span>) <span class="kw">if </span><span class="self">self</span>.end == <span class="self">self</span>.pos =&gt; {
+            OpType::MarkEnd(<span class="kw">_</span>) <span class="kw">if </span><span class="self">self</span>.end == <span class="self">self</span>.idx.pos() =&gt; {
                 <span class="kw">if </span><span class="self">self</span>.super_marks.is_empty() {
                     <span class="comment">// complete a mark
                     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(next_mark) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.next_mark {
-                        next_mark.end = <span class="self">self</span>.seen;
+                        next_mark.end = <span class="self">self</span>.idx.index();
                         <span class="self">self</span>.marks.push(next_mark.clone());
                     }
                 }
@@ -224,28 +201,27 @@
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(next_mark) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.next_mark {
                     <span class="kw">if </span><span class="self">self</span>.super_marks.is_empty() {
                         <span class="comment">// begin a new mark
-                        </span>next_mark.start = <span class="self">self</span>.seen;
+                        </span>next_mark.start = <span class="self">self</span>.idx.index();
                     }
                 }
             }
             <span class="kw">_ </span>=&gt; {}
         }
         <span class="comment">// the end op hasn&#39;t been inserted yet so we need to work off the position
-        </span><span class="kw">if </span><span class="self">self</span>.end == <span class="self">self</span>.pos {
+        </span><span class="kw">if </span><span class="self">self</span>.end == <span class="self">self</span>.idx.pos() {
             <span class="kw">if </span><span class="self">self</span>.super_marks.is_empty() {
                 <span class="comment">// complete a mark
                 </span><span class="kw">if let </span><span class="prelude-val">Some</span>(next_mark) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.next_mark {
-                    next_mark.end = <span class="self">self</span>.seen;
+                    next_mark.end = <span class="self">self</span>.idx.index();
                     <span class="self">self</span>.marks.push(next_mark.clone());
                 }
             }
             <span class="kw">return </span>QueryResult::Finish;
         }
 
-        <span class="self">self</span>.pos += <span class="number">1</span>;
-        <span class="self">self</span>.count_visible(op);
+        <span class="self">self</span>.idx.process_op(op, op.elemid_or_key(), op.visible());
         QueryResult::Next
     }
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="automerge" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0 (2c8cc3432 2023-03-06)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="automerge" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

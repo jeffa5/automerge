@@ -1,5 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `automerge-wasm/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https:///raw.githubusercontent.com/automerge/automerge/main/img/favicon.ico"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../automerge_wasm/index.html">
-                        <img src="https://raw.githubusercontent.com/automerge/automerge/main/img/brandmark.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `automerge-wasm/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../static.files/ayu-be46fdc453a55015.css"><script src="../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https:///raw.githubusercontent.com/automerge/automerge/main/img/favicon.ico"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../automerge_wasm/index.html">
+                        <img src="https://raw.githubusercontent.com/automerge/automerge/main/img/brandmark.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1265,6 +1265,39 @@
 <a href="#1264" id="1264">1264</a>
 <a href="#1265" id="1265">1265</a>
 <a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
+<a href="#1271" id="1271">1271</a>
+<a href="#1272" id="1272">1272</a>
+<a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a>
+<a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
+<a href="#1283" id="1283">1283</a>
+<a href="#1284" id="1284">1284</a>
+<a href="#1285" id="1285">1285</a>
+<a href="#1286" id="1286">1286</a>
+<a href="#1287" id="1287">1287</a>
+<a href="#1288" id="1288">1288</a>
+<a href="#1289" id="1289">1289</a>
+<a href="#1290" id="1290">1290</a>
+<a href="#1291" id="1291">1291</a>
+<a href="#1292" id="1292">1292</a>
+<a href="#1293" id="1293">1293</a>
+<a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
+<a href="#1296" id="1296">1296</a>
+<a href="#1297" id="1297">1297</a>
+<a href="#1298" id="1298">1298</a>
+<a href="#1299" id="1299">1299</a>
 </pre><pre class="rust"><code><span class="attr">#![doc(
     html_logo_url = <span class="string">&quot;https://raw.githubusercontent.com/automerge/automerge/main/img/brandmark.svg&quot;</span>,
     html_favicon_url = <span class="string">&quot;https:///raw.githubusercontent.com/automerge/automerge/main/img/favicon.ico&quot;
@@ -1297,8 +1330,8 @@
 <span class="kw">use </span>am::transaction::{Observed, Transactable, UnObserved};
 <span class="kw">use </span>am::ScalarValue;
 <span class="kw">use </span>automerge <span class="kw">as </span>am;
-<span class="kw">use </span>automerge::{sync::SyncDoc, Change, Prop, ReadDoc, TextEncoding, Value, ROOT};
-<span class="kw">use </span>automerge::{ToggleObserver, VecOpObserver16};
+<span class="kw">use </span>automerge::ToggleObserver;
+<span class="kw">use </span>automerge::{sync::SyncDoc, Change, Prop, ReadDoc, Value, VecOpObserver, ROOT};
 <span class="kw">use </span>js_sys::{Array, Function, Object, Uint8Array};
 <span class="kw">use </span>serde::ser::Serialize;
 <span class="kw">use </span>std::borrow::Cow;
@@ -1325,7 +1358,7 @@
     };
 }
 
-<span class="kw">type </span>AutoCommit = am::AutoCommitWithObs&lt;Observed&lt;ToggleObserver&lt;VecOpObserver16&gt;&gt;&gt;;
+<span class="kw">type </span>AutoCommit = am::AutoCommitWithObs&lt;Observed&lt;ToggleObserver&lt;VecOpObserver&gt;&gt;&gt;;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;wee_alloc&quot;</span>)]
 #[global_allocator]
@@ -1372,8 +1405,7 @@
         text_rep: TextRepresentation,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Automerge, error::BadActorId&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>doc = AutoCommit::default()
-            .with_observer(ToggleObserver::default().with_text_rep(text_rep.into()))
-            .with_encoding(TextEncoding::Utf16);
+            .with_observer(ToggleObserver::default().with_text_rep(text_rep.into()));
         doc.observer().set_text_rep(text_rep.into());
         <span class="kw">if let </span><span class="prelude-val">Some</span>(a) = actor {
             <span class="kw">let </span>a = automerge::ActorId::from(hex::decode(a)<span class="question-mark">?</span>.to_vec());
@@ -1844,18 +1876,41 @@
     }
 
     <span class="attr">#[wasm_bindgen(js_name = applyPatches)]
-    </span><span class="kw">pub fn </span>apply_patches(
+    </span><span class="kw">pub fn </span>apply_patches(<span class="kw-2">&amp;mut </span><span class="self">self</span>, object: JsValue, meta: JsValue) -&gt; <span class="prelude-ty">Result</span>&lt;JsValue, JsValue&gt; {
+        <span class="kw">let </span>(value, _patches) = <span class="self">self</span>.apply_patches_impl(object, meta)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(value)
+    }
+
+    <span class="attr">#[wasm_bindgen(js_name = applyAndReturnPatches)]
+    </span><span class="kw">pub fn </span>apply_and_return_patches(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         object: JsValue,
         meta: JsValue,
-        callback: JsValue,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;JsValue, JsValue&gt; {
+        <span class="kw">let </span>(value, patches) = <span class="self">self</span>.apply_patches_impl(object, meta)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>patches: Array = patches
+            .into_iter()
+            .map(interop::JsPatch)
+            .map(JsValue::try_from)
+            .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>result = Object::new();
+        js_set(<span class="kw-2">&amp;</span>result, <span class="string">&quot;value&quot;</span>, value)<span class="question-mark">?</span>;
+        js_set(<span class="kw-2">&amp;</span>result, <span class="string">&quot;patches&quot;</span>, patches)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(result.into())
+    }
+
+    <span class="kw">fn </span>apply_patches_impl(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        object: JsValue,
+        meta: JsValue,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(JsValue, Vec&lt;automerge::Patch&gt;), JsValue&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>object = object
             .dyn_into::&lt;Object&gt;()
             .map_err(|<span class="kw">_</span>| error::ApplyPatch::NotObjectd)<span class="question-mark">?</span>;
         <span class="kw">let </span>end_heads = <span class="self">self</span>.doc.get_heads();
-        <span class="kw">let </span>(patches, begin_heads) = <span class="self">self</span>.doc.observer().take_patches(end_heads.clone());
-        <span class="kw">let </span>callback = callback.dyn_into::&lt;Function&gt;().ok();
+        <span class="kw">let </span>(patches, _begin_heads) = <span class="self">self</span>.doc.observer().take_patches(end_heads);
 
         <span class="comment">// even if there are no patches we may need to update the meta object
         // which requires that we update the object too
@@ -1867,31 +1922,13 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>exposed = HashSet::default();
 
-        <span class="kw">let </span>before = object.clone();
-
         <span class="kw">for </span>p <span class="kw">in </span><span class="kw-2">&amp;</span>patches {
             object = <span class="self">self</span>.apply_patch(object, p, <span class="number">0</span>, <span class="kw-2">&amp;</span>meta, <span class="kw-2">&amp;mut </span>exposed)<span class="question-mark">?</span>;
         }
 
         <span class="self">self</span>.finalize_exposed(<span class="kw-2">&amp;</span>object, exposed, <span class="kw-2">&amp;</span>meta)<span class="question-mark">?</span>;
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = <span class="kw-2">&amp;</span>callback {
-            <span class="kw">if </span>!patches.is_empty() {
-                <span class="kw">let </span>patches: Array = patches
-                    .into_iter()
-                    .map(interop::JsPatch)
-                    .map(JsValue::try_from)
-                    .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
-                <span class="kw">let </span>info = Object::new();
-                js_set(<span class="kw-2">&amp;</span>info, <span class="string">&quot;before&quot;</span>, <span class="kw-2">&amp;</span>before)<span class="question-mark">?</span>;
-                js_set(<span class="kw-2">&amp;</span>info, <span class="string">&quot;after&quot;</span>, <span class="kw-2">&amp;</span>object)<span class="question-mark">?</span>;
-                js_set(<span class="kw-2">&amp;</span>info, <span class="string">&quot;from&quot;</span>, AR::from(begin_heads))<span class="question-mark">?</span>;
-                js_set(<span class="kw-2">&amp;</span>info, <span class="string">&quot;to&quot;</span>, AR::from(end_heads))<span class="question-mark">?</span>;
-                c.call2(<span class="kw-2">&amp;</span>JsValue::undefined(), <span class="kw-2">&amp;</span>patches.into(), <span class="kw-2">&amp;</span>info)<span class="question-mark">?</span>;
-            }
-        }
-
-        <span class="prelude-val">Ok</span>(object.into())
+        <span class="prelude-val">Ok</span>((object.into(), patches))
     }
 
     <span class="attr">#[wasm_bindgen(js_name = popPatches)]
@@ -1907,6 +1944,14 @@
             result.push(<span class="kw-2">&amp;</span>interop::JsPatch(p).try_into()<span class="question-mark">?</span>);
         }
         <span class="prelude-val">Ok</span>(result)
+    }
+
+    <span class="kw">pub fn </span>diff(<span class="kw-2">&amp;mut </span><span class="self">self</span>, before: Array, after: Array) -&gt; <span class="prelude-ty">Result</span>&lt;Array, error::Diff&gt; {
+        <span class="kw">let </span>before = get_heads(<span class="prelude-val">Some</span>(before))<span class="question-mark">?</span>.unwrap();
+        <span class="kw">let </span>after = get_heads(<span class="prelude-val">Some</span>(after))<span class="question-mark">?</span>.unwrap();
+
+        <span class="kw">let </span>patches = <span class="self">self</span>.doc.diff(<span class="kw-2">&amp;</span>before, <span class="kw-2">&amp;</span>after)<span class="question-mark">?</span>.take_patches(<span class="macro">vec!</span>[]).<span class="number">0</span>;
+        <span class="prelude-val">Ok</span>(interop::JsPatches(patches).try_into()<span class="question-mark">?</span>)
     }
 
     <span class="kw">pub fn </span>length(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: JsValue, heads: <span class="prelude-ty">Option</span>&lt;Array&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;f64, error::Get&gt; {
@@ -1933,6 +1978,18 @@
     </span><span class="kw">pub fn </span>save_incremental(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Uint8Array {
         <span class="kw">let </span>bytes = <span class="self">self</span>.doc.save_incremental();
         Uint8Array::from(bytes.as_slice())
+    }
+
+    <span class="attr">#[wasm_bindgen(js_name = saveNoCompress)]
+    </span><span class="kw">pub fn </span>save_nocompress(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Uint8Array {
+        <span class="kw">let </span>bytes = <span class="self">self</span>.doc.save_nocompress();
+        Uint8Array::from(bytes.as_slice())
+    }
+
+    <span class="attr">#[wasm_bindgen(js_name = saveAndVerify)]
+    </span><span class="kw">pub fn </span>save_and_verify(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Uint8Array, error::Load&gt; {
+        <span class="kw">let </span>bytes = <span class="self">self</span>.doc.save_and_verify()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(Uint8Array::from(bytes.as_slice()))
     }
 
     <span class="attr">#[wasm_bindgen(js_name = loadIncremental)]
@@ -2106,16 +2163,10 @@
     <span class="kw">pub fn </span>unmark(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         obj: JsValue,
-        key: JsValue,
-        start: f64,
-        end: f64,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), JsValue&gt; {
-        <span class="kw">let </span>(obj, <span class="kw">_</span>) = <span class="self">self</span>.import(obj)<span class="question-mark">?</span>;
-        <span class="kw">let </span>key = key.as_string().ok_or(<span class="string">&quot;key must be a string&quot;</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.doc
-            .unmark(<span class="kw-2">&amp;</span>obj, <span class="kw-2">&amp;</span>key, start <span class="kw">as </span>usize, end <span class="kw">as </span>usize)
-            .map_err(to_js_err)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(())
+        range: JsValue,
+        name: JsValue,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Mark&gt; {
+        <span class="self">self</span>.mark(obj, range, name, JsValue::NULL, JsValue::from_str(<span class="string">&quot;null&quot;</span>))
     }
 
     <span class="kw">pub fn </span>marks(<span class="kw-2">&amp;mut </span><span class="self">self</span>, obj: JsValue, heads: <span class="prelude-ty">Option</span>&lt;Array&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;JsValue, JsValue&gt; {
@@ -2164,8 +2215,7 @@
         TextRepresentation::Array
     };
     <span class="kw">let </span><span class="kw-2">mut </span>doc = am::AutoCommitWithObs::&lt;UnObserved&gt;::load(<span class="kw-2">&amp;</span>data)<span class="question-mark">?
-        </span>.with_observer(ToggleObserver::default().with_text_rep(text_rep.into()))
-        .with_encoding(TextEncoding::Utf16);
+        </span>.with_observer(ToggleObserver::default().with_text_rep(text_rep.into()));
     <span class="kw">if let </span><span class="prelude-val">Some</span>(s) = actor {
         <span class="kw">let </span>actor =
             automerge::ActorId::from(hex::decode(s).map_err(error::BadActorId::from)<span class="question-mark">?</span>.to_vec());
@@ -2440,6 +2490,22 @@
     }
 
     <span class="attr">#[derive(Debug, thiserror::Error)]
+    </span><span class="kw">pub enum </span>Diff {
+        <span class="attr">#[error(transparent)]
+        </span>Export(<span class="attr">#[from] </span>interop::error::Export),
+        <span class="attr">#[error(<span class="string">&quot;bad heads: {0}&quot;</span>)]
+        </span>Heads(<span class="attr">#[from] </span>interop::error::BadChangeHashes),
+        <span class="attr">#[error(transparent)]
+        </span>Automerge(<span class="attr">#[from] </span>AutomergeError),
+    }
+
+    <span class="kw">impl </span>From&lt;Diff&gt; <span class="kw">for </span>JsValue {
+        <span class="kw">fn </span>from(e: Diff) -&gt; <span class="self">Self </span>{
+            JsValue::from(e.to_string())
+        }
+    }
+
+    <span class="attr">#[derive(Debug, thiserror::Error)]
     </span><span class="kw">pub enum </span>Materialize {
         <span class="attr">#[error(transparent)]
         </span>Export(<span class="attr">#[from] </span>interop::error::Export),
@@ -2532,4 +2598,4 @@
     }
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="automerge_wasm" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0 (2c8cc3432 2023-03-06)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="automerge_wasm" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
