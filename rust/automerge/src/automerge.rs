@@ -1156,6 +1156,16 @@ impl Automerge {
         }
     }
 
+    pub fn partial_cmp_heads(
+        &self,
+        heads1: &[ChangeHash],
+        heads2: &[ChangeHash],
+    ) -> Option<Ordering> {
+        let clock1 = self.clock_at(heads1);
+        let clock2 = self.clock_at(heads2);
+        clock1.partial_cmp(&clock2)
+    }
+
     fn calculate_marks<O: AsRef<ExId>>(
         &self,
         obj: O,

@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::ops::RangeBounds;
 
 use crate::exid::ExId;
@@ -50,6 +51,14 @@ impl<'a, Obs: observation::Observation> Transaction<'a, Obs> {
     /// - is for an operation in this transaction
     pub fn hash_for_opid(&self, opid: &ExId) -> Option<ChangeHash> {
         self.doc.hash_for_opid(opid)
+    }
+
+    pub fn partial_cmp_heads(
+        &self,
+        heads1: &[ChangeHash],
+        heads2: &[ChangeHash],
+    ) -> Option<Ordering> {
+        self.doc.partial_cmp_heads(heads1, heads2)
     }
 }
 
