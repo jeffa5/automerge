@@ -543,6 +543,10 @@ impl<Obs: Observation> ReadDoc for AutoCommitWithObs<Obs> {
     fn get_change_by_hash(&self, hash: &ChangeHash) -> Option<&Change> {
         self.doc.get_change_by_hash(hash)
     }
+
+    fn hash_for_opid(&self, opid: &ExId) -> Option<ChangeHash> {
+        self.doc.hash_for_opid(opid)
+    }
 }
 
 impl<Obs: Observation> Transactable for AutoCommitWithObs<Obs> {
