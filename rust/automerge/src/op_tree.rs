@@ -13,6 +13,7 @@ use std::cmp::Ordering;
 use std::{fmt::Debug, mem};
 
 mod iter;
+mod iter_visible;
 mod node;
 
 pub(crate) use iter::OpTreeIter;
@@ -347,7 +348,7 @@ impl OpTreeInternal {
             Prop::Map(key_name) => {
                 let key = Key::Map(meta.props.lookup(&key_name)?);
                 let pos = self.binary_search_by(|op| meta.key_cmp(&op.key, &key));
-                Some(OpsFound::new(pos, self.iter(), key, clock))
+                Some(OpsFound::new(pos, self.iter_visible(clock), key, clock))
             }
             Prop::Seq(index) => {
                 let query = self.search(query::Nth::new(index, encoding, clock.cloned()), meta);
@@ -394,6 +395,14 @@ impl OpTreeInternal {
     /// Create an iterator through the sequence.
     pub(crate) fn iter(&self) -> OpTreeIter<'_> {
         iter::OpTreeIter::new(self)
+    }
+
+    /// Create an iterator through the sequence of visible ops.
+    pub(crate) fn iter_visible(
+        &self,
+        clock: Option<&Clock>,
+    ) -> iter_visible::OpTreeIterVisible<'_> {
+        iter_visible::OpTreeIterVisible::new(self, clock.cloned())
     }
 
     /// Insert the `element` into the sequence at `index`.
@@ -535,7 +544,7 @@ pub(crate) struct FoundOpId<'a> {
 }
 
 impl<'a> OpsFound<'a> {
-    fn new<T: Iterator<Item = &'a Op>>(
+    fn new<T: Iterator<Item = (usize, &'a Op)>>(
         start_pos: usize,
         mut iter: T,
         key: Key,
@@ -547,13 +556,13 @@ impl<'a> OpsFound<'a> {
             ops_pos: vec![],
         };
         let mut next = iter.nth(start_pos);
-        while let Some(op) = next {
+        while let Some((passed, op)) = next {
             if op.elemid_or_key() == key {
+                found.end_pos += passed;
                 if op.visible_at(clock) {
                     found.ops.push(op);
-                    found.ops_pos.push(found.end_pos);
+                    found.ops_pos.push(found.end_pos - 1);
                 }
-                found.end_pos += 1;
             } else {
                 break;
             }
