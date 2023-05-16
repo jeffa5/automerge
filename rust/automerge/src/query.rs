@@ -1,6 +1,7 @@
 use crate::op_tree::{OpSetMetadata, OpTree, OpTreeNode};
 use crate::types::{Key, ListEncoding, Op, OpId};
 use fxhash::FxBuildHasher;
+use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 
@@ -8,12 +9,14 @@ mod insert;
 mod list_state;
 mod nth;
 mod opid;
+mod prop;
 mod seek_mark;
 
 pub(crate) use insert::InsertNth;
 pub(crate) use list_state::ListState;
 pub(crate) use nth::Nth;
 pub(crate) use opid::{OpIdSearch, SimpleOpIdSearch};
+pub(crate) use prop::Prop;
 pub(crate) use seek_mark::SeekMark;
 
 // use a struct for the args for clarity as they are passed up the update chain in the optree
@@ -238,4 +241,21 @@ impl Default for Index {
     fn default() -> Self {
         Self::new()
     }
+}
+
+pub(crate) fn binary_search_by<F>(node: &OpTreeNode, ops: &[Op], f: F) -> usize
+where
+    F: Fn(&Op) -> Ordering,
+{
+    let mut right = node.len();
+    let mut left = 0;
+    while left < right {
+        let seq = (left + right) / 2;
+        if f(&ops[node.get(seq).unwrap()]) == Ordering::Less {
+            left = seq + 1;
+        } else {
+            right = seq;
+        }
+    }
+    left
 }

@@ -345,9 +345,19 @@ impl OpTreeInternal {
     ) -> Option<OpsFound<'a>> {
         match prop {
             Prop::Map(key_name) => {
-                let key = Key::Map(meta.props.lookup(&key_name)?);
-                let pos = self.binary_search_by(|op| meta.key_cmp(&op.key, &key));
-                Some(OpsFound::new(pos, self.iter(), key, clock))
+                if clock.is_some() {
+                    let key = Key::Map(meta.props.lookup(&key_name)?);
+                    let pos = self.binary_search_by(|op| meta.key_cmp(&op.key, &key));
+                    Some(OpsFound::new(pos, self.iter(), key, clock))
+                } else {
+                    let key = meta.props.lookup(&key_name)?;
+                    let query = self.search(query::Prop::new(key), meta);
+                    Some(OpsFound {
+                        ops: query.ops,
+                        ops_pos: query.ops_pos,
+                        end_pos: query.pos,
+                    })
+                }
             }
             Prop::Seq(index) => {
                 let query = self.search(query::Nth::new(index, encoding, clock.cloned()), meta);
