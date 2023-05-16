@@ -1,9 +1,6 @@
 use std::cmp::Ordering;
 
-use crate::{
-    clock::Clock,
-    types::{ListEncoding, Op},
-};
+use crate::types::{ListEncoding, Op};
 
 use super::{OpTreeInternal, OpTreeNode};
 
@@ -17,7 +14,7 @@ impl<'a> Default for OpTreeIterVisible<'a> {
 }
 
 impl<'a> OpTreeIterVisible<'a> {
-    pub(crate) fn new(tree: &'a OpTreeInternal, clock: Option<Clock>) -> OpTreeIterVisible<'a> {
+    pub(crate) fn new(tree: &'a OpTreeInternal) -> OpTreeIterVisible<'a> {
         Self(
             tree.root_node
                 .as_ref()
@@ -31,7 +28,6 @@ impl<'a> OpTreeIterVisible<'a> {
                     cumulative_index: 0,
                     root_node: root,
                     ops: &tree.ops,
-                    clock,
                 })
                 .unwrap_or(Inner::Empty),
         )
@@ -62,8 +58,6 @@ enum Inner<'a> {
         cumulative_index: usize,
         root_node: &'a OpTreeNode,
         ops: &'a [Op],
-        // clock for checking visibility.
-        clock: Option<Clock>,
     },
 }
 
@@ -161,7 +155,6 @@ impl<'a> Inner<'a> {
                 ops,
                 current,
                 cumulative_index,
-                clock,
                 ..
             } => {
                 if current.node.is_leaf() {
@@ -173,7 +166,7 @@ impl<'a> Inner<'a> {
                         *cumulative_index += 1;
                         let op = &ops[result];
                         processed += 1;
-                        if op.visible_at(clock.as_ref()) {
+                        if op.visible() {
                             Some((processed, op))
                         } else {
                             self.next_internal(processed)
@@ -470,7 +463,7 @@ mod tests {
         #[test]
         fn optree_iter_proptest(model in model()) {
             let optree = make_optree(&model.actions);
-            let iter = super::OpTreeIterVisible::new(&optree, None);
+            let iter = super::OpTreeIterVisible::new(&optree);
             let iterated = iter.map(|o|o.1).cloned().collect::<Vec<_>>();
             assert_eq!(DebugOps(&model.model), DebugOps(&iterated))
         }
@@ -478,7 +471,7 @@ mod tests {
         #[test]
         fn optree_iter_nth(model in nth_model()) {
             let optree = make_optree(&model.actions);
-            let mut iter = super::OpTreeIterVisible::new(&optree, None);
+            let mut iter = super::OpTreeIterVisible::new(&optree);
             let mut model_iter = model.model.iter();
             assert_eq!(model_iter.nth(model.n), iter.nth(model.n).map(|o|o.1));
 

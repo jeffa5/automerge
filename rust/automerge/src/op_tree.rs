@@ -348,7 +348,11 @@ impl OpTreeInternal {
             Prop::Map(key_name) => {
                 let key = Key::Map(meta.props.lookup(&key_name)?);
                 let pos = self.binary_search_by(|op| meta.key_cmp(&op.key, &key));
-                Some(OpsFound::new(pos, self.iter_visible(clock), key, clock))
+                if clock.is_some() {
+                    Some(OpsFound::new(pos, self.iter().map(|o| (1, o)), key, clock))
+                } else {
+                    Some(OpsFound::new(pos, self.iter_visible(), key, clock))
+                }
             }
             Prop::Seq(index) => {
                 let query = self.search(query::Nth::new(index, encoding, clock.cloned()), meta);
@@ -398,11 +402,8 @@ impl OpTreeInternal {
     }
 
     /// Create an iterator through the sequence of visible ops.
-    pub(crate) fn iter_visible(
-        &self,
-        clock: Option<&Clock>,
-    ) -> iter_visible::OpTreeIterVisible<'_> {
-        iter_visible::OpTreeIterVisible::new(self, clock.cloned())
+    pub(crate) fn iter_visible(&self) -> iter_visible::OpTreeIterVisible<'_> {
+        iter_visible::OpTreeIterVisible::new(self)
     }
 
     /// Insert the `element` into the sequence at `index`.
