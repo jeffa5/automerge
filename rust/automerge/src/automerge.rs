@@ -459,7 +459,6 @@ impl Automerge {
     }
 
     /// Load a document with an observer
-    #[tracing::instrument(skip(data, observer), err)]
     pub fn load_with<Obs: OpObserver>(
         data: &[u8],
         on_error: OnPartialLoad,

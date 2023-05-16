@@ -4,8 +4,6 @@ use std::{
     num::NonZeroU64,
 };
 
-use tracing::instrument;
-
 use crate::{
     op_tree::OpSetMetadata,
     storage::{
@@ -77,7 +75,6 @@ impl<'a> ChangeCollector<'a> {
         Ok(ChangeCollector { changes_by_actor })
     }
 
-    #[instrument(skip(self))]
     pub(crate) fn collect(&mut self, obj: ObjId, op: Op) -> Result<(), Error> {
         let actor_changes = self
             .changes_by_actor
@@ -95,7 +92,6 @@ impl<'a> ChangeCollector<'a> {
         Ok(())
     }
 
-    #[instrument(skip(self, metadata))]
     pub(crate) fn finish(
         self,
         metadata: &OpSetMetadata,
@@ -154,7 +150,6 @@ impl<'a> PartialChange<'a> {
     ///
     /// * If any op references a property index which is not in `props`
     /// * If any op references an actor index which is not in `actors`
-    #[instrument(skip(self, known_changes, metadata))]
     fn finish(
         mut self,
         known_changes: &HashMap<usize, ChangeHash>,

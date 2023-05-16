@@ -229,7 +229,6 @@ impl OpSetInternal {
         }
     }
 
-    #[tracing::instrument(skip(self, index))]
     pub(crate) fn insert(&mut self, index: usize, obj: &ObjId, element: Op) {
         if let OpType::Make(typ) = element.action {
             self.trees.insert(

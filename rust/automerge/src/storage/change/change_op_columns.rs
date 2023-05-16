@@ -142,7 +142,6 @@ impl ChangeOpsColumns {
         }
     }
 
-    #[tracing::instrument(skip(ops, out))]
     pub(crate) fn encode<'a, 'b, 'c, I, C, Op>(ops: I, out: &'b mut Vec<u8>) -> ChangeOpsColumns
     where
         I: Iterator<Item = C> + Clone + ExactSizeIterator + 'a,

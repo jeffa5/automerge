@@ -1,5 +1,3 @@
-use tracing::instrument;
-
 use crate::{
     change::Change,
     storage::{self, parse},
@@ -51,7 +49,6 @@ pub(crate) enum LoadedChanges<'a> {
 /// or more changes. This means it is possible to partially load corrupted data if the first `n`
 /// chunks are valid. This function returns a `LoadedChanges` which you can examine to determine if
 /// this is the case.
-#[instrument(skip(data))]
 pub(crate) fn load_changes<'a>(mut data: parse::Input<'a>) -> LoadedChanges<'a> {
     let mut changes = Vec::new();
     while !data.is_empty() {

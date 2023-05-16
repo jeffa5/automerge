@@ -1,6 +1,5 @@
 use super::change_collector::ChangeCollector;
 use std::collections::{BTreeSet, HashMap};
-use tracing::instrument;
 
 use crate::{
     change::Change,
@@ -89,7 +88,6 @@ pub enum VerificationMode {
     DontCheck,
 }
 
-#[instrument(skip(doc, observer))]
 pub(crate) fn reconstruct_document<'a, O: DocObserver>(
     doc: &'a Document<'a>,
     mode: VerificationMode,

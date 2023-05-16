@@ -182,7 +182,6 @@ impl ColumnLayoutParser {
         Ok(Columns { columns })
     }
 
-    #[tracing::instrument(skip(self), err)]
     fn add_column(
         &mut self,
         column: ColumnSpec,

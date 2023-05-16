@@ -17,7 +17,6 @@ use crate::{
 /// * If any of ops in `ops` reference an actor which is not in `actors`
 /// * If any of ops in `ops` reference a property which is not in `props`
 /// * If any of the changes reference a dependency index which is not in `changes`
-#[tracing::instrument(skip(changes, ops, actors, props, config))]
 pub(crate) fn save_document<'a, I, O>(
     changes: I,
     ops: O,

@@ -70,7 +70,6 @@ impl TransactionInner {
     /// the new heads.
     ///
     /// Returns `None` if there were no operations to commit
-    #[tracing::instrument(skip(self, doc))]
     pub(crate) fn commit(
         self,
         doc: &mut Automerge,
@@ -112,7 +111,6 @@ impl TransactionInner {
         hash
     }
 
-    #[tracing::instrument(skip(self, metadata))]
     pub(crate) fn export(self, metadata: &OpSetMetadata) -> Change {
         use crate::storage::{change::PredOutOfOrder, convert::op_as_actor_id};
 
