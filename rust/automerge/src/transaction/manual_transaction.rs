@@ -41,6 +41,16 @@ impl<'a, Obs: observation::Observation> Transaction<'a, Obs> {
             observation: Some(obs),
         }
     }
+
+    /// Get the hash of the change that contains the given opid.
+    ///
+    /// Returns none if the opid:
+    /// - is the root object id
+    /// - does not exist in this document
+    /// - is for an operation in this transaction
+    pub fn hash_for_opid(&self, opid: &ExId) -> Option<ChangeHash> {
+        self.doc.hash_for_opid(opid)
+    }
 }
 
 impl<'a> Transaction<'a, observation::UnObserved> {
@@ -273,10 +283,6 @@ impl<'a, Obs: observation::Observation> ReadDoc for Transaction<'a, Obs> {
 
     fn get_change_by_hash(&self, hash: &ChangeHash) -> Option<&crate::Change> {
         self.doc.get_change_by_hash(hash)
-    }
-
-    fn hash_for_opid(&self, opid: &ExId) -> Option<ChangeHash> {
-        self.doc.hash_for_opid(opid)
     }
 }
 

@@ -383,6 +383,16 @@ impl<Obs: Observation> AutoCommitWithObs<Obs> {
         self.ensure_transaction_closed();
         SyncWrapper { inner: self }
     }
+
+    /// Get the hash of the change that contains the given opid.
+    ///
+    /// Returns none if the opid:
+    /// - is the root object id
+    /// - does not exist in this document
+    /// - is for an operation in a transaction
+    pub fn hash_for_opid(&self, opid: &ExId) -> Option<ChangeHash> {
+        self.doc.hash_for_opid(opid)
+    }
 }
 
 impl<Obs: Observation> ReadDoc for AutoCommitWithObs<Obs> {
@@ -542,10 +552,6 @@ impl<Obs: Observation> ReadDoc for AutoCommitWithObs<Obs> {
 
     fn get_change_by_hash(&self, hash: &ChangeHash) -> Option<&Change> {
         self.doc.get_change_by_hash(hash)
-    }
-
-    fn hash_for_opid(&self, opid: &ExId) -> Option<ChangeHash> {
-        self.doc.hash_for_opid(opid)
     }
 }
 
