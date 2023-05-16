@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeSet, HashMap};
 
 use crate::{
     clock::{Clock, ClockData},
@@ -15,7 +15,7 @@ pub(crate) struct ChangeGraph {
     nodes: Vec<ChangeNode>,
     edges: Vec<Edge>,
     hashes: Vec<ChangeHash>,
-    nodes_by_hash: BTreeMap<ChangeHash, NodeIdx>,
+    nodes_by_hash: HashMap<ChangeHash, NodeIdx>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -49,7 +49,7 @@ impl ChangeGraph {
         Self {
             nodes: Vec::new(),
             edges: Vec::new(),
-            nodes_by_hash: BTreeMap::new(),
+            nodes_by_hash: HashMap::new(),
             hashes: Vec::new(),
         }
     }
