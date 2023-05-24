@@ -44,6 +44,7 @@ impl<'a> TreeQuery<'a> for Prop<'a> {
             optree_len,
         }) = self.start
         {
+            // in this node
             if self.pos + child.len() >= start {
                 // skip empty nodes
                 if child.index.visible_len(ListEncoding::default()) == 0 {
@@ -58,6 +59,7 @@ impl<'a> TreeQuery<'a> for Prop<'a> {
                     QueryResult::Descend
                 }
             } else {
+                // skip the whole child
                 self.pos += child.len();
                 QueryResult::Next
             }
@@ -68,16 +70,23 @@ impl<'a> TreeQuery<'a> for Prop<'a> {
                 idx: start,
                 optree_len: child.len(),
             });
-            self.pos = start;
             self.query_node_with_metadata(child, m, ops)
         }
     }
 
     fn query_element(&mut self, op: &'a Op) -> QueryResult {
+        // may need to skip to start still
+        let Start { idx, optree_len: _ } = self.start.as_ref().unwrap();
+        if self.pos < *idx {
+            self.pos += 1;
+            return QueryResult::Next;
+        }
+
         // don't bother looking at things past our key
         if op.key != self.key {
             return QueryResult::Finish;
         }
+
         if op.visible() {
             self.ops.push(op);
             self.ops_pos.push(self.pos);
