@@ -191,6 +191,7 @@ mod tests {
     use std::{
         num::NonZeroU64,
         time::{SystemTime, UNIX_EPOCH},
+        collections::BTreeMap,
     };
 
     use crate::{
