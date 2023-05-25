@@ -98,9 +98,9 @@ pub trait OpObserver {
     /// - `doc`: a handle to the doc after the op has been inserted, can be used to query information
     /// - `objid`: the object that has been deleted in.
     /// - `prop`: the prop to be deleted
-    fn delete<R: ReadDoc>(&mut self, doc: &R, objid: ExId, prop: Prop) {
+    fn delete<R: ReadDoc>(&mut self, doc: &R, objid: ExId, prop: Prop, opid: ExId) {
         match prop {
-            Prop::Map(k) => self.delete_map(doc, objid, &k),
+            Prop::Map(k) => self.delete_map(doc, objid, &k, opid),
             Prop::Seq(i) => self.delete_seq(doc, objid, i, 1),
         }
     }
@@ -110,7 +110,7 @@ pub trait OpObserver {
     /// - `doc`: a handle to the doc after the op has been inserted, can be used to query information
     /// - `objid`: the object that has been deleted in.
     /// - `key`: the map key to be deleted
-    fn delete_map<R: ReadDoc>(&mut self, doc: &R, objid: ExId, key: &str);
+    fn delete_map<R: ReadDoc>(&mut self, doc: &R, objid: ExId, key: &str, opid: ExId);
 
     /// A one or more list values have beeen deleted.
     ///
@@ -213,7 +213,7 @@ impl OpObserver for () {
     ) {
     }
 
-    fn delete_map<R: ReadDoc>(&mut self, _doc: &R, _objid: ExId, _key: &str) {}
+    fn delete_map<R: ReadDoc>(&mut self, _doc: &R, _objid: ExId, _key: &str, _opid: ExId) {}
 
     fn delete_seq<R: ReadDoc>(&mut self, _doc: &R, _objid: ExId, _index: usize, _num: usize) {}
 }

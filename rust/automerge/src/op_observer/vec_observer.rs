@@ -200,10 +200,11 @@ impl OpObserver for VecOpObserver {
         }
     }
 
-    fn delete_map<R: ReadDoc>(&mut self, doc: &R, obj: ObjId, key: &str) {
+    fn delete_map<R: ReadDoc>(&mut self, doc: &R, obj: ObjId, key: &str, opid: ObjId) {
         if let Some(path) = self.get_path(doc, &obj) {
             let action = PatchAction::DeleteMap {
                 key: key.to_owned(),
+                opid,
             };
             self.patches.push(Patch { obj, path, action })
         }

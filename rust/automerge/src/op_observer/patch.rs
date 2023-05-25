@@ -42,6 +42,7 @@ pub enum PatchAction {
     },
     DeleteMap {
         key: String,
+        opid: ObjId,
     },
     DeleteSeq {
         index: usize,

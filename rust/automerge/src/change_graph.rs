@@ -189,9 +189,9 @@ pub struct MissingDep(ChangeHash);
 #[cfg(test)]
 mod tests {
     use std::{
+        collections::BTreeMap,
         num::NonZeroU64,
         time::{SystemTime, UNIX_EPOCH},
-        collections::BTreeMap,
     };
 
     use crate::{

@@ -122,7 +122,9 @@ impl<'a> FoundOpWithObserver<'a> {
         if op.is_delete() {
             match (self.before, self.overwritten, self.after) {
                 (None, Some(over), None) => match key {
-                    Prop::Map(k) => observer.delete_map(doc, ex_obj, &k),
+                    Prop::Map(k) => {
+                        observer.delete_map(doc, ex_obj, &k, doc.ops().id_to_exid(op.id))
+                    }
                     Prop::Seq(index) => {
                         observer.delete_seq(doc, ex_obj, index, over.width(obj.encoding))
                     }

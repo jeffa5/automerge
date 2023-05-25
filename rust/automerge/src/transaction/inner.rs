@@ -745,7 +745,7 @@ impl TransactionInner {
                     }
                 }
             } else if op.is_delete() {
-                op_observer.delete(doc, ex_obj, prop);
+                op_observer.delete(doc, ex_obj, prop, doc.ops().id_to_exid(op.id));
             } else if let Some(value) = op.get_increment_value() {
                 op_observer.increment(doc, ex_obj, prop, (value, doc.ops().id_to_exid(op.id)));
             } else {

@@ -97,9 +97,15 @@ impl<'a, O1: OpObserver, O2: OpObserver> OpObserver for ComposeObservers<'a, O1,
         self.obs2.mark(doc, objid, marks.into_iter());
     }
 
-    fn delete_map<R: crate::ReadDoc>(&mut self, doc: &R, objid: crate::ObjId, key: &str) {
-        self.obs1.delete_map(doc, objid.clone(), key);
-        self.obs2.delete_map(doc, objid, key);
+    fn delete_map<R: crate::ReadDoc>(
+        &mut self,
+        doc: &R,
+        objid: crate::ObjId,
+        key: &str,
+        opid: crate::ObjId,
+    ) {
+        self.obs1.delete_map(doc, objid.clone(), key, opid.clone());
+        self.obs2.delete_map(doc, objid, key, opid);
     }
 
     fn delete_seq<R: crate::ReadDoc>(

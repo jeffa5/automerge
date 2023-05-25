@@ -415,7 +415,13 @@ mod tests {
             panic!("increment not expected");
         }
 
-        fn delete_map<R: ReadDoc>(&mut self, _doc: &R, _objid: crate::ObjId, _key: &str) {
+        fn delete_map<R: ReadDoc>(
+            &mut self,
+            _doc: &R,
+            _objid: crate::ObjId,
+            _key: &str,
+            _opid: crate::ObjId,
+        ) {
             panic!("delete not expected");
         }
 

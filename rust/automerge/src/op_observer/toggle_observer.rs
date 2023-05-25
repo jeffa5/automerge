@@ -97,9 +97,9 @@ impl<T: OpObserver + HasPatches> OpObserver for ToggleObserver<T> {
         }
     }
 
-    fn delete_map<R: ReadDoc>(&mut self, doc: &R, obj: ObjId, key: &str) {
+    fn delete_map<R: ReadDoc>(&mut self, doc: &R, obj: ObjId, key: &str, opid: ObjId) {
         if self.enabled {
-            self.observer.delete_map(doc, obj, key)
+            self.observer.delete_map(doc, obj, key, opid)
         }
     }
 

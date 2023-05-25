@@ -282,7 +282,9 @@ fn observe_map_diff<'a, I: Iterator<Item = Patch<'a>>, O: OpObserver>(
                     );
                 }
             }
-            Patch::Delete(_) => observer.delete_map(&doc, exid.clone(), prop),
+            Patch::Delete(winner) => {
+                observer.delete_map(&doc, exid.clone(), prop, doc.as_ref().id_to_exid(winner.id))
+            }
             Patch::Mark(_, _) => {}
         });
 }
@@ -726,7 +728,7 @@ mod tests {
                     },
                     path: ex_path_and(path, index),
                 },
-                PatchAction::DeleteMap { key } => ObservedPatch {
+                PatchAction::DeleteMap { key, opid: _ } => ObservedPatch {
                     action: ObservedAction::DelMap,
                     path: ex_path_and(path, key),
                 },
