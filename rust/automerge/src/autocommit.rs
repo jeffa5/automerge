@@ -412,6 +412,10 @@ impl<Obs: Observation> AutoCommitWithObs<Obs> {
     ) -> Option<Ordering> {
         self.doc.partial_cmp_heads(heads1, heads2)
     }
+
+    pub fn prepare_clock(&mut self, heads: &[ChangeHash]) {
+        self.doc.prepare_clock(heads)
+    }
 }
 
 impl<Obs: Observation> ReadDoc for AutoCommitWithObs<Obs> {
