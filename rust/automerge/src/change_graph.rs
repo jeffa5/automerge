@@ -173,33 +173,9 @@ impl ChangeGraph {
         let mut clock = Clock::new();
 
         for hash in heads {
-            if let Some(sub_clock) = self.clock_cache.get(hash) {
-                clock.merge(sub_clock);
-            }
+            let sub_clock = self.clock_for_hash(hash, actor_count);
+            clock.merge(&sub_clock);
         }
-
-        self.traverse_ancestors(heads, |node, hash| {
-            // if we have a clock for this hash then we can stop this path now.
-            if let Some(sub_clock) = self.clock_cache.get(hash) {
-                clock.merge(sub_clock);
-                return Step::Next;
-            }
-            // otherwise, we need to continue on.
-            let newer = clock.include(
-                node.actor_index,
-                ClockData {
-                    max_op: node.max_op,
-                    seq: node.seq,
-                },
-            );
-            // if we have an entry for every actor, and this is not new information, then none of
-            // the children are going to be new information either, so skip them
-            if clock.len() == actor_count && !newer {
-                Step::Next
-            } else {
-                Step::Descend
-            }
-        });
 
         clock
     }
