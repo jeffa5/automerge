@@ -1,4 +1,4 @@
-use std::collections::{BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap};
 
 use crate::{
     clock::{Clock, ClockData},
@@ -16,9 +16,10 @@ pub(crate) struct ChangeGraph {
     edges: Vec<Edge>,
     hashes: Vec<ChangeHash>,
     nodes_by_hash: HashMap<ChangeHash, NodeIdx>,
+    clock_cache: HashMap<Vec<ChangeHash>, Clock>,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct NodeIdx(u32);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -51,6 +52,7 @@ impl ChangeGraph {
             edges: Vec::new(),
             nodes_by_hash: HashMap::new(),
             hashes: Vec::new(),
+            clock_cache: HashMap::new(),
         }
     }
 
@@ -125,11 +127,19 @@ impl ChangeGraph {
         })
     }
 
+    pub(crate) fn cache_clock(&mut self, heads: Vec<ChangeHash>, clock: Clock) {
+        self.clock_cache.insert(heads, clock);
+    }
+
     /// Get the clock for the given heads.
     ///
     /// Short-curcuits when a value has been found for all actors.
     pub(crate) fn clock_for_heads(&self, heads: &[ChangeHash], actor_count: usize) -> Clock {
         let mut clock = Clock::new();
+
+        if let Some(clock) = self.clock_cache.get(heads) {
+            return clock.clone();
+        }
 
         self.traverse_ancestors(heads, |node, _hash| {
             let newer = clock.include(
@@ -177,7 +187,7 @@ impl ChangeGraph {
             .copied()
             .collect::<Vec<_>>();
 
-        let mut visited = HashSet::new();
+        let mut visited = BTreeSet::new();
 
         while let Some(idx) = to_visit.pop() {
             if visited.contains(&idx) {
@@ -241,7 +251,7 @@ mod tests {
         let change2 = builder.change(&actor2, 20, &[change1]);
         let change3 = builder.change(&actor3, 30, &[change1]);
         let change4 = builder.change(&actor1, 10, &[change2, change3]);
-        let graph = builder.build();
+        let mut graph = builder.build();
 
         let mut expected_clock = Clock::new();
         expected_clock.include(builder.index(&actor1), ClockData { max_op: 50, seq: 2 });
