@@ -16,7 +16,7 @@ pub(crate) struct ChangeGraph {
     edges: Vec<Edge>,
     hashes: Vec<ChangeHash>,
     nodes_by_hash: HashMap<ChangeHash, NodeIdx>,
-    clock_cache: HashMap<Vec<ChangeHash>, Clock>,
+    clock_cache: HashMap<ChangeHash, Clock>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -127,8 +127,43 @@ impl ChangeGraph {
         })
     }
 
-    pub(crate) fn cache_clock(&mut self, heads: Vec<ChangeHash>, clock: Clock) {
-        self.clock_cache.insert(heads, clock);
+    pub(crate) fn cache_clock(&mut self, heads: &[ChangeHash], actor_count: usize) {
+        for hash in heads {
+            let clock = self.clock_for_hash(hash, actor_count);
+            self.clock_cache.insert(*hash, clock);
+        }
+    }
+
+    pub(crate) fn clock_for_hash(&self, hash: &ChangeHash, actor_count: usize) -> Clock {
+        if let Some(clock) = self.clock_cache.get(hash) {
+            return clock.clone();
+        }
+
+        let mut clock = Clock::new();
+
+        self.traverse_ancestors(&[*hash], |node, hash| {
+            // if we have a clock for this hash then we can stop this path now.
+            if let Some(sub_clock) = self.clock_cache.get(hash) {
+                clock.merge(sub_clock);
+                return Step::Next;
+            }
+            // otherwise, we need to continue on.
+            let newer = clock.include(
+                node.actor_index,
+                ClockData {
+                    max_op: node.max_op,
+                    seq: node.seq,
+                },
+            );
+            // if we have an entry for every actor, and this is not new information, then none of
+            // the children are going to be new information either, so skip them
+            if clock.len() == actor_count && !newer {
+                Step::Next
+            } else {
+                Step::Descend
+            }
+        });
+        clock
     }
 
     /// Get the clock for the given heads.
@@ -137,11 +172,19 @@ impl ChangeGraph {
     pub(crate) fn clock_for_heads(&self, heads: &[ChangeHash], actor_count: usize) -> Clock {
         let mut clock = Clock::new();
 
-        if let Some(clock) = self.clock_cache.get(heads) {
-            return clock.clone();
+        for hash in heads {
+            if let Some(sub_clock) = self.clock_cache.get(hash) {
+                clock.merge(sub_clock);
+            }
         }
 
-        self.traverse_ancestors(heads, |node, _hash| {
+        self.traverse_ancestors(heads, |node, hash| {
+            // if we have a clock for this hash then we can stop this path now.
+            if let Some(sub_clock) = self.clock_cache.get(hash) {
+                clock.merge(sub_clock);
+                return Step::Next;
+            }
+            // otherwise, we need to continue on.
             let newer = clock.include(
                 node.actor_index,
                 ClockData {

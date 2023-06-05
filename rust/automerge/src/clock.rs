@@ -78,6 +78,13 @@ impl Clock {
         self.0.get(actor_index)
     }
 
+    /// Merge entries from another clock into ours.
+    pub(crate) fn merge(&mut self, other: &Clock) {
+        for (index, data) in &other.0 {
+            self.include(*index, *data);
+        }
+    }
+
     fn is_greater(&self, other: &Self) -> bool {
         let mut has_greater = false;
 

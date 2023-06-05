@@ -1196,8 +1196,7 @@ impl Automerge {
     }
 
     pub fn prepare_clock(&mut self, heads: &[ChangeHash]) {
-        let clock = self.clock_at(heads);
-        self.change_graph.cache_clock(heads.to_vec(), clock);
+        self.change_graph.cache_clock(heads, self.states.len());
     }
 }
 
