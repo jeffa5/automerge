@@ -225,6 +225,7 @@ impl OpTreeInternal {
         mut pos: usize,
         index: usize,
     ) -> FoundOpWithObserver<'a> {
+        // let query = self.search(query::SeekOpWithPatch::new(op, ListEncoding::List), meta);
         let mut iter = self.iter();
         let mut found = None;
         let mut before = None;
@@ -232,7 +233,24 @@ impl OpTreeInternal {
         let mut overwritten = None;
         let mut after = None;
         let mut succ = vec![];
+
+        for opid in &op.pred {
+            let query = self.search(
+                query::OpIdSearch::opid(*opid, ListEncoding::List, None),
+                meta,
+            );
+            if let Some(found) = query.found() {
+                succ.push(found);
+                let e = &self.ops[found];
+                if e.visible() {
+                    overwritten = Some(e)
+                }
+                pos = std::cmp::max(pos, found);
+            }
+        }
+
         let mut next = iter.nth(pos);
+
         while let Some(e) = next {
             if e.elemid_or_key() != op.elemid_or_key() {
                 break;
@@ -243,11 +261,6 @@ impl OpTreeInternal {
             }
 
             if op.overwrites(e) {
-                succ.push(pos);
-
-                if e.visible() {
-                    overwritten = Some(e);
-                }
             } else if e.visible() {
                 if found.is_none() && overwritten.is_none() {
                     before = Some(e);

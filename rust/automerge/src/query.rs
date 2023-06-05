@@ -11,6 +11,7 @@ mod nth;
 mod opid;
 mod prop;
 mod seek_mark;
+mod seek_op_with_patch;
 
 pub(crate) use insert::InsertNth;
 pub(crate) use list_state::ListState;
@@ -18,6 +19,7 @@ pub(crate) use nth::Nth;
 pub(crate) use opid::{OpIdSearch, SimpleOpIdSearch};
 pub(crate) use prop::Prop;
 pub(crate) use seek_mark::SeekMark;
+pub(crate) use seek_op_with_patch::SeekOpWithPatch;
 
 // use a struct for the args for clarity as they are passed up the update chain in the optree
 #[derive(Debug, Clone)]
