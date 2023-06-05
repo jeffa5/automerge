@@ -47,15 +47,22 @@ impl Clock {
         Clock(Default::default())
     }
 
-    pub(crate) fn include(&mut self, actor_index: usize, data: ClockData) {
+    /// Include data for an actor in this clock.
+    ///
+    /// Returns whether the information was newer than what already existed.
+    pub(crate) fn include(&mut self, actor_index: usize, data: ClockData) -> bool {
+        let mut newer = true;
         self.0
             .entry(actor_index)
             .and_modify(|d| {
                 if data.max_op > d.max_op {
                     *d = data;
+                } else {
+                    newer = false;
                 }
             })
             .or_insert(data);
+        newer
     }
 
     pub(crate) fn covers(&self, id: &OpId) -> bool {
@@ -103,6 +110,11 @@ impl Clock {
             // could still be concurrent
             false
         }
+    }
+
+    /// How many actors this clock has entries for.
+    pub(crate) fn len(&self) -> usize {
+        self.0.len()
     }
 }
 

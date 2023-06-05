@@ -125,17 +125,27 @@ impl ChangeGraph {
         })
     }
 
-    pub(crate) fn clock_for_heads(&self, heads: &[ChangeHash]) -> Clock {
+    /// Get the clock for the given heads.
+    ///
+    /// Short-curcuits when a value has been found for all actors.
+    pub(crate) fn clock_for_heads(&self, heads: &[ChangeHash], actor_count: usize) -> Clock {
         let mut clock = Clock::new();
 
         self.traverse_ancestors(heads, |node, _hash| {
-            clock.include(
+            let newer = clock.include(
                 node.actor_index,
                 ClockData {
                     max_op: node.max_op,
                     seq: node.seq,
                 },
             );
+            // if we have an entry for every actor, and this is not new information, then none of
+            // the children are going to be new information either, so skip them
+            if clock.len() == actor_count && !newer {
+                Step::Next
+            } else {
+                Step::Descend
+            }
         });
 
         clock
@@ -148,6 +158,7 @@ impl ChangeGraph {
     ) {
         self.traverse_ancestors(heads, |_node, hash| {
             changes.remove(hash);
+            Step::Descend
         });
     }
 
@@ -155,7 +166,7 @@ impl ChangeGraph {
     ///
     /// No guarantees are made about the order of traversal but each node will only be visited
     /// once.
-    fn traverse_ancestors<F: FnMut(&ChangeNode, &ChangeHash)>(
+    fn traverse_ancestors<F: FnMut(&ChangeNode, &ChangeHash) -> Step>(
         &self,
         heads: &[ChangeHash],
         mut f: F,
@@ -176,10 +187,26 @@ impl ChangeGraph {
             }
             let node = &self.nodes[idx.0 as usize];
             let hash = &self.hashes[node.hash_idx.0 as usize];
-            f(node, hash);
-            to_visit.extend(self.parents(idx));
+            let step = f(node, hash);
+            match step {
+                Step::Descend => {
+                    to_visit.extend(self.parents(idx));
+                }
+                Step::Next => continue,
+                Step::Stop => break,
+            }
         }
     }
+}
+
+/// What action to take when traversing the graph.
+enum Step {
+    /// Continue to visit the parents of this node.
+    Descend,
+    /// Don't visit the parents of this node, but do continue visiting other nodes.
+    Next,
+    /// Stop traversing all-together.
+    Stop,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -221,7 +248,7 @@ mod tests {
         expected_clock.include(builder.index(&actor2), ClockData { max_op: 30, seq: 1 });
         expected_clock.include(builder.index(&actor3), ClockData { max_op: 40, seq: 1 });
 
-        let clock = graph.clock_for_heads(&[change4]);
+        let clock = graph.clock_for_heads(&[change4], 3);
         assert_eq!(clock, expected_clock);
     }
 

@@ -889,7 +889,7 @@ impl Automerge {
     }
 
     fn clock_at(&self, heads: &[ChangeHash]) -> Clock {
-        self.change_graph.clock_for_heads(heads)
+        self.change_graph.clock_for_heads(heads, self.states.len())
     }
 
     fn get_hash(&self, actor: usize, seq: u64) -> Result<ChangeHash, AutomergeError> {
