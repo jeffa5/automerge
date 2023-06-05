@@ -1,4 +1,4 @@
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeSet, HashMap, HashSet};
 
 use crate::{
     clock::{Clock, ClockData},
@@ -18,7 +18,7 @@ pub(crate) struct ChangeGraph {
     nodes_by_hash: HashMap<ChangeHash, NodeIdx>,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 struct NodeIdx(u32);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -177,7 +177,7 @@ impl ChangeGraph {
             .copied()
             .collect::<Vec<_>>();
 
-        let mut visited = BTreeSet::new();
+        let mut visited = HashSet::new();
 
         while let Some(idx) = to_visit.pop() {
             if visited.contains(&idx) {
