@@ -161,6 +161,7 @@ impl ChangeGraph {
         clock
     }
 
+    /// Remove the changes that are ancestors of the heads from the set.
     pub(crate) fn remove_ancestors(
         &self,
         changes: &mut BTreeSet<ChangeHash>,
@@ -168,7 +169,12 @@ impl ChangeGraph {
     ) {
         self.traverse_ancestors(heads, |_node, hash| {
             changes.remove(hash);
-            Step::Descend
+            if changes.is_empty() {
+                // nothing left to remove
+                Step::Stop
+            } else {
+                Step::Descend
+            }
         });
     }
 
