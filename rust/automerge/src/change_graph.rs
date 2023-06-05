@@ -257,7 +257,7 @@ mod tests {
         let change2 = builder.change(&actor2, 20, &[change1]);
         let change3 = builder.change(&actor3, 30, &[change1]);
         let change4 = builder.change(&actor1, 10, &[change2, change3]);
-        let mut graph = builder.build();
+        let graph = builder.build();
 
         let mut expected_clock = Clock::new();
         expected_clock.include(builder.index(&actor1), ClockData { max_op: 50, seq: 2 });
