@@ -836,7 +836,7 @@ impl Automerge {
     ///
     /// Thus a graph with these heads has not seen the remaining changes.
     pub(crate) fn filter_changes(
-        &self,
+        &mut self,
         heads: &[ChangeHash],
         changes: &mut BTreeSet<ChangeHash>,
     ) -> Result<(), AutomergeError> {
@@ -846,7 +846,7 @@ impl Automerge {
             .copied()
             .collect::<Vec<_>>();
 
-        self.change_graph.remove_ancestors(changes, &heads);
+        self.change_graph.remove_ancestors(changes, &heads, self.states.len());
 
         Ok(())
     }

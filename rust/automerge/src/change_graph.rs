@@ -1,4 +1,7 @@
-use std::collections::{BTreeSet, HashMap};
+use std::{
+    cmp::Ordering,
+    collections::{BTreeSet, HashMap},
+};
 
 use crate::{
     clock::{Clock, ClockData},
@@ -182,19 +185,37 @@ impl ChangeGraph {
 
     /// Remove the changes that are ancestors of the heads from the set.
     pub(crate) fn remove_ancestors(
-        &self,
+        &mut self,
         changes: &mut BTreeSet<ChangeHash>,
         heads: &[ChangeHash],
+        actor_count: usize,
     ) {
-        self.traverse_ancestors(heads, |_node, hash| {
-            changes.remove(hash);
-            if changes.is_empty() {
-                // nothing left to remove
-                Step::Stop
+        let clock = self.clock_for_heads(heads, actor_count);
+        changes.retain(|hash| {
+            if let Some(hash_clock) = self.clock_cache.get(hash) {
+                !matches!(
+                    hash_clock.partial_cmp(&clock),
+                    Some(Ordering::Less | Ordering::Equal)
+                )
             } else {
-                Step::Descend
+                let hash_clock = self.clock_for_hash(hash, actor_count);
+                let matched = !matches!(
+                    hash_clock.partial_cmp(&clock),
+                    Some(Ordering::Less | Ordering::Equal)
+                );
+                self.clock_cache.insert(*hash, hash_clock);
+                matched
             }
         });
+        // self.traverse_ancestors(heads, |_node, hash| {
+        //     changes.remove(hash);
+        //     if changes.is_empty() {
+        //         // nothing left to remove
+        //         Step::Stop
+        //     } else {
+        //         Step::Descend
+        //     }
+        // });
     }
 
     /// Call `f` for each (node, hash) in the graph, starting from the given heads
@@ -297,13 +318,13 @@ mod tests {
         let change2 = builder.change(&actor2, 20, &[change1]);
         let change3 = builder.change(&actor3, 30, &[change1]);
         let change4 = builder.change(&actor1, 10, &[change2, change3]);
-        let graph = builder.build();
+        let mut graph = builder.build();
 
         let mut changes = vec![change1, change2, change3, change4]
             .into_iter()
             .collect::<BTreeSet<_>>();
         let heads = vec![change2];
-        graph.remove_ancestors(&mut changes, &heads);
+        graph.remove_ancestors(&mut changes, &heads, 3);
 
         let expected_changes = vec![change3, change4].into_iter().collect::<BTreeSet<_>>();
 
