@@ -212,6 +212,16 @@ impl<Obs: Observation> AutoCommitWithObs<Obs> {
         }
     }
 
+    // Apply changes with a temporary observer.
+    pub fn apply_changes_with<I: IntoIterator<Item = Change>, ObsT: OpObserver>(
+        &mut self,
+        changes: I,
+        op_observer: Option<&mut ObsT>,
+    ) -> Result<(), AutomergeError> {
+        self.ensure_transaction_closed();
+        self.doc.apply_changes_with(changes, op_observer)
+    }
+
     /// Takes all the changes in `other` which are not in `self` and applies them
     pub fn merge<Obs2: Observation>(
         &mut self,
