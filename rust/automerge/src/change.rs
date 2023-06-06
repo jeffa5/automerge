@@ -339,6 +339,8 @@ impl From<&Change> for crate::ExpandedChange {
 
 #[cfg(test)]
 pub(crate) mod gen {
+    use std::borrow::Cow;
+
     use super::Change;
     use crate::{
         op_tree::OpSetMetadata,
@@ -402,9 +404,9 @@ pub(crate) mod gen {
                 deps in proptest::collection::vec(gen_hash(), 0..100),
                 message in proptest::option::of("[a-z]{200}"),
                 this_actor in Just(this_actor),
-            ) -> Change {
+            ) -> Cow<'static, Change> {
             let ops = ops.iter().map(|(obj, op)| op_as_actor_id(obj, op, &metadata));
-            Change::new(ChangeBuilder::new()
+            Cow::Owned(Change::new(ChangeBuilder::new()
                 .with_dependencies(deps)
                 .with_start_op(start_op.try_into().unwrap())
                 .with_message(message)
@@ -412,7 +414,7 @@ pub(crate) mod gen {
                 .with_seq(seq)
                 .with_timestamp(timestamp)
                 .build(ops.into_iter())
-                .unwrap())
+                .unwrap()))
         }
 
     }

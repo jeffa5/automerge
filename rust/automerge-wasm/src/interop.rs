@@ -357,7 +357,7 @@ impl TryFrom<JS> for am::sync::BloomFilter {
     }
 }
 
-impl TryFrom<JS> for am::sync::Message {
+impl TryFrom<JS> for am::sync::Message<'static> {
     type Error = error::BadSyncMessage;
 
     fn try_from(value: JS) -> Result<Self, Self::Error> {
@@ -367,7 +367,8 @@ impl TryFrom<JS> for am::sync::Message {
         let need = js_get(&value.0, "need")?
             .try_into()
             .map_err(error::BadSyncMessage::BadNeed)?;
-        let changes = js_get(&value.0, "changes")?.try_into()?;
+        let changes: Vec<Change> = js_get(&value.0, "changes")?.try_into()?;
+        let changes = changes.into_iter().map(|c| Cow::Owned(c)).collect();
         let have = js_get(&value.0, "have")?.try_into()?;
         Ok(am::sync::Message {
             heads,

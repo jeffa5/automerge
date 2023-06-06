@@ -69,7 +69,10 @@
 
 use itertools::Itertools;
 use serde::ser::SerializeMap;
-use std::collections::{HashMap, HashSet};
+use std::{
+    borrow::Cow,
+    collections::{HashMap, HashSet},
+};
 
 use crate::{
     storage::{parse, Change as StoredChange, ReadChangeOpError},
@@ -92,21 +95,21 @@ pub trait SyncDoc {
     /// If this returns `None` then there are no new messages to send, either because we are
     /// waiting for an acknolwedgement of an in-flight message, or because the remote is up to
     /// date.
-    fn generate_sync_message(&self, sync_state: &mut State) -> Option<Message>;
+    fn generate_sync_message<'a>(&'a self, sync_state: &mut State) -> Option<Message<'a>>;
 
     /// Apply a received sync message to this document and `sync_state`
-    fn receive_sync_message(
+    fn receive_sync_message<'a>(
         &mut self,
         sync_state: &mut State,
-        message: Message,
+        message: Message<'a>,
     ) -> Result<(), AutomergeError>;
 
     /// Apply a received sync message to this document and `sync_state`, observing any changes with
     /// `op_observer`
-    fn receive_sync_message_with<Obs: OpObserver>(
+    fn receive_sync_message_with<'a, Obs: OpObserver>(
         &mut self,
         sync_state: &mut State,
-        message: Message,
+        message: Message<'a>,
         op_observer: &mut Obs,
     ) -> Result<(), AutomergeError>;
 }
@@ -114,7 +117,7 @@ pub trait SyncDoc {
 const MESSAGE_TYPE_SYNC: u8 = 0x42; // first byte of a sync message, for identification
 
 impl SyncDoc for Automerge {
-    fn generate_sync_message(&self, sync_state: &mut State) -> Option<Message> {
+    fn generate_sync_message(&self, sync_state: &mut State) -> Option<Message<'_>> {
         let our_heads = self.get_heads();
 
         let our_need = self.get_missing_deps(sync_state.their_heads.as_ref().unwrap_or(&vec![]));
@@ -148,7 +151,7 @@ impl SyncDoc for Automerge {
             }
         }
 
-        let changes_to_send = if let (Some(their_have), Some(their_need)) = (
+        let mut changes_to_send = if let (Some(their_have), Some(their_need)) = (
             sync_state.their_have.as_ref(),
             sync_state.their_need.as_ref(),
         ) {
@@ -167,16 +170,7 @@ impl SyncDoc for Automerge {
         };
 
         // deduplicate the changes to send with those we have already sent and clone it now
-        let changes_to_send = changes_to_send
-            .into_iter()
-            .filter_map(|change| {
-                if !sync_state.sent_hashes.contains(&change.hash()) {
-                    Some(change.clone())
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
+        changes_to_send.retain(|change| !sync_state.sent_hashes.contains(&change.hash()));
 
         if heads_unchanged {
             if heads_equal && changes_to_send.is_empty() {
@@ -203,18 +197,18 @@ impl SyncDoc for Automerge {
         Some(sync_message)
     }
 
-    fn receive_sync_message(
+    fn receive_sync_message<'a>(
         &mut self,
         sync_state: &mut State,
-        message: Message,
+        message: Message<'a>,
     ) -> Result<(), AutomergeError> {
         self.do_receive_sync_message::<()>(sync_state, message, None)
     }
 
-    fn receive_sync_message_with<Obs: OpObserver>(
+    fn receive_sync_message_with<'a, Obs: OpObserver>(
         &mut self,
         sync_state: &mut State,
-        message: Message,
+        message: Message<'a>,
         op_observer: &mut Obs,
     ) -> Result<(), AutomergeError> {
         self.do_receive_sync_message(sync_state, message, Some(op_observer))
@@ -237,11 +231,12 @@ impl Automerge {
         &self,
         have: &[Have],
         need: &[ChangeHash],
-    ) -> Result<Vec<&Change>, AutomergeError> {
+    ) -> Result<Vec<Cow<'_, Change>>, AutomergeError> {
         if have.is_empty() {
             Ok(need
                 .iter()
                 .filter_map(|hash| self.get_change_by_hash(hash))
+                .map(|c| Cow::Borrowed(c))
                 .collect())
         } else {
             let mut last_sync_hashes = HashSet::new();
@@ -290,24 +285,24 @@ impl Automerge {
             for hash in need {
                 if !hashes_to_send.contains(hash) {
                     if let Some(change) = self.get_change_by_hash(hash) {
-                        changes_to_send.push(change);
+                        changes_to_send.push(Cow::Borrowed(change));
                     }
                 }
             }
 
             for change in changes {
                 if hashes_to_send.contains(&change.hash()) {
-                    changes_to_send.push(change);
+                    changes_to_send.push(Cow::Borrowed(change));
                 }
             }
             Ok(changes_to_send)
         }
     }
 
-    fn do_receive_sync_message<Obs: OpObserver>(
+    fn do_receive_sync_message<'a, Obs: OpObserver>(
         &mut self,
         sync_state: &mut State,
-        message: Message,
+        message: Message<'a>,
         op_observer: Option<&mut Obs>,
     ) -> Result<(), AutomergeError> {
         let before_heads = self.get_heads();
@@ -321,7 +316,10 @@ impl Automerge {
 
         let changes_is_empty = message_changes.is_empty();
         if !changes_is_empty {
-            self.apply_changes_with(message_changes, op_observer)?;
+            self.apply_changes_with(
+                message_changes.into_iter().map(|c| c.into_owned()),
+                op_observer,
+            )?;
             sync_state.shared_heads = advance_heads(
                 &before_heads.iter().collect(),
                 &self.get_heads().into_iter().collect(),
@@ -418,7 +416,7 @@ impl From<parse::ParseError<ReadMessageError>> for ReadMessageError {
 
 /// The sync message to be sent.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Message {
+pub struct Message<'a> {
     /// The heads of the sender.
     pub heads: Vec<ChangeHash>,
     /// The hashes of any changes that are being explicitly requested from the recipient.
@@ -426,10 +424,10 @@ pub struct Message {
     /// A summary of the changes that the sender already has.
     pub have: Vec<Have>,
     /// The changes for the recipient to apply.
-    pub changes: Vec<Change>,
+    pub changes: Vec<Cow<'a, Change>>,
 }
 
-impl serde::Serialize for Message {
+impl<'a> serde::Serialize for Message<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -443,7 +441,7 @@ impl serde::Serialize for Message {
             &self
                 .changes
                 .iter()
-                .map(crate::ExpandedChange::from)
+                .map(|c| crate::ExpandedChange::from((*c).as_ref()))
                 .collect::<Vec<_>>(),
         )?;
         map.end()
@@ -457,7 +455,7 @@ fn parse_have(input: parse::Input<'_>) -> parse::ParseResult<'_, Have, ReadMessa
     Ok((i, Have { last_sync, bloom }))
 }
 
-impl Message {
+impl<'a> Message<'a> {
     pub fn decode(input: &[u8]) -> Result<Self, ReadMessageError> {
         let input = parse::Input::new(input);
         match Self::parse(input) {
@@ -488,14 +486,14 @@ impl Message {
         };
         let (i, stored_changes) = parse::length_prefixed(change_parser)(i)?;
         let changes_len = stored_changes.len();
-        let changes: Vec<Change> = stored_changes
+        let changes: Vec<Cow<'static, Change>> = stored_changes
             .into_iter()
             .try_fold::<_, _, Result<_, ReadMessageError>>(
                 Vec::with_capacity(changes_len),
                 |mut acc, stored| {
                     let change = Change::new_from_unverified(stored.into_owned(), None)
                         .map_err(ReadMessageError::ReadChangeOps)?;
-                    acc.push(change);
+                    acc.push(Cow::Owned(change));
                     Ok(acc)
                 },
             )?;
@@ -528,6 +526,19 @@ impl Message {
         });
 
         buf
+    }
+
+    pub fn into_owned(self) -> Message<'static> {
+        Message {
+            heads: self.heads,
+            need: self.need,
+            have: self.have,
+            changes: self
+                .changes
+                .into_iter()
+                .map(|c| Cow::Owned(c.into_owned()))
+                .collect(),
+        }
     }
 }
 
@@ -614,7 +625,7 @@ mod tests {
             need in gen_sorted_hashes(0..10),
             have in proptest::collection::vec(gen_have(), 0..10),
             changes in proptest::collection::vec(gen_change(), 0..10),
-        ) -> Message {
+        ) -> Message<'static> {
             Message {
                 heads,
                 need,
@@ -666,10 +677,14 @@ mod tests {
         let m1 = doc1
             .sync()
             .generate_sync_message(&mut s1)
-            .expect("message was none");
+            .expect("message was none")
+            .into_owned();
 
         doc2.sync().receive_sync_message(&mut s2, m1).unwrap();
-        let m2 = doc2.sync().generate_sync_message(&mut s2);
+        let m2 = doc2
+            .sync()
+            .generate_sync_message(&mut s2)
+            .map(|m| m.into_owned());
         assert!(m2.is_none());
     }
 
@@ -695,11 +710,13 @@ mod tests {
         let msg1to2 = doc1
             .sync()
             .generate_sync_message(&mut s1)
-            .expect("initial sync from 1 to 2 was None");
+            .expect("initial sync from 1 to 2 was None")
+            .into_owned();
         let msg2to1 = doc2
             .sync()
             .generate_sync_message(&mut s2)
-            .expect("initial sync message from 2 to 1 was None");
+            .expect("initial sync message from 2 to 1 was None")
+            .into_owned();
         assert_eq!(msg1to2.changes.len(), 0);
         assert_eq!(msg1to2.have[0].last_sync.len(), 0);
         assert_eq!(msg2to1.changes.len(), 0);
@@ -714,13 +731,15 @@ mod tests {
         let msg1to2 = doc1
             .sync()
             .generate_sync_message(&mut s1)
-            .expect("first reply from 1 to 2 was None");
+            .expect("first reply from 1 to 2 was None")
+            .into_owned();
         assert_eq!(msg1to2.changes.len(), 5);
 
         let msg2to1 = doc2
             .sync()
             .generate_sync_message(&mut s2)
-            .expect("first reply from 2 to 1 was None");
+            .expect("first reply from 2 to 1 was None")
+            .into_owned();
         assert_eq!(msg2to1.changes.len(), 5);
 
         //// both should now apply the changes
@@ -734,12 +753,14 @@ mod tests {
         let msg1to2 = doc1
             .sync()
             .generate_sync_message(&mut s1)
-            .expect("second reply from 1 to 2 was None");
+            .expect("second reply from 1 to 2 was None")
+            .into_owned();
         assert_eq!(msg1to2.changes.len(), 0);
         let msg2to1 = doc2
             .sync()
             .generate_sync_message(&mut s2)
-            .expect("second reply from 2 to 1 was None");
+            .expect("second reply from 2 to 1 was None")
+            .into_owned();
         assert_eq!(msg2to1.changes.len(), 0);
 
         //// After receiving acknowledgements, their shared heads should be equal
@@ -758,7 +779,8 @@ mod tests {
         let msg1to2 = doc1
             .sync()
             .generate_sync_message(&mut s1)
-            .expect("third reply from 1 to 2 was None");
+            .expect("third reply from 1 to 2 was None")
+            .into_owned();
         let mut expected_heads = vec![head1, head2];
         expected_heads.sort();
         let mut actual_heads = msg1to2.have[0].last_sync.clone();
@@ -943,8 +965,14 @@ mod tests {
         let mut iterations = 0;
 
         loop {
-            let a_to_b = a.sync().generate_sync_message(a_sync_state);
-            let b_to_a = b.sync().generate_sync_message(b_sync_state);
+            let a_to_b = a
+                .sync()
+                .generate_sync_message(a_sync_state)
+                .map(|m| m.into_owned());
+            let b_to_a = b
+                .sync()
+                .generate_sync_message(b_sync_state)
+                .map(|m| m.into_owned());
             if a_to_b.is_none() && b_to_a.is_none() {
                 break;
             }

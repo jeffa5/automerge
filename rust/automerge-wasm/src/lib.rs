@@ -967,7 +967,7 @@ pub fn export_sync_state(state: &SyncState) -> JsValue {
 
 #[wasm_bindgen(js_name = encodeSyncMessage)]
 pub fn encode_sync_message(message: JsValue) -> Result<Uint8Array, interop::error::BadSyncMessage> {
-    let message: am::sync::Message = JS(message).try_into()?;
+    let message: am::sync::Message<'_> = JS(message).try_into()?;
     Ok(Uint8Array::from(message.encode().as_slice()))
 }
 
@@ -977,7 +977,8 @@ pub fn decode_sync_message(msg: Uint8Array) -> Result<JsValue, error::BadSyncMes
     let msg = am::sync::Message::decode(&data)?;
     let heads = AR::from(msg.heads.as_slice());
     let need = AR::from(msg.need.as_slice());
-    let changes = AR::from(msg.changes.as_slice());
+    let changes: Vec<Change> = msg.changes.into_iter().map(|c| c.into_owned()).collect();
+    let changes = AR::from(changes.as_slice());
     let have = AR::from(msg.have.as_slice());
     let obj = Object::new().into();
     // SAFETY: we just created this object
