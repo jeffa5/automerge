@@ -9,7 +9,7 @@ use crate::{
     types::{Key, ListEncoding, ObjId, ObjMeta, Op, OpId, Prop},
     ObjType, OpType,
 };
-use std::cmp::Ordering;
+use std::{cmp::Ordering, ops::RangeBounds};
 use std::{fmt::Debug, mem};
 
 mod iter;
@@ -193,27 +193,35 @@ impl OpTreeInternal {
         &self,
         meta: &OpSetMetadata,
         op: &Op,
-        mut pos: usize,
+        start: usize,
     ) -> FoundOpWithoutObserver {
-        let mut iter = self.iter();
         let mut succ = vec![];
-        let mut next = iter.nth(pos);
-        while let Some(e) = next {
-            if e.elemid_or_key() != op.elemid_or_key() {
-                break;
-            }
 
-            if meta.lamport_cmp(e.id, op.id) == Ordering::Greater {
-                break;
-            }
+        let end = self
+            .binary_search_in_by(start.., |tree_op| {
+                if tree_op.elemid_or_key() != op.elemid_or_key() {
+                    Ordering::Greater
+                } else {
+                    Ordering::Less
+                }
+            })
+            .unwrap_err();
 
-            if op.overwrites(e) {
-                succ.push(pos);
-            }
-
-            pos += 1;
-            next = iter.next();
+        for pred in &op.pred {
+            let pos = self.binary_search_in_by(start..=end, |tree_op| tree_op.id.cmp(pred));
+            let pos = match pos {
+                Ok(p) => p,
+                Err(p) => p,
+            };
+            succ.push(pos);
         }
+
+        let pos = match self
+            .binary_search_in_by(start..=end, |tree_op| meta.lamport_cmp(tree_op.id, op.id))
+        {
+            Ok(p) => p,
+            Err(p) => p,
+        };
 
         FoundOpWithoutObserver { pos, succ }
     }
@@ -401,6 +409,39 @@ impl OpTreeInternal {
             }
         }
         left
+    }
+
+    /// Find an item by binary searching.
+    ///
+    /// Returns `Ok` if it is found with the index, otherwise `Err` with the last position checked.
+    fn binary_search_in_by<R, F>(&self, range: R, f: F) -> Result<usize, usize>
+    where
+        R: RangeBounds<usize>,
+        F: Fn(&Op) -> Ordering,
+    {
+        let mut left = match range.start_bound() {
+            std::ops::Bound::Included(s) => *s,
+            std::ops::Bound::Excluded(s) => *s + 1,
+            std::ops::Bound::Unbounded => 0,
+        };
+        let mut right = match range.end_bound() {
+            std::ops::Bound::Included(e) => *e,
+            std::ops::Bound::Excluded(e) => e.saturating_sub(1),
+            std::ops::Bound::Unbounded => self.len(),
+        };
+        while left < right {
+            let seq = (left + right) / 2;
+            match f(self.get(seq).unwrap()) {
+                Ordering::Less => {
+                    left = seq + 1;
+                }
+                Ordering::Equal => return Ok(seq),
+                Ordering::Greater => {
+                    right = seq;
+                }
+            }
+        }
+        Err(left)
     }
 
     pub(crate) fn search<'a, 'b: 'a, Q>(&'b self, mut query: Q, m: &OpSetMetadata) -> Q
