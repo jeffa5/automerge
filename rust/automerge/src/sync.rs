@@ -71,7 +71,7 @@ use itertools::Itertools;
 use serde::ser::SerializeMap;
 use std::{
     borrow::Cow,
-    collections::{HashMap, HashSet, BTreeSet},
+    collections::{BTreeSet, HashMap, HashSet},
 };
 
 use crate::{
@@ -136,7 +136,7 @@ impl SyncDoc for Automerge {
             HashSet::new()
         };
         let our_have = if our_need.iter().all(|hash| their_heads_set.contains(hash)) {
-            vec![self.make_bloom_filter(sync_state.shared_heads.clone())]
+            vec![self.make_bloom_filter(sync_state.shared_heads.clone(), max_changes)]
         } else {
             Vec::new()
         };
@@ -221,9 +221,14 @@ impl SyncDoc for Automerge {
 }
 
 impl Automerge {
-    fn make_bloom_filter(&self, last_sync: Vec<ChangeHash>) -> Have {
+    /// Make a bloom filter, with only some of our local changes.
+    ///
+    /// This may not be fully safe in terms of maintaining round trip count performance, but
+    /// definitely helps local performance.
+    fn make_bloom_filter(&self, last_sync: Vec<ChangeHash>, max_changes: usize) -> Have {
+        let empty_set = BTreeSet::new();
         let new_changes = self
-            .get_changes(&last_sync)
+            .get_changes_sync(&last_sync, &empty_set, max_changes)
             .expect("Should have only used hashes that are in the document");
         let hashes = new_changes.iter().map(|change| change.hash());
         Have {
@@ -258,7 +263,8 @@ impl Automerge {
             }
             let last_sync_hashes = last_sync_hashes.into_iter().copied().collect::<Vec<_>>();
 
-            let changes = self.get_changes_sync(&last_sync_hashes, already_sent_hashes, max_changes)?;
+            let changes =
+                self.get_changes_sync(&last_sync_hashes, already_sent_hashes, max_changes)?;
 
             let mut change_hashes = HashSet::with_capacity(changes.len());
             let mut dependents: HashMap<ChangeHash, Vec<ChangeHash>> = HashMap::new();
