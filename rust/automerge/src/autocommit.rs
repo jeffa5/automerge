@@ -753,14 +753,14 @@ struct SyncWrapper<'a, Obs: Observation> {
 }
 
 impl<'a, Obs: Observation> SyncDoc for SyncWrapper<'a, Obs> {
-    fn generate_sync_message(&self, sync_state: &mut sync::State) -> Option<sync::Message> {
-        self.inner.doc.generate_sync_message(sync_state)
+    fn generate_sync_message(&self, sync_state: &mut sync::State, max_changes : usize) -> Option<sync::Message<'_>> {
+        self.inner.doc.generate_sync_message(sync_state, max_changes)
     }
 
     fn receive_sync_message(
         &mut self,
         sync_state: &mut sync::State,
-        message: sync::Message,
+        message: sync::Message<'_>,
     ) -> Result<(), AutomergeError> {
         self.inner.ensure_transaction_closed();
         if let Some(observer) = self.inner.observation.observer() {
@@ -775,7 +775,7 @@ impl<'a, Obs: Observation> SyncDoc for SyncWrapper<'a, Obs> {
     fn receive_sync_message_with<Obs2: OpObserver>(
         &mut self,
         sync_state: &mut sync::State,
-        message: sync::Message,
+        message: sync::Message<'_>,
         op_observer: &mut Obs2,
     ) -> Result<(), AutomergeError> {
         if let Some(our_observer) = self.inner.observation.observer() {

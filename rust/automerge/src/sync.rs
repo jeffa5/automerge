@@ -95,7 +95,11 @@ pub trait SyncDoc {
     /// If this returns `None` then there are no new messages to send, either because we are
     /// waiting for an acknolwedgement of an in-flight message, or because the remote is up to
     /// date.
-    fn generate_sync_message<'a>(&'a self, sync_state: &mut State) -> Option<Message<'a>>;
+    fn generate_sync_message<'a>(
+        &'a self,
+        sync_state: &mut State,
+        max_changes: usize,
+    ) -> Option<Message<'a>>;
 
     /// Apply a received sync message to this document and `sync_state`
     fn receive_sync_message<'a>(
@@ -117,7 +121,11 @@ pub trait SyncDoc {
 const MESSAGE_TYPE_SYNC: u8 = 0x42; // first byte of a sync message, for identification
 
 impl SyncDoc for Automerge {
-    fn generate_sync_message(&self, sync_state: &mut State) -> Option<Message<'_>> {
+    fn generate_sync_message(
+        &self,
+        sync_state: &mut State,
+        max_changes: usize,
+    ) -> Option<Message<'_>> {
         let our_heads = self.get_heads();
 
         let our_need = self.get_missing_deps(sync_state.their_heads.as_ref().unwrap_or(&vec![]));
@@ -171,6 +179,9 @@ impl SyncDoc for Automerge {
 
         // deduplicate the changes to send with those we have already sent and clone it now
         changes_to_send.retain(|change| !sync_state.sent_hashes.contains(&change.hash()));
+
+        // don't send too many in one go
+        changes_to_send.truncate(max_changes);
 
         if heads_unchanged {
             if heads_equal && changes_to_send.is_empty() {
@@ -664,8 +675,8 @@ mod tests {
         doc.put(crate::ROOT, "key", "value").unwrap();
         let mut sync_state = State::new();
 
-        assert!(doc.sync().generate_sync_message(&mut sync_state).is_some());
-        assert!(doc.sync().generate_sync_message(&mut sync_state).is_none());
+        assert!(doc.sync().generate_sync_message(&mut sync_state, usize::MAX).is_some());
+        assert!(doc.sync().generate_sync_message(&mut sync_state, usize::MAX).is_none());
     }
 
     #[test]
@@ -676,14 +687,14 @@ mod tests {
         let mut s2 = State::new();
         let m1 = doc1
             .sync()
-            .generate_sync_message(&mut s1)
+            .generate_sync_message(&mut s1, usize::MAX)
             .expect("message was none")
             .into_owned();
 
         doc2.sync().receive_sync_message(&mut s2, m1).unwrap();
         let m2 = doc2
             .sync()
-            .generate_sync_message(&mut s2)
+            .generate_sync_message(&mut s2, usize::MAX)
             .map(|m| m.into_owned());
         assert!(m2.is_none());
     }
@@ -709,12 +720,12 @@ mod tests {
         //// both sides report what they have but have no shared peer state
         let msg1to2 = doc1
             .sync()
-            .generate_sync_message(&mut s1)
+            .generate_sync_message(&mut s1, usize::MAX)
             .expect("initial sync from 1 to 2 was None")
             .into_owned();
         let msg2to1 = doc2
             .sync()
-            .generate_sync_message(&mut s2)
+            .generate_sync_message(&mut s2, usize::MAX)
             .expect("initial sync message from 2 to 1 was None")
             .into_owned();
         assert_eq!(msg1to2.changes.len(), 0);
@@ -730,14 +741,14 @@ mod tests {
         //// (standard warning that 1% of the time this will result in a "need" message)
         let msg1to2 = doc1
             .sync()
-            .generate_sync_message(&mut s1)
+            .generate_sync_message(&mut s1, usize::MAX)
             .expect("first reply from 1 to 2 was None")
             .into_owned();
         assert_eq!(msg1to2.changes.len(), 5);
 
         let msg2to1 = doc2
             .sync()
-            .generate_sync_message(&mut s2)
+            .generate_sync_message(&mut s2, usize::MAX)
             .expect("first reply from 2 to 1 was None")
             .into_owned();
         assert_eq!(msg2to1.changes.len(), 5);
@@ -752,13 +763,13 @@ mod tests {
         //// The response acknowledges the changes received and sends no further changes
         let msg1to2 = doc1
             .sync()
-            .generate_sync_message(&mut s1)
+            .generate_sync_message(&mut s1, usize::MAX)
             .expect("second reply from 1 to 2 was None")
             .into_owned();
         assert_eq!(msg1to2.changes.len(), 0);
         let msg2to1 = doc2
             .sync()
-            .generate_sync_message(&mut s2)
+            .generate_sync_message(&mut s2, usize::MAX)
             .expect("second reply from 2 to 1 was None")
             .into_owned();
         assert_eq!(msg2to1.changes.len(), 0);
@@ -770,15 +781,15 @@ mod tests {
         assert_eq!(s1.shared_heads, s2.shared_heads);
 
         //// We're in sync, no more messages required
-        assert!(doc1.sync().generate_sync_message(&mut s1).is_none());
-        assert!(doc2.sync().generate_sync_message(&mut s2).is_none());
+        assert!(doc1.sync().generate_sync_message(&mut s1, usize::MAX).is_none());
+        assert!(doc2.sync().generate_sync_message(&mut s2, usize::MAX).is_none());
 
         //// If we make one more change and start another sync then its lastSync should be updated
         doc1.put(crate::ROOT, "x", 5).unwrap();
         doc1.commit();
         let msg1to2 = doc1
             .sync()
-            .generate_sync_message(&mut s1)
+            .generate_sync_message(&mut s1, usize::MAX)
             .expect("third reply from 1 to 2 was None")
             .into_owned();
         let mut expected_heads = vec![head1, head2];
@@ -967,11 +978,11 @@ mod tests {
         loop {
             let a_to_b = a
                 .sync()
-                .generate_sync_message(a_sync_state)
+                .generate_sync_message(a_sync_state, usize::MAX)
                 .map(|m| m.into_owned());
             let b_to_a = b
                 .sync()
-                .generate_sync_message(b_sync_state)
+                .generate_sync_message(b_sync_state, usize::MAX)
                 .map(|m| m.into_owned());
             if a_to_b.is_none() && b_to_a.is_none() {
                 break;
