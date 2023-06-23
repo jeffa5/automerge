@@ -846,9 +846,51 @@ impl Automerge {
             .copied()
             .collect::<Vec<_>>();
 
-        self.change_graph.remove_ancestors(changes, &heads, self.states.len());
+        self.change_graph
+            .remove_ancestors(changes, &heads, self.states.len());
 
         Ok(())
+    }
+
+    /// Get the changes since `have_deps` in this document using a clock internally.
+    fn get_changes_clock_sync(
+        &self,
+        have_deps: &[ChangeHash],
+        already_sent_hashes: &BTreeSet<ChangeHash>,
+        max_changes: usize,
+    ) -> Result<Vec<&Change>, AutomergeError> {
+        // get the clock for the given deps
+        let clock = self.clock_at(have_deps);
+
+        // get the documents current clock
+
+        let mut change_indexes: Vec<usize> = Vec::new();
+        // walk the state from the given deps clock and add them into the vec
+        'outer: for (actor_index, actor_changes) in &self.states {
+            let actor_changes = if let Some(clock_data) = clock.get_for_actor(actor_index) {
+                // find the change in this actors sequence of changes that corresponds to the max_op
+                // recorded for them in the clock
+                &actor_changes[clock_data.seq as usize..]
+            } else {
+                &actor_changes[..]
+            };
+            for change in actor_changes {
+                if !already_sent_hashes.contains(&self.history[*change].hash()) {
+                    change_indexes.push(*change);
+                }
+                if change_indexes.len() >= max_changes {
+                    break 'outer;
+                }
+            }
+        }
+
+        // ensure the changes are still in sorted order
+        change_indexes.sort_unstable();
+
+        Ok(change_indexes
+            .into_iter()
+            .map(|i| &self.history[i])
+            .collect())
     }
 
     /// Get the changes since `have_deps` in this document using a clock internally.
@@ -1093,6 +1135,15 @@ impl Automerge {
 
     pub fn get_changes(&self, have_deps: &[ChangeHash]) -> Result<Vec<&Change>, AutomergeError> {
         self.get_changes_clock(have_deps)
+    }
+
+    pub(crate) fn get_changes_sync(
+        &self,
+        have_deps: &[ChangeHash],
+        already_sent_hashes: &BTreeSet<ChangeHash>,
+        max_changes: usize,
+    ) -> Result<Vec<&Change>, AutomergeError> {
+        self.get_changes_clock_sync(have_deps, already_sent_hashes, max_changes)
     }
 
     /// Get changes in `other` that are not in `self

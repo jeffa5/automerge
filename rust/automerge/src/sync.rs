@@ -71,7 +71,7 @@ use itertools::Itertools;
 use serde::ser::SerializeMap;
 use std::{
     borrow::Cow,
-    collections::{HashMap, HashSet},
+    collections::{HashMap, HashSet, BTreeSet},
 };
 
 use crate::{
@@ -159,11 +159,11 @@ impl SyncDoc for Automerge {
             }
         }
 
-        let mut changes_to_send = if let (Some(their_have), Some(their_need)) = (
+        let changes_to_send = if let (Some(their_have), Some(their_need)) = (
             sync_state.their_have.as_ref(),
             sync_state.their_need.as_ref(),
         ) {
-            self.get_changes_to_send(their_have, their_need)
+            self.get_changes_to_send(their_have, their_need, &sync_state.sent_hashes, max_changes)
                 .expect("Should have only used hashes that are in the document")
         } else {
             Vec::new()
@@ -176,12 +176,6 @@ impl SyncDoc for Automerge {
         } else {
             false
         };
-
-        // deduplicate the changes to send with those we have already sent and clone it now
-        changes_to_send.retain(|change| !sync_state.sent_hashes.contains(&change.hash()));
-
-        // don't send too many in one go
-        changes_to_send.truncate(max_changes);
 
         if heads_unchanged {
             if heads_equal && changes_to_send.is_empty() {
@@ -242,11 +236,15 @@ impl Automerge {
         &self,
         have: &[Have],
         need: &[ChangeHash],
+        already_sent_hashes: &BTreeSet<ChangeHash>,
+        max_changes: usize,
     ) -> Result<Vec<Cow<'_, Change>>, AutomergeError> {
         if have.is_empty() {
             Ok(need
                 .iter()
+                .filter(|hash| !already_sent_hashes.contains(hash))
                 .filter_map(|hash| self.get_change_by_hash(hash))
+                .take(max_changes)
                 .map(|c| Cow::Borrowed(c))
                 .collect())
         } else {
@@ -260,7 +258,7 @@ impl Automerge {
             }
             let last_sync_hashes = last_sync_hashes.into_iter().copied().collect::<Vec<_>>();
 
-            let changes = self.get_changes(&last_sync_hashes)?;
+            let changes = self.get_changes_sync(&last_sync_hashes, already_sent_hashes, max_changes)?;
 
             let mut change_hashes = HashSet::with_capacity(changes.len());
             let mut dependents: HashMap<ChangeHash, Vec<ChangeHash>> = HashMap::new();
@@ -675,8 +673,14 @@ mod tests {
         doc.put(crate::ROOT, "key", "value").unwrap();
         let mut sync_state = State::new();
 
-        assert!(doc.sync().generate_sync_message(&mut sync_state, usize::MAX).is_some());
-        assert!(doc.sync().generate_sync_message(&mut sync_state, usize::MAX).is_none());
+        assert!(doc
+            .sync()
+            .generate_sync_message(&mut sync_state, usize::MAX)
+            .is_some());
+        assert!(doc
+            .sync()
+            .generate_sync_message(&mut sync_state, usize::MAX)
+            .is_none());
     }
 
     #[test]
@@ -781,8 +785,14 @@ mod tests {
         assert_eq!(s1.shared_heads, s2.shared_heads);
 
         //// We're in sync, no more messages required
-        assert!(doc1.sync().generate_sync_message(&mut s1, usize::MAX).is_none());
-        assert!(doc2.sync().generate_sync_message(&mut s2, usize::MAX).is_none());
+        assert!(doc1
+            .sync()
+            .generate_sync_message(&mut s1, usize::MAX)
+            .is_none());
+        assert!(doc2
+            .sync()
+            .generate_sync_message(&mut s2, usize::MAX)
+            .is_none());
 
         //// If we make one more change and start another sync then its lastSync should be updated
         doc1.put(crate::ROOT, "x", 5).unwrap();
