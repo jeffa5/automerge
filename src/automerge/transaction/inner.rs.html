@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `automerge/src/transaction/inner.rs`."><title>inner.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-be46fdc453a55015.css"><script src="../../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https:///raw.githubusercontent.com/automerge/automerge/main/img/favicon.ico"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../automerge/index.html">
-                        <img src="https://raw.githubusercontent.com/automerge/automerge/main/img/brandmark.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `automerge/src/transaction/inner.rs`."><title>inner.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="automerge" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.0 (8ede3aae2 2023-07-12)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https:///raw.githubusercontent.com/automerge/automerge/main/img/favicon.ico"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../automerge/index.html"><img src="https://raw.githubusercontent.com/automerge/automerge/main/img/brandmark.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -798,14 +797,71 @@
 <a href="#797" id="797">797</a>
 <a href="#798" id="798">798</a>
 <a href="#799" id="799">799</a>
-</pre><pre class="rust"><code><span class="kw">use </span>std::num::NonZeroU64;
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
+<a href="#819" id="819">819</a>
+<a href="#820" id="820">820</a>
+<a href="#821" id="821">821</a>
+<a href="#822" id="822">822</a>
+<a href="#823" id="823">823</a>
+<a href="#824" id="824">824</a>
+<a href="#825" id="825">825</a>
+<a href="#826" id="826">826</a>
+<a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::num::NonZeroU64;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span><span class="kw">crate</span>::exid::ExId;
-<span class="kw">use </span><span class="kw">crate</span>::marks::{ExpandMark, Mark};
+<span class="kw">use </span><span class="kw">crate</span>::marks::{ExpandMark, Mark, MarkSet};
+<span class="kw">use </span><span class="kw">crate</span>::patches::{PatchLog, TextRepresentation};
 <span class="kw">use </span><span class="kw">crate</span>::query::{<span class="self">self</span>, OpIdSearch};
 <span class="kw">use </span><span class="kw">crate</span>::storage::Change <span class="kw">as </span>StoredChange;
-<span class="kw">use </span><span class="kw">crate</span>::types::{Key, ListEncoding, ObjId, OpId, OpIds};
-<span class="kw">use crate</span>::{op_tree::OpSetMetadata, types::Op, Automerge, Change, ChangeHash, OpObserver, Prop};
+<span class="kw">use </span><span class="kw">crate</span>::types::{Clock, Key, ListEncoding, ObjId, OpId, OpIds};
+<span class="kw">use crate</span>::{op_tree::OpSetMetadata, types::Op, Automerge, Change, ChangeHash, Prop};
 <span class="kw">use crate</span>::{AutomergeError, ObjType, OpType, ScalarValue};
 
 <span class="attr">#[derive(Debug, Clone)]
@@ -816,6 +872,7 @@
     time: i64,
     message: <span class="prelude-ty">Option</span>&lt;String&gt;,
     deps: Vec&lt;ChangeHash&gt;,
+    scope: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
     operations: Vec&lt;(ObjId, Op)&gt;,
 }
 
@@ -830,6 +887,8 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) start_op: NonZeroU64,
     <span class="doccomment">/// The dependencies of the change this transaction will create
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) deps: Vec&lt;ChangeHash&gt;,
+    <span class="doccomment">/// The scope that should be visible to the transaction
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) scope: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
 }
 
 <span class="kw">impl </span>TransactionInner {
@@ -839,6 +898,7 @@
             seq,
             start_op,
             deps,
+            scope,
         }: TransactionArgs,
     ) -&gt; <span class="self">Self </span>{
         TransactionInner {
@@ -849,6 +909,7 @@
             message: <span class="prelude-val">None</span>,
             operations: <span class="macro">vec!</span>[],
             deps,
+            scope,
         }
     }
 
@@ -908,8 +969,8 @@
             <span class="macro">tracing::trace!</span>(commit=<span class="question-mark">?</span>hash, <span class="question-mark">?</span>ops, deps=<span class="question-mark">?</span>change.deps(), <span class="string">&quot;committing transaction&quot;</span>);
         }
         doc.update_history(change, num_ops);
-        <span class="macro">debug_assert_eq!</span>(doc.get_heads(), <span class="macro">vec!</span>[hash]);
-        hash
+        <span class="comment">//debug_assert_eq!(doc.get_heads(), vec![hash]);
+        </span>hash
     }
 
     <span class="attr">#[tracing::instrument(skip(<span class="self">self</span>, metadata))]
@@ -989,10 +1050,10 @@
     /// - The object does not exist
     /// - The key is the wrong type for the object
     /// - The key does not exist in the object
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>put&lt;P: Into&lt;Prop&gt;, V: Into&lt;ScalarValue&gt;, Obs: OpObserver&gt;(
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>put&lt;P: Into&lt;Prop&gt;, V: Into&lt;ScalarValue&gt;&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         ex_obj: <span class="kw-2">&amp;</span>ExId,
         prop: P,
         value: V,
@@ -1006,7 +1067,7 @@
             (Prop::Seq(<span class="kw">_</span>), ObjType::Text) =&gt; <span class="prelude-val">Ok</span>(()),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(AutomergeError::InvalidOp(obj.typ)),
         }<span class="question-mark">?</span>;
-        <span class="self">self</span>.local_op(doc, op_observer, obj.id, prop, value.into())<span class="question-mark">?</span>;
+        <span class="self">self</span>.local_op(doc, patch_log, obj.id, prop, value.into())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1023,10 +1084,10 @@
     /// - The object does not exist
     /// - The key is the wrong type for the object
     /// - The key does not exist in the object
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>put_object&lt;P: Into&lt;Prop&gt;, Obs: OpObserver&gt;(
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>put_object&lt;P: Into&lt;Prop&gt;&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         ex_obj: <span class="kw-2">&amp;</span>ExId,
         prop: P,
         value: ObjType,
@@ -1039,7 +1100,7 @@
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(AutomergeError::InvalidOp(obj.typ)),
         }<span class="question-mark">?</span>;
         <span class="kw">let </span>id = <span class="self">self
-            </span>.local_op(doc, op_observer, obj.id, prop, value.into())<span class="question-mark">?
+            </span>.local_op(doc, patch_log, obj.id, prop, value.into())<span class="question-mark">?
             </span>.unwrap();
         <span class="kw">let </span>id = doc.id_to_exid(id);
         <span class="prelude-val">Ok</span>(id)
@@ -1072,10 +1133,10 @@
     }
 
     <span class="attr">#[allow(clippy::too_many_arguments)]
-    </span><span class="kw">fn </span>insert_local_op&lt;Obs: OpObserver&gt;(
+    </span><span class="kw">fn </span>insert_local_op(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         prop: Prop,
         op: Op,
         pos: usize,
@@ -1088,13 +1149,13 @@
             doc.ops_mut().insert(pos, <span class="kw-2">&amp;</span>obj, op.clone());
         }
 
-        <span class="self">self</span>.finalize_op(doc, op_observer, obj, prop, op);
+        <span class="self">self</span>.finalize_op(doc, patch_log, obj, prop, op, <span class="prelude-val">None</span>);
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>insert&lt;V: Into&lt;ScalarValue&gt;, Obs: OpObserver&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>insert&lt;V: Into&lt;ScalarValue&gt;&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         ex_obj: <span class="kw-2">&amp;</span>ExId,
         index: usize,
         value: V,
@@ -1105,14 +1166,21 @@
         }
         <span class="kw">let </span>value = value.into();
         <span class="macro">tracing::trace!</span>(obj=<span class="question-mark">?</span>obj, value=<span class="question-mark">?</span>value, <span class="string">&quot;inserting value&quot;</span>);
-        <span class="self">self</span>.do_insert(doc, op_observer, obj.id, index, value.into())<span class="question-mark">?</span>;
+        <span class="self">self</span>.do_insert(
+            doc,
+            patch_log,
+            obj.id,
+            index,
+            ListEncoding::List,
+            value.into(),
+        )<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>insert_object&lt;Obs: OpObserver&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>insert_object(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         ex_obj: <span class="kw-2">&amp;</span>ExId,
         index: usize,
         value: ObjType,
@@ -1121,25 +1189,35 @@
         <span class="kw">if </span>!<span class="macro">matches!</span>(obj.typ, ObjType::List | ObjType::Text) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(AutomergeError::InvalidOp(obj.typ));
         }
-        <span class="kw">let </span>id = <span class="self">self</span>.do_insert(doc, op_observer, obj.id, index, value.into())<span class="question-mark">?</span>;
+        <span class="kw">let </span>id = <span class="self">self</span>.do_insert(
+            doc,
+            patch_log,
+            obj.id,
+            index,
+            ListEncoding::List,
+            value.into(),
+        )<span class="question-mark">?</span>;
         <span class="kw">let </span>id = doc.id_to_exid(id);
         <span class="prelude-val">Ok</span>(id)
     }
 
-    <span class="kw">fn </span>do_insert&lt;Obs: OpObserver&gt;(
+    <span class="kw">fn </span>do_insert(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         obj: ObjId,
         index: usize,
+        encoding: ListEncoding,
         action: OpType,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;OpId, AutomergeError&gt; {
         <span class="kw">let </span>id = <span class="self">self</span>.next_id();
 
-        <span class="kw">let </span>query = doc
-            .ops()
-            .search(<span class="kw-2">&amp;</span>obj, query::InsertNth::new(index, ListEncoding::List));
-
+        <span class="kw">let </span>query = doc.ops().search(
+            <span class="kw-2">&amp;</span>obj,
+            query::InsertNth::new(index, encoding, <span class="self">self</span>.scope.clone()),
+        );
+        <span class="kw">let </span>marks = query.marks(<span class="kw-2">&amp;</span>doc.ops().m);
+        <span class="kw">let </span>pos = query.pos();
         <span class="kw">let </span>key = query.key()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>op = Op {
@@ -1151,31 +1229,31 @@
             insert: <span class="bool-val">true</span>,
         };
 
-        doc.ops_mut().insert(query.pos(), <span class="kw-2">&amp;</span>obj, op.clone());
+        doc.ops_mut().insert(pos, <span class="kw-2">&amp;</span>obj, op.clone());
 
-        <span class="self">self</span>.finalize_op(doc, op_observer, obj, Prop::Seq(index), op);
+        <span class="self">self</span>.finalize_op(doc, patch_log, obj, Prop::Seq(index), op, marks);
 
         <span class="prelude-val">Ok</span>(id)
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>local_op&lt;Obs: OpObserver&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>local_op(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         obj: ObjId,
         prop: Prop,
         action: OpType,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;OpId&gt;, AutomergeError&gt; {
         <span class="kw">match </span>prop {
-            Prop::Map(s) =&gt; <span class="self">self</span>.local_map_op(doc, op_observer, obj, s, action),
-            Prop::Seq(n) =&gt; <span class="self">self</span>.local_list_op(doc, op_observer, obj, n, action),
+            Prop::Map(s) =&gt; <span class="self">self</span>.local_map_op(doc, patch_log, obj, s, action),
+            Prop::Seq(n) =&gt; <span class="self">self</span>.local_list_op(doc, patch_log, obj, n, action),
         }
     }
 
-    <span class="kw">fn </span>local_map_op&lt;Obs: OpObserver&gt;(
+    <span class="kw">fn </span>local_map_op(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         obj: ObjId,
         prop: String,
         action: OpType,
@@ -1188,9 +1266,9 @@
         <span class="kw">let </span>prop_index = doc.ops_mut().m.props.cache(prop.clone());
         <span class="kw">let </span>key = Key::Map(prop_index);
         <span class="kw">let </span>prop: Prop = prop.into();
-        <span class="kw">let </span>query = doc
-            .ops()
-            .seek_ops_by_prop(<span class="kw-2">&amp;</span>obj, prop.clone(), ListEncoding::List, <span class="prelude-val">None</span>);
+        <span class="kw">let </span>query =
+            doc.ops()
+                .seek_ops_by_prop(<span class="kw-2">&amp;</span>obj, prop.clone(), ListEncoding::List, <span class="self">self</span>.scope.as_ref());
         <span class="kw">let </span>ops = query.ops;
         <span class="kw">let </span>ops_pos = query.ops_pos;
 
@@ -1221,22 +1299,23 @@
         };
 
         <span class="kw">let </span>pos = query.end_pos;
-        <span class="self">self</span>.insert_local_op(doc, op_observer, prop, op, pos, obj, <span class="kw-2">&amp;</span>ops_pos);
+        <span class="self">self</span>.insert_local_op(doc, patch_log, prop, op, pos, obj, <span class="kw-2">&amp;</span>ops_pos);
 
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(id))
     }
 
-    <span class="kw">fn </span>local_list_op&lt;Obs: OpObserver&gt;(
+    <span class="kw">fn </span>local_list_op(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         obj: ObjId,
         index: usize,
         action: OpType,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;OpId&gt;, AutomergeError&gt; {
-        <span class="kw">let </span>query = doc
-            .ops()
-            .search(<span class="kw-2">&amp;</span>obj, query::Nth::new(index, ListEncoding::List, <span class="prelude-val">None</span>));
+        <span class="kw">let </span>query = doc.ops().search(
+            <span class="kw-2">&amp;</span>obj,
+            query::Nth::new(index, ListEncoding::List, <span class="self">self</span>.scope.clone()),
+        );
 
         <span class="kw">let </span>id = <span class="self">self</span>.next_id();
         <span class="kw">let </span>pred = doc.ops().m.sorted_opids(query.ops.iter().map(|o| o.id));
@@ -1263,15 +1342,15 @@
 
         <span class="kw">let </span>pos = query.pos();
         <span class="kw">let </span>ops_pos = query.ops_pos;
-        <span class="self">self</span>.insert_local_op(doc, op_observer, Prop::Seq(index), op, pos, obj, <span class="kw-2">&amp;</span>ops_pos);
+        <span class="self">self</span>.insert_local_op(doc, patch_log, Prop::Seq(index), op, pos, obj, <span class="kw-2">&amp;</span>ops_pos);
 
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(id))
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>increment&lt;P: Into&lt;Prop&gt;, Obs: OpObserver&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>increment&lt;P: Into&lt;Prop&gt;&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         obj: <span class="kw-2">&amp;</span>ExId,
         prop: P,
         value: i64,
@@ -1279,7 +1358,7 @@
         <span class="kw">let </span>obj = doc.exid_to_obj(obj)<span class="question-mark">?</span>;
         <span class="self">self</span>.local_op(
             doc,
-            op_observer,
+            patch_log,
             obj.id,
             prop.into(),
             OpType::Increment(value),
@@ -1287,20 +1366,20 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>delete&lt;P: Into&lt;Prop&gt;, Obs: OpObserver&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>delete&lt;P: Into&lt;Prop&gt;&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         ex_obj: <span class="kw-2">&amp;</span>ExId,
         prop: P,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
         <span class="kw">let </span>obj = doc.exid_to_obj(ex_obj)<span class="question-mark">?</span>;
         <span class="kw">let </span>prop = prop.into();
         <span class="kw">if </span>obj.typ == ObjType::Text {
-            <span class="kw">let </span>index = prop.to_index().ok_or(AutomergeError::InvalidOp(obj.typ))<span class="question-mark">?</span>;
+            <span class="kw">let </span>index = prop.as_index().ok_or(AutomergeError::InvalidOp(obj.typ))<span class="question-mark">?</span>;
             <span class="self">self</span>.inner_splice(
                 doc,
-                op_observer,
+                patch_log,
                 SpliceArgs {
                     obj: obj.id,
                     index,
@@ -1310,20 +1389,20 @@
                 },
             )<span class="question-mark">?</span>;
         } <span class="kw">else </span>{
-            <span class="self">self</span>.local_op(doc, op_observer, obj.id, prop, OpType::Delete)<span class="question-mark">?</span>;
+            <span class="self">self</span>.local_op(doc, patch_log, obj.id, prop, OpType::Delete)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Splice new elements into the given sequence. Returns a vector of the OpIds used to insert
     /// the new elements
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>splice&lt;Obs: OpObserver&gt;(
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>splice(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         ex_obj: <span class="kw-2">&amp;</span>ExId,
         index: usize,
-        del: usize,
+        del: isize,
         vals: <span class="kw">impl </span>IntoIterator&lt;Item = ScalarValue&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
         <span class="kw">let </span>obj = doc.exid_to_obj(ex_obj)<span class="question-mark">?</span>;
@@ -1333,7 +1412,7 @@
         <span class="kw">let </span>values = vals.into_iter().collect();
         <span class="self">self</span>.inner_splice(
             doc,
-            op_observer,
+            patch_log,
             SpliceArgs {
                 obj: obj.id,
                 index,
@@ -1345,13 +1424,13 @@
     }
 
     <span class="doccomment">/// Splice string into a text object
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>splice_text&lt;Obs: OpObserver&gt;(
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>splice_text(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         ex_obj: <span class="kw-2">&amp;</span>ExId,
         index: usize,
-        del: usize,
+        del: isize,
         text: <span class="kw-2">&amp;</span>str,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
         <span class="kw">let </span>obj = doc.exid_to_obj(ex_obj)<span class="question-mark">?</span>;
@@ -1361,7 +1440,7 @@
         <span class="kw">let </span>values = text.chars().map(ScalarValue::from).collect();
         <span class="self">self</span>.inner_splice(
             doc,
-            op_observer,
+            patch_log,
             SpliceArgs {
                 obj: obj.id,
                 index,
@@ -1372,10 +1451,10 @@
         )
     }
 
-    <span class="kw">fn </span>inner_splice&lt;Obs: OpObserver&gt;(
+    <span class="kw">fn </span>inner_splice(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        <span class="kw-2">mut </span>op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         SpliceArgs {
             obj,
             <span class="kw-2">mut </span>index,
@@ -1384,21 +1463,30 @@
             splice_type,
         }: SpliceArgs&lt;<span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
-        <span class="kw">let </span>ex_obj = doc.ops().id_to_exid(obj.<span class="number">0</span>);
-        <span class="kw">let </span>encoding = splice_type.encoding();
+        <span class="kw">if </span>del &lt; <span class="number">0 </span>{
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(n) = index.checked_add_signed(del) {
+                index = n;
+                del = del.abs();
+            } <span class="kw">else </span>{
+                <span class="kw">return </span><span class="prelude-val">Err</span>(AutomergeError::InvalidIndex(index));
+            }
+        }
+
+        <span class="comment">//let ex_obj = doc.ops().id_to_exid(obj.0);
+        </span><span class="kw">let </span>encoding = splice_type.encoding();
         <span class="comment">// delete `del` items - performing the query for each one
-        </span><span class="kw">let </span><span class="kw-2">mut </span>deleted = <span class="number">0</span>;
-        <span class="kw">while </span>deleted &lt; del {
+        </span><span class="kw">let </span><span class="kw-2">mut </span>deleted: usize = <span class="number">0</span>;
+        <span class="kw">while </span>deleted &lt; (del <span class="kw">as </span>usize) {
             <span class="comment">// TODO: could do this with a single custom query
             </span><span class="kw">let </span>query = doc
                 .ops()
-                .search(<span class="kw-2">&amp;</span>obj, query::Nth::new(index, encoding, <span class="prelude-val">None</span>));
+                .search(<span class="kw-2">&amp;</span>obj, query::Nth::new(index, encoding, <span class="self">self</span>.scope.clone()));
 
             <span class="comment">// if we delete in the middle of a multi-character
             // move cursor back to the beginning and expand the del width
             </span><span class="kw">let </span>adjusted_index = query.index();
             <span class="kw">if </span>adjusted_index &lt; index {
-                del += index - adjusted_index;
+                del += (index - adjusted_index) <span class="kw">as </span>isize;
                 index = adjusted_index;
             }
 
@@ -1418,20 +1506,20 @@
             deleted += step;
         }
 
-        <span class="kw">if </span>deleted &gt; <span class="number">0 </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(obs) = op_observer.as_mut() {
-                obs.delete_seq(doc, ex_obj.clone(), index, deleted);
-            }
+        <span class="kw">if </span>deleted &gt; <span class="number">0 </span>&amp;&amp; patch_log.is_active() {
+            patch_log.delete_seq(obj, index, deleted);
         }
 
         <span class="comment">// do the insert query for the first item and then
         // insert the remaining ops one after the other
         </span><span class="kw">if </span>!values.is_empty() {
-            <span class="kw">let </span>query = doc
-                .ops()
-                .search(<span class="kw-2">&amp;</span>obj, query::InsertNth::new(index, encoding));
+            <span class="kw">let </span>query = doc.ops().search(
+                <span class="kw-2">&amp;</span>obj,
+                query::InsertNth::new(index, encoding, <span class="self">self</span>.scope.clone()),
+            );
             <span class="kw">let </span><span class="kw-2">mut </span>pos = query.pos();
             <span class="kw">let </span><span class="kw-2">mut </span>key = query.key()<span class="question-mark">?</span>;
+            <span class="kw">let </span>marks = query.marks(<span class="kw-2">&amp;</span>doc.ops().m);
             <span class="kw">let </span><span class="kw-2">mut </span>cursor = index;
             <span class="kw">let </span><span class="kw-2">mut </span>width = <span class="number">0</span>;
 
@@ -1451,18 +1539,25 @@
             doc.ops_mut()
                 .hint(<span class="kw-2">&amp;</span>obj, cursor - width, pos - <span class="number">1</span>, width, key);
 
-            <span class="comment">// handle the observer
-            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(obs) = op_observer.as_mut() {
+            <span class="kw">if </span>patch_log.is_active() {
                 <span class="kw">match </span>splice_type {
-                    SpliceType::Text(text) <span class="kw">if </span>!obs.text_as_seq() =&gt; {
-                        obs.splice_text(doc, ex_obj, index, text)
+                    SpliceType::Text(text)
+                        <span class="kw">if </span><span class="macro">matches!</span>(patch_log.text_rep(), TextRepresentation::String) =&gt;
+                    {
+                        patch_log.splice(obj, index, text, marks);
                     }
                     SpliceType::List | SpliceType::Text(..) =&gt; {
                         <span class="kw">let </span>start = <span class="self">self</span>.operations.len() - values.len();
                         <span class="kw">for </span>(offset, v) <span class="kw">in </span>values.iter().enumerate() {
                             <span class="kw">let </span>op = <span class="kw-2">&amp;</span><span class="self">self</span>.operations[start + offset].<span class="number">1</span>;
-                            <span class="kw">let </span>value = (v.clone().into(), doc.ops().id_to_exid(op.id));
-                            obs.insert(doc, ex_obj.clone(), index + offset, value, <span class="bool-val">false</span>)
+                            patch_log.insert(
+                                obj,
+                                index + offset,
+                                v.clone().into(),
+                                op.id,
+                                <span class="bool-val">false</span>,
+                                marks.clone(),
+                            );
                         }
                     }
                 }
@@ -1472,39 +1567,37 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>mark&lt;Obs: OpObserver&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>mark(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         ex_obj: <span class="kw-2">&amp;</span>ExId,
         mark: Mark&lt;<span class="lifetime">&#39;_</span>&gt;,
         expand: ExpandMark,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
         <span class="kw">let </span>obj = doc.exid_to_obj(ex_obj)<span class="question-mark">?</span>;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(obs) = op_observer {
-            <span class="kw">let </span>action = OpType::MarkBegin(expand.before(), mark.data.clone().into_owned());
-            <span class="self">self</span>.do_insert(doc, <span class="prelude-val">Some</span>(obs), obj.id, mark.start, action)<span class="question-mark">?</span>;
-            <span class="self">self</span>.do_insert(
-                doc,
-                <span class="prelude-val">Some</span>(obs),
-                obj.id,
-                mark.end,
-                OpType::MarkEnd(expand.after()),
-            )<span class="question-mark">?</span>;
-            obs.mark(doc, ex_obj.clone(), <span class="prelude-val">Some</span>(mark).into_iter());
-        } <span class="kw">else </span>{
-            <span class="kw">let </span>action = OpType::MarkBegin(expand.before(), mark.data.into_owned());
-            <span class="self">self</span>.do_insert::&lt;Obs&gt;(doc, <span class="prelude-val">None</span>, obj.id, mark.start, action)<span class="question-mark">?</span>;
-            <span class="self">self</span>.do_insert::&lt;Obs&gt;(doc, <span class="prelude-val">None</span>, obj.id, mark.end, OpType::MarkEnd(expand.after()))<span class="question-mark">?</span>;
+        <span class="kw">let </span>action = OpType::MarkBegin(expand.before(), mark.data.clone().into_owned());
+
+        <span class="self">self</span>.do_insert(doc, patch_log, obj.id, mark.start, obj.encoding, action)<span class="question-mark">?</span>;
+        <span class="self">self</span>.do_insert(
+            doc,
+            patch_log,
+            obj.id,
+            mark.end,
+            obj.encoding,
+            OpType::MarkEnd(expand.after()),
+        )<span class="question-mark">?</span>;
+        <span class="kw">if </span>patch_log.is_active() {
+            patch_log.mark(obj.id, mark.start, mark.len(), <span class="kw-2">&amp;</span>mark.into_mark_set());
         }
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attr">#[allow(clippy::too_many_arguments)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>unmark&lt;Obs: OpObserver&gt;(
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>unmark(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         ex_obj: <span class="kw-2">&amp;</span>ExId,
         name: <span class="kw-2">&amp;</span>str,
         start: usize,
@@ -1512,50 +1605,66 @@
         expand: ExpandMark,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
         <span class="kw">let </span>mark = Mark::new(name.to_string(), ScalarValue::Null, start, end);
-        <span class="self">self</span>.mark(doc, op_observer, ex_obj, mark, expand)
+        <span class="self">self</span>.mark(doc, patch_log, ex_obj, mark, expand)
     }
 
-    <span class="kw">fn </span>finalize_op&lt;Obs: OpObserver&gt;(
+    <span class="kw">fn </span>finalize_op(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         doc: <span class="kw-2">&amp;mut </span>Automerge,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
         obj: ObjId,
         prop: Prop,
         op: Op,
+        marks: <span class="prelude-ty">Option</span>&lt;Arc&lt;MarkSet&gt;&gt;,
     ) {
         <span class="comment">// TODO - id_to_exid should be a noop if not used - change type to Into&lt;ExId&gt;?
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(op_observer) = op_observer {
-            <span class="kw">let </span>ex_obj = doc.ops().id_to_exid(obj.<span class="number">0</span>);
-            <span class="kw">if </span>op.insert {
+        </span><span class="kw">if </span>patch_log.is_active() {
+            <span class="comment">//let ex_obj = doc.ops().id_to_exid(obj.0);
+            </span><span class="kw">if </span>op.insert {
                 <span class="kw">if </span>!op.is_mark() {
                     <span class="kw">let </span>obj_type = doc.ops().object_type(<span class="kw-2">&amp;</span>obj);
                     <span class="macro">assert!</span>(obj_type.unwrap().is_sequence());
                     <span class="kw">match </span>(obj_type, prop) {
                         (<span class="prelude-val">Some</span>(ObjType::List), Prop::Seq(index)) =&gt; {
-                            <span class="kw">let </span>value = (op.value(), doc.ops().id_to_exid(op.id));
-                            op_observer.insert(doc, ex_obj, index, value, <span class="bool-val">false</span>)
+                            <span class="comment">//let value = (op.value(), doc.ops().id_to_exid(op.id));
+                            </span>patch_log.insert(obj, index, op.value().into(), op.id, <span class="bool-val">false</span>, marks);
                         }
                         (<span class="prelude-val">Some</span>(ObjType::Text), Prop::Seq(index)) =&gt; {
-                            <span class="kw">if </span>op_observer.text_as_seq() {
-                                <span class="kw">let </span>value = (op.value(), doc.ops().id_to_exid(op.id));
-                                op_observer.insert(doc, ex_obj, index, value, <span class="bool-val">false</span>)
+                            <span class="kw">if </span><span class="macro">matches!</span>(patch_log.text_rep(), TextRepresentation::Array) {
+                                <span class="comment">//let value = (op.value(), doc.ops().id_to_exid(op.id));
+                                </span>patch_log.insert(
+                                    obj,
+                                    index,
+                                    op.value().into(),
+                                    op.id,
+                                    <span class="bool-val">false</span>,
+                                    marks,
+                                );
                             } <span class="kw">else </span>{
-                                op_observer.splice_text(doc, ex_obj, index, op.to_str())
+                                patch_log.splice(obj, index, op.to_str(), marks);
                             }
                         }
                         <span class="kw">_ </span>=&gt; {}
                     }
                 }
             } <span class="kw">else if </span>op.is_delete() {
-                op_observer.delete(doc, ex_obj, prop);
+                patch_log.delete(obj, <span class="kw-2">&amp;</span>prop);
             } <span class="kw">else if let </span><span class="prelude-val">Some</span>(value) = op.get_increment_value() {
-                op_observer.increment(doc, ex_obj, prop, (value, doc.ops().id_to_exid(op.id)));
+                patch_log.increment(obj, <span class="kw-2">&amp;</span>prop, value, op.id);
             } <span class="kw">else </span>{
-                <span class="kw">let </span>value = (op.value(), doc.ops().id_to_exid(op.id));
-                op_observer.put(doc, ex_obj, prop, value, <span class="bool-val">false</span>);
+                <span class="comment">//let value = (op.value(), doc.ops().id_to_exid(op.id));
+                </span>patch_log.put(obj, <span class="kw-2">&amp;</span>prop, op.value().into(), op.id, <span class="bool-val">false</span>, <span class="bool-val">false</span>);
             }
         }
         <span class="self">self</span>.operations.push((obj, op));
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_scope(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Clock&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.scope
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_deps(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;ChangeHash&gt; {
+        <span class="self">self</span>.deps.clone()
     }
 }
 
@@ -1576,7 +1685,7 @@
 <span class="kw">struct </span>SpliceArgs&lt;<span class="lifetime">&#39;a</span>&gt; {
     obj: ObjId,
     index: usize,
-    del: usize,
+    del: isize,
     values: Vec&lt;ScalarValue&gt;,
     splice_type: SpliceType&lt;<span class="lifetime">&#39;a</span>&gt;,
 }
@@ -1597,5 +1706,4 @@
         <span class="macro">assert!</span>(tx.get(<span class="kw-2">&amp;</span>a, <span class="string">&quot;b&quot;</span>).unwrap().is_some());
     }
 }
-</code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="automerge" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+</code></pre></div></section></main></body></html>

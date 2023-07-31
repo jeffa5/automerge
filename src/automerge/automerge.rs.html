@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `automerge/src/automerge.rs`."><title>automerge.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../static.files/ayu-be46fdc453a55015.css"><script src="../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https:///raw.githubusercontent.com/automerge/automerge/main/img/favicon.ico"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../automerge/index.html">
-                        <img src="https://raw.githubusercontent.com/automerge/automerge/main/img/brandmark.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `automerge/src/automerge.rs`."><title>automerge.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-f3501f0f5ae15dfb.css" id="mainThemeStyle"><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="automerge" data-themes="" data-resource-suffix="" data-rustdoc-version="1.71.0 (8ede3aae2 2023-07-12)" data-search-js="search-4926e5fc22a5646a.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-0f8c037637f9eb3e.css" data-theme-dark-css="dark-1097f8e92a01e3cf.css" data-theme-ayu-css="ayu-614652228113ac93.css" ></div><script src="../../static.files/storage-62ce34ea385b278a.js"></script><script defer src="../../static.files/source-script-11255107d0a65077.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-f0540c1d82cde29b.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-0f8c037637f9eb3e.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-1097f8e92a01e3cf.css"><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="icon" href="https:///raw.githubusercontent.com/automerge/automerge/main/img/favicon.ico"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../automerge/index.html"><img src="https://raw.githubusercontent.com/automerge/automerge/main/img/brandmark.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1448,7 +1447,233 @@
 <a href="#1447" id="1447">1447</a>
 <a href="#1448" id="1448">1448</a>
 <a href="#1449" id="1449">1449</a>
-</pre><pre class="rust"><code><span class="kw">use </span>std::collections::{BTreeSet, HashMap, HashSet};
+<a href="#1450" id="1450">1450</a>
+<a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
+<a href="#1453" id="1453">1453</a>
+<a href="#1454" id="1454">1454</a>
+<a href="#1455" id="1455">1455</a>
+<a href="#1456" id="1456">1456</a>
+<a href="#1457" id="1457">1457</a>
+<a href="#1458" id="1458">1458</a>
+<a href="#1459" id="1459">1459</a>
+<a href="#1460" id="1460">1460</a>
+<a href="#1461" id="1461">1461</a>
+<a href="#1462" id="1462">1462</a>
+<a href="#1463" id="1463">1463</a>
+<a href="#1464" id="1464">1464</a>
+<a href="#1465" id="1465">1465</a>
+<a href="#1466" id="1466">1466</a>
+<a href="#1467" id="1467">1467</a>
+<a href="#1468" id="1468">1468</a>
+<a href="#1469" id="1469">1469</a>
+<a href="#1470" id="1470">1470</a>
+<a href="#1471" id="1471">1471</a>
+<a href="#1472" id="1472">1472</a>
+<a href="#1473" id="1473">1473</a>
+<a href="#1474" id="1474">1474</a>
+<a href="#1475" id="1475">1475</a>
+<a href="#1476" id="1476">1476</a>
+<a href="#1477" id="1477">1477</a>
+<a href="#1478" id="1478">1478</a>
+<a href="#1479" id="1479">1479</a>
+<a href="#1480" id="1480">1480</a>
+<a href="#1481" id="1481">1481</a>
+<a href="#1482" id="1482">1482</a>
+<a href="#1483" id="1483">1483</a>
+<a href="#1484" id="1484">1484</a>
+<a href="#1485" id="1485">1485</a>
+<a href="#1486" id="1486">1486</a>
+<a href="#1487" id="1487">1487</a>
+<a href="#1488" id="1488">1488</a>
+<a href="#1489" id="1489">1489</a>
+<a href="#1490" id="1490">1490</a>
+<a href="#1491" id="1491">1491</a>
+<a href="#1492" id="1492">1492</a>
+<a href="#1493" id="1493">1493</a>
+<a href="#1494" id="1494">1494</a>
+<a href="#1495" id="1495">1495</a>
+<a href="#1496" id="1496">1496</a>
+<a href="#1497" id="1497">1497</a>
+<a href="#1498" id="1498">1498</a>
+<a href="#1499" id="1499">1499</a>
+<a href="#1500" id="1500">1500</a>
+<a href="#1501" id="1501">1501</a>
+<a href="#1502" id="1502">1502</a>
+<a href="#1503" id="1503">1503</a>
+<a href="#1504" id="1504">1504</a>
+<a href="#1505" id="1505">1505</a>
+<a href="#1506" id="1506">1506</a>
+<a href="#1507" id="1507">1507</a>
+<a href="#1508" id="1508">1508</a>
+<a href="#1509" id="1509">1509</a>
+<a href="#1510" id="1510">1510</a>
+<a href="#1511" id="1511">1511</a>
+<a href="#1512" id="1512">1512</a>
+<a href="#1513" id="1513">1513</a>
+<a href="#1514" id="1514">1514</a>
+<a href="#1515" id="1515">1515</a>
+<a href="#1516" id="1516">1516</a>
+<a href="#1517" id="1517">1517</a>
+<a href="#1518" id="1518">1518</a>
+<a href="#1519" id="1519">1519</a>
+<a href="#1520" id="1520">1520</a>
+<a href="#1521" id="1521">1521</a>
+<a href="#1522" id="1522">1522</a>
+<a href="#1523" id="1523">1523</a>
+<a href="#1524" id="1524">1524</a>
+<a href="#1525" id="1525">1525</a>
+<a href="#1526" id="1526">1526</a>
+<a href="#1527" id="1527">1527</a>
+<a href="#1528" id="1528">1528</a>
+<a href="#1529" id="1529">1529</a>
+<a href="#1530" id="1530">1530</a>
+<a href="#1531" id="1531">1531</a>
+<a href="#1532" id="1532">1532</a>
+<a href="#1533" id="1533">1533</a>
+<a href="#1534" id="1534">1534</a>
+<a href="#1535" id="1535">1535</a>
+<a href="#1536" id="1536">1536</a>
+<a href="#1537" id="1537">1537</a>
+<a href="#1538" id="1538">1538</a>
+<a href="#1539" id="1539">1539</a>
+<a href="#1540" id="1540">1540</a>
+<a href="#1541" id="1541">1541</a>
+<a href="#1542" id="1542">1542</a>
+<a href="#1543" id="1543">1543</a>
+<a href="#1544" id="1544">1544</a>
+<a href="#1545" id="1545">1545</a>
+<a href="#1546" id="1546">1546</a>
+<a href="#1547" id="1547">1547</a>
+<a href="#1548" id="1548">1548</a>
+<a href="#1549" id="1549">1549</a>
+<a href="#1550" id="1550">1550</a>
+<a href="#1551" id="1551">1551</a>
+<a href="#1552" id="1552">1552</a>
+<a href="#1553" id="1553">1553</a>
+<a href="#1554" id="1554">1554</a>
+<a href="#1555" id="1555">1555</a>
+<a href="#1556" id="1556">1556</a>
+<a href="#1557" id="1557">1557</a>
+<a href="#1558" id="1558">1558</a>
+<a href="#1559" id="1559">1559</a>
+<a href="#1560" id="1560">1560</a>
+<a href="#1561" id="1561">1561</a>
+<a href="#1562" id="1562">1562</a>
+<a href="#1563" id="1563">1563</a>
+<a href="#1564" id="1564">1564</a>
+<a href="#1565" id="1565">1565</a>
+<a href="#1566" id="1566">1566</a>
+<a href="#1567" id="1567">1567</a>
+<a href="#1568" id="1568">1568</a>
+<a href="#1569" id="1569">1569</a>
+<a href="#1570" id="1570">1570</a>
+<a href="#1571" id="1571">1571</a>
+<a href="#1572" id="1572">1572</a>
+<a href="#1573" id="1573">1573</a>
+<a href="#1574" id="1574">1574</a>
+<a href="#1575" id="1575">1575</a>
+<a href="#1576" id="1576">1576</a>
+<a href="#1577" id="1577">1577</a>
+<a href="#1578" id="1578">1578</a>
+<a href="#1579" id="1579">1579</a>
+<a href="#1580" id="1580">1580</a>
+<a href="#1581" id="1581">1581</a>
+<a href="#1582" id="1582">1582</a>
+<a href="#1583" id="1583">1583</a>
+<a href="#1584" id="1584">1584</a>
+<a href="#1585" id="1585">1585</a>
+<a href="#1586" id="1586">1586</a>
+<a href="#1587" id="1587">1587</a>
+<a href="#1588" id="1588">1588</a>
+<a href="#1589" id="1589">1589</a>
+<a href="#1590" id="1590">1590</a>
+<a href="#1591" id="1591">1591</a>
+<a href="#1592" id="1592">1592</a>
+<a href="#1593" id="1593">1593</a>
+<a href="#1594" id="1594">1594</a>
+<a href="#1595" id="1595">1595</a>
+<a href="#1596" id="1596">1596</a>
+<a href="#1597" id="1597">1597</a>
+<a href="#1598" id="1598">1598</a>
+<a href="#1599" id="1599">1599</a>
+<a href="#1600" id="1600">1600</a>
+<a href="#1601" id="1601">1601</a>
+<a href="#1602" id="1602">1602</a>
+<a href="#1603" id="1603">1603</a>
+<a href="#1604" id="1604">1604</a>
+<a href="#1605" id="1605">1605</a>
+<a href="#1606" id="1606">1606</a>
+<a href="#1607" id="1607">1607</a>
+<a href="#1608" id="1608">1608</a>
+<a href="#1609" id="1609">1609</a>
+<a href="#1610" id="1610">1610</a>
+<a href="#1611" id="1611">1611</a>
+<a href="#1612" id="1612">1612</a>
+<a href="#1613" id="1613">1613</a>
+<a href="#1614" id="1614">1614</a>
+<a href="#1615" id="1615">1615</a>
+<a href="#1616" id="1616">1616</a>
+<a href="#1617" id="1617">1617</a>
+<a href="#1618" id="1618">1618</a>
+<a href="#1619" id="1619">1619</a>
+<a href="#1620" id="1620">1620</a>
+<a href="#1621" id="1621">1621</a>
+<a href="#1622" id="1622">1622</a>
+<a href="#1623" id="1623">1623</a>
+<a href="#1624" id="1624">1624</a>
+<a href="#1625" id="1625">1625</a>
+<a href="#1626" id="1626">1626</a>
+<a href="#1627" id="1627">1627</a>
+<a href="#1628" id="1628">1628</a>
+<a href="#1629" id="1629">1629</a>
+<a href="#1630" id="1630">1630</a>
+<a href="#1631" id="1631">1631</a>
+<a href="#1632" id="1632">1632</a>
+<a href="#1633" id="1633">1633</a>
+<a href="#1634" id="1634">1634</a>
+<a href="#1635" id="1635">1635</a>
+<a href="#1636" id="1636">1636</a>
+<a href="#1637" id="1637">1637</a>
+<a href="#1638" id="1638">1638</a>
+<a href="#1639" id="1639">1639</a>
+<a href="#1640" id="1640">1640</a>
+<a href="#1641" id="1641">1641</a>
+<a href="#1642" id="1642">1642</a>
+<a href="#1643" id="1643">1643</a>
+<a href="#1644" id="1644">1644</a>
+<a href="#1645" id="1645">1645</a>
+<a href="#1646" id="1646">1646</a>
+<a href="#1647" id="1647">1647</a>
+<a href="#1648" id="1648">1648</a>
+<a href="#1649" id="1649">1649</a>
+<a href="#1650" id="1650">1650</a>
+<a href="#1651" id="1651">1651</a>
+<a href="#1652" id="1652">1652</a>
+<a href="#1653" id="1653">1653</a>
+<a href="#1654" id="1654">1654</a>
+<a href="#1655" id="1655">1655</a>
+<a href="#1656" id="1656">1656</a>
+<a href="#1657" id="1657">1657</a>
+<a href="#1658" id="1658">1658</a>
+<a href="#1659" id="1659">1659</a>
+<a href="#1660" id="1660">1660</a>
+<a href="#1661" id="1661">1661</a>
+<a href="#1662" id="1662">1662</a>
+<a href="#1663" id="1663">1663</a>
+<a href="#1664" id="1664">1664</a>
+<a href="#1665" id="1665">1665</a>
+<a href="#1666" id="1666">1666</a>
+<a href="#1667" id="1667">1667</a>
+<a href="#1668" id="1668">1668</a>
+<a href="#1669" id="1669">1669</a>
+<a href="#1670" id="1670">1670</a>
+<a href="#1671" id="1671">1671</a>
+<a href="#1672" id="1672">1672</a>
+<a href="#1673" id="1673">1673</a>
+<a href="#1674" id="1674">1674</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp::Ordering;
+<span class="kw">use </span>std::collections::{BTreeSet, HashMap, HashSet};
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::num::NonZeroU64;
 <span class="kw">use </span>std::ops::RangeBounds;
@@ -1458,23 +1683,22 @@
 <span class="kw">use </span><span class="kw">crate</span>::change_graph::ChangeGraph;
 <span class="kw">use </span><span class="kw">crate</span>::columnar::Key <span class="kw">as </span>EncodedKey;
 <span class="kw">use </span><span class="kw">crate</span>::exid::ExId;
+<span class="kw">use </span><span class="kw">crate</span>::hydrate;
 <span class="kw">use </span><span class="kw">crate</span>::iter::{Keys, ListRange, MapRange, Values};
-<span class="kw">use </span><span class="kw">crate</span>::marks::{Mark, MarkStateMachine};
-<span class="kw">use </span><span class="kw">crate</span>::op_observer::{BranchableObserver, OpObserver};
+<span class="kw">use </span><span class="kw">crate</span>::marks::{Mark, MarkAccumulator, MarkStateMachine};
 <span class="kw">use </span><span class="kw">crate</span>::op_set::OpSet;
 <span class="kw">use </span><span class="kw">crate</span>::parents::Parents;
+<span class="kw">use </span><span class="kw">crate</span>::patches::{Patch, PatchLog, TextRepresentation};
 <span class="kw">use </span><span class="kw">crate</span>::storage::{<span class="self">self</span>, load, CompressConfig, VerificationMode};
-<span class="kw">use </span><span class="kw">crate</span>::transaction::{
-    <span class="self">self</span>, CommitOptions, Failure, Observed, Success, Transaction, TransactionArgs, UnObserved,
-};
+<span class="kw">use </span><span class="kw">crate</span>::transaction::{<span class="self">self</span>, CommitOptions, Failure, Success, Transaction, TransactionArgs};
 <span class="kw">use </span><span class="kw">crate</span>::types::{
     ActorId, ChangeHash, Clock, ElemId, Export, Exportable, Key, MarkData, ObjId, ObjMeta, Op,
     OpId, OpType, Value,
 };
 <span class="kw">use crate</span>::{AutomergeError, Change, Cursor, ObjType, Prop, ReadDoc};
 
-<span class="kw">mod </span>current_state;
-<span class="kw">mod </span>diff;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>current_state;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>diff;
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests;
@@ -1502,7 +1726,7 @@
 /// [`ActorId`]. Existing documents can be loaded with [`Self::load`], or [`Self::load_with`].
 ///
 /// If you have two documents and you want to merge the changes from one into the other you can use
-/// [`Self::merge`] or [`Self::merge_with`].
+/// [`Self::merge`] or [`Self::merge_and_log_patches`].
 ///
 /// If you have a document you want to split into two concurrent threads of execution you can use
 /// [`Self::fork`]. If you want to split a document from ealier in its history you can use
@@ -1522,11 +1746,6 @@
 ///
 /// This type implements [`crate::sync::SyncDoc`]
 ///
-/// ## Observers
-///
-/// Many of the methods on this type have an `_with` or `_observed` variant
-/// which allow you to pass in an [`OpObserver`] to observe any changes which
-/// occur.
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>Automerge {
     <span class="doccomment">/// The list of unapplied changes that are not causally ready.
@@ -1541,8 +1760,6 @@
     </span>states: HashMap&lt;usize, Vec&lt;usize&gt;&gt;,
     <span class="doccomment">/// Current dependencies of this document (heads hashes).
     </span>deps: HashSet&lt;ChangeHash&gt;,
-    <span class="doccomment">/// Heads at the last save.
-    </span>saved: Vec&lt;ChangeHash&gt;,
     <span class="doccomment">/// The set of operations that form this document.
     </span>ops: OpSet,
     <span class="doccomment">/// The current actor.
@@ -1562,7 +1779,6 @@
             states: HashMap::new(),
             ops: Default::default(),
             deps: Default::default(),
-            saved: Default::default(),
             actor: Actor::Unused(ActorId::random()),
             max_op: <span class="number">0</span>,
         }
@@ -1644,73 +1860,95 @@
     }
 
     <span class="doccomment">/// Start a transaction.
-    </span><span class="kw">pub fn </span>transaction(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Transaction&lt;<span class="lifetime">&#39;_</span>, UnObserved&gt; {
-        <span class="kw">let </span>args = <span class="self">self</span>.transaction_args();
-        Transaction::new(<span class="self">self</span>, args, UnObserved)
+    </span><span class="kw">pub fn </span>transaction(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Transaction&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">let </span>args = <span class="self">self</span>.transaction_args(<span class="prelude-val">None</span>);
+        Transaction::new(
+            <span class="self">self</span>,
+            args,
+            PatchLog::inactive(TextRepresentation::default()),
+        )
     }
 
-    <span class="doccomment">/// Start a transaction with an observer
-    </span><span class="kw">pub fn </span>transaction_with_observer&lt;Obs: OpObserver + BranchableObserver&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        op_observer: Obs,
-    ) -&gt; Transaction&lt;<span class="lifetime">&#39;_</span>, Observed&lt;Obs&gt;&gt; {
-        <span class="kw">let </span>args = <span class="self">self</span>.transaction_args();
-        Transaction::new(<span class="self">self</span>, args, Observed::new(op_observer))
+    <span class="doccomment">/// Start a transaction which records changes in a [`PatchLog`]
+    </span><span class="kw">pub fn </span>transaction_log_patches(<span class="kw-2">&amp;mut </span><span class="self">self</span>, patch_log: PatchLog) -&gt; Transaction&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">let </span>args = <span class="self">self</span>.transaction_args(<span class="prelude-val">None</span>);
+        Transaction::new(<span class="self">self</span>, args, patch_log)
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>transaction_args(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; TransactionArgs {
-        <span class="kw">let </span>actor = <span class="self">self</span>.get_actor_index();
-        <span class="kw">let </span>seq = <span class="self">self</span>.states.get(<span class="kw-2">&amp;</span>actor).map_or(<span class="number">0</span>, |v| v.len()) <span class="kw">as </span>u64 + <span class="number">1</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>deps = <span class="self">self</span>.get_heads();
-        <span class="kw">if </span>seq &gt; <span class="number">1 </span>{
-            <span class="kw">let </span>last_hash = <span class="self">self</span>.get_hash(actor, seq - <span class="number">1</span>).unwrap();
-            <span class="kw">if </span>!deps.contains(<span class="kw-2">&amp;</span>last_hash) {
-                deps.push(last_hash);
+    <span class="doccomment">/// Start a transaction isolated at a given heads
+    </span><span class="kw">pub fn </span>transaction_at(<span class="kw-2">&amp;mut </span><span class="self">self</span>, patch_log: PatchLog, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Transaction&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">let </span>args = <span class="self">self</span>.transaction_args(<span class="prelude-val">Some</span>(heads));
+        Transaction::new(<span class="self">self</span>, args, patch_log)
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>transaction_args(<span class="kw-2">&amp;mut </span><span class="self">self</span>, heads: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[ChangeHash]&gt;) -&gt; TransactionArgs {
+        <span class="kw">let </span>actor_index;
+        <span class="kw">let </span>seq;
+        <span class="kw">let </span><span class="kw-2">mut </span>deps;
+        <span class="kw">let </span>scope;
+        <span class="kw">match </span>heads {
+            <span class="prelude-val">Some</span>(heads) =&gt; {
+                deps = heads.to_vec();
+                <span class="kw">let </span>isolation = <span class="self">self</span>.isolate_actor(heads);
+                actor_index = isolation.actor_index;
+                seq = isolation.seq;
+                scope = <span class="prelude-val">Some</span>(isolation.clock);
+            }
+            <span class="prelude-val">None </span>=&gt; {
+                actor_index = <span class="self">self</span>.get_actor_index();
+                seq = <span class="self">self</span>.states.get(<span class="kw-2">&amp;</span>actor_index).map_or(<span class="number">0</span>, |v| v.len()) <span class="kw">as </span>u64 + <span class="number">1</span>;
+                deps = <span class="self">self</span>.get_heads();
+                scope = <span class="prelude-val">None</span>;
+                <span class="kw">if </span>seq &gt; <span class="number">1 </span>{
+                    <span class="kw">let </span>last_hash = <span class="self">self</span>.get_hash(actor_index, seq - <span class="number">1</span>).unwrap();
+                    <span class="kw">if </span>!deps.contains(<span class="kw-2">&amp;</span>last_hash) {
+                        deps.push(last_hash);
+                    }
+                }
             }
         }
+
         <span class="comment">// SAFETY: this unwrap is safe as we always add 1
         </span><span class="kw">let </span>start_op = NonZeroU64::new(<span class="self">self</span>.max_op + <span class="number">1</span>).unwrap();
 
         TransactionArgs {
-            actor_index: actor,
+            actor_index,
             seq,
             start_op,
             deps,
+            scope,
         }
     }
 
     <span class="doccomment">/// Run a transaction on this document in a closure, automatically handling commit or rollback
     /// afterwards.
-    </span><span class="kw">pub fn </span>transact&lt;F, O, E&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; transaction::Result&lt;O, (), E&gt;
+    </span><span class="kw">pub fn </span>transact&lt;F, O, E&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; transaction::Result&lt;O, E&gt;
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>, UnObserved&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
     {
         <span class="self">self</span>.transact_with_impl(<span class="prelude-val">None</span>::&lt;<span class="kw-2">&amp;</span><span class="kw">dyn </span>Fn(<span class="kw-2">&amp;</span>O) -&gt; CommitOptions&gt;, f)
     }
 
     <span class="doccomment">/// Like [`Self::transact`] but with a function for generating the commit options.
-    </span><span class="kw">pub fn </span>transact_with&lt;F, O, E, C&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: C, f: F) -&gt; transaction::Result&lt;O, (), E&gt;
+    </span><span class="kw">pub fn </span>transact_with&lt;F, O, E, C&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: C, f: F) -&gt; transaction::Result&lt;O, E&gt;
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>, UnObserved&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
         C: FnOnce(<span class="kw-2">&amp;</span>O) -&gt; CommitOptions,
     {
-        <span class="self">self</span>.transact_with_impl(<span class="prelude-val">Some</span>(c), f)
+        <span class="comment">// FIXME
+        </span><span class="self">self</span>.transact_with_impl(<span class="prelude-val">Some</span>(c), f)
     }
 
-    <span class="kw">fn </span>transact_with_impl&lt;F, O, E, C&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        c: <span class="prelude-ty">Option</span>&lt;C&gt;,
-        f: F,
-    ) -&gt; transaction::Result&lt;O, (), E&gt;
+    <span class="kw">fn </span>transact_with_impl&lt;F, O, E, C&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, c: <span class="prelude-ty">Option</span>&lt;C&gt;, f: F) -&gt; transaction::Result&lt;O, E&gt;
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>, UnObserved&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
         C: FnOnce(<span class="kw-2">&amp;</span>O) -&gt; CommitOptions,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>tx = <span class="self">self</span>.transaction();
         <span class="kw">let </span>result = f(<span class="kw-2">&amp;mut </span>tx);
         <span class="kw">match </span>result {
             <span class="prelude-val">Ok</span>(result) =&gt; {
-                <span class="kw">let </span>hash = <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = c {
+                <span class="kw">let </span>(hash, patch_log) = <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = c {
                     <span class="kw">let </span>commit_options = c(<span class="kw-2">&amp;</span>result);
                     tx.commit_with(commit_options)
                 } <span class="kw">else </span>{
@@ -1719,7 +1957,7 @@
                 <span class="prelude-val">Ok</span>(Success {
                     result,
                     hash,
-                    op_observer: (),
+                    patch_log,
                 })
             }
             <span class="prelude-val">Err</span>(error) =&gt; <span class="prelude-val">Err</span>(Failure {
@@ -1729,46 +1967,50 @@
         }
     }
 
-    <span class="doccomment">/// Run a transaction on this document in a closure, observing ops with `Obs`, automatically handling commit or rollback
+    <span class="doccomment">/// Run a transaction on this document in a closure, collecting patches, automatically handling commit or rollback
     /// afterwards.
-    </span><span class="kw">pub fn </span>transact_observed&lt;F, O, E, Obs&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; transaction::Result&lt;O, Obs, E&gt;
+    ///
+    /// The collected patches are available in the return value of [`Transaction::commit`]
+    </span><span class="kw">pub fn </span>transact_and_log_patches&lt;F, O, E&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        text_rep: TextRepresentation,
+        f: F,
+    ) -&gt; transaction::Result&lt;O, E&gt;
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>, Observed&lt;Obs&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
-        Obs: OpObserver + BranchableObserver + Default,
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
     {
-        <span class="self">self</span>.transact_observed_with_impl(<span class="prelude-val">None</span>::&lt;<span class="kw-2">&amp;</span><span class="kw">dyn </span>Fn(<span class="kw-2">&amp;</span>O) -&gt; CommitOptions&gt;, f)
+        <span class="self">self</span>.transact_and_log_patches_with_impl(text_rep, <span class="prelude-val">None</span>::&lt;<span class="kw-2">&amp;</span><span class="kw">dyn </span>Fn(<span class="kw-2">&amp;</span>O) -&gt; CommitOptions&gt;, f)
     }
 
-    <span class="doccomment">/// Like [`Self::transact_observed`] but with a function for generating the commit options
-    </span><span class="kw">pub fn </span>transact_observed_with&lt;F, O, E, C, Obs&gt;(
+    <span class="doccomment">/// Like [`Self::transact_and_log_patches`] but with a function for generating the commit options
+    </span><span class="kw">pub fn </span>transact_and_log_patches_with&lt;F, O, E, C&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        text_rep: TextRepresentation,
         c: C,
         f: F,
-    ) -&gt; transaction::Result&lt;O, Obs, E&gt;
+    ) -&gt; transaction::Result&lt;O, E&gt;
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>, Observed&lt;Obs&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
         C: FnOnce(<span class="kw-2">&amp;</span>O) -&gt; CommitOptions,
-        Obs: OpObserver + BranchableObserver + Default,
     {
-        <span class="self">self</span>.transact_observed_with_impl(<span class="prelude-val">Some</span>(c), f)
+        <span class="self">self</span>.transact_and_log_patches_with_impl(text_rep, <span class="prelude-val">Some</span>(c), f)
     }
 
-    <span class="kw">fn </span>transact_observed_with_impl&lt;F, O, Obs, E, C&gt;(
+    <span class="kw">fn </span>transact_and_log_patches_with_impl&lt;F, O, E, C&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        text_rep: TextRepresentation,
         c: <span class="prelude-ty">Option</span>&lt;C&gt;,
         f: F,
-    ) -&gt; transaction::Result&lt;O, Obs, E&gt;
+    ) -&gt; transaction::Result&lt;O, E&gt;
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>, Observed&lt;Obs&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Transaction&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;O, E&gt;,
         C: FnOnce(<span class="kw-2">&amp;</span>O) -&gt; CommitOptions,
-        Obs: OpObserver + BranchableObserver + Default,
     {
-        <span class="kw">let </span>observer = Obs::default();
-        <span class="kw">let </span><span class="kw-2">mut </span>tx = <span class="self">self</span>.transaction_with_observer(observer);
+        <span class="kw">let </span><span class="kw-2">mut </span>tx = <span class="self">self</span>.transaction_log_patches(PatchLog::active(text_rep));
         <span class="kw">let </span>result = f(<span class="kw-2">&amp;mut </span>tx);
         <span class="kw">match </span>result {
             <span class="prelude-val">Ok</span>(result) =&gt; {
-                <span class="kw">let </span>(obs, hash) = <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = c {
+                <span class="kw">let </span>(hash, history) = <span class="kw">if let </span><span class="prelude-val">Some</span>(c) = c {
                     <span class="kw">let </span>commit_options = c(<span class="kw-2">&amp;</span>result);
                     tx.commit_with(commit_options)
                 } <span class="kw">else </span>{
@@ -1777,7 +2019,7 @@
                 <span class="prelude-val">Ok</span>(Success {
                     result,
                     hash,
-                    op_observer: obs,
+                    patch_log: history,
                 })
             }
             <span class="prelude-val">Err</span>(error) =&gt; <span class="prelude-val">Err</span>(Failure {
@@ -1792,7 +2034,7 @@
     /// The main reason to do this is if you want to create a &quot;merge commit&quot;, which is a change
     /// that has all the current heads of the document as dependencies.
     </span><span class="kw">pub fn </span>empty_commit(<span class="kw-2">&amp;mut </span><span class="self">self</span>, opts: CommitOptions) -&gt; ChangeHash {
-        <span class="kw">let </span>args = <span class="self">self</span>.transaction_args();
+        <span class="kw">let </span>args = <span class="self">self</span>.transaction_args(<span class="prelude-val">None</span>);
         Transaction::empty(<span class="self">self</span>, args, opts)
     }
 
@@ -1832,6 +2074,22 @@
         <span class="prelude-val">Ok</span>(f)
     }
 
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>exid_to_opid(<span class="kw-2">&amp;</span><span class="self">self</span>, id: <span class="kw-2">&amp;</span>ExId) -&gt; <span class="prelude-ty">Result</span>&lt;OpId, AutomergeError&gt; {
+        <span class="kw">match </span>id {
+            ExId::Root =&gt; <span class="prelude-val">Ok</span>(OpId::new(<span class="number">0</span>, <span class="number">0</span>)),
+            ExId::Id(ctr, actor, idx) =&gt; {
+                <span class="kw">let </span>opid = <span class="kw">if </span><span class="self">self</span>.ops.m.actors.cache.get(<span class="kw-2">*</span>idx) == <span class="prelude-val">Some</span>(actor) {
+                    OpId::new(<span class="kw-2">*</span>ctr, <span class="kw-2">*</span>idx)
+                } <span class="kw">else if let </span><span class="prelude-val">Some</span>(backup_idx) = <span class="self">self</span>.ops.m.actors.lookup(actor) {
+                    OpId::new(<span class="kw-2">*</span>ctr, backup_idx)
+                } <span class="kw">else </span>{
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(AutomergeError::InvalidObjId(id.to_string()));
+                };
+                <span class="prelude-val">Ok</span>(opid)
+            }
+        }
+    }
+
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_obj_meta(<span class="kw-2">&amp;</span><span class="self">self</span>, id: ObjId) -&gt; <span class="prelude-ty">Result</span>&lt;ObjMeta, AutomergeError&gt; {
         <span class="kw">if </span>id.is_root() {
             <span class="prelude-val">Ok</span>(ObjMeta::root())
@@ -1861,18 +2119,8 @@
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>exid_to_obj(<span class="kw-2">&amp;</span><span class="self">self</span>, id: <span class="kw-2">&amp;</span>ExId) -&gt; <span class="prelude-ty">Result</span>&lt;ObjMeta, AutomergeError&gt; {
-        <span class="kw">let </span>obj = <span class="kw">match </span>id {
-            ExId::Root =&gt; ObjId::root(),
-            ExId::Id(ctr, actor, idx) =&gt; {
-                <span class="kw">if </span><span class="self">self</span>.ops.m.actors.cache.get(<span class="kw-2">*</span>idx) == <span class="prelude-val">Some</span>(actor) {
-                    ObjId(OpId::new(<span class="kw-2">*</span>ctr, <span class="kw-2">*</span>idx))
-                } <span class="kw">else if let </span><span class="prelude-val">Some</span>(backup_idx) = <span class="self">self</span>.ops.m.actors.lookup(actor) {
-                    ObjId(OpId::new(<span class="kw-2">*</span>ctr, backup_idx))
-                } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(AutomergeError::InvalidObjId(id.to_string()));
-                }
-            }
-        };
+        <span class="kw">let </span>opid = <span class="self">self</span>.exid_to_opid(id)<span class="question-mark">?</span>;
+        <span class="kw">let </span>obj = ObjId(opid);
         <span class="self">self</span>.get_obj_meta(obj)
     }
 
@@ -1886,28 +2134,41 @@
 
     <span class="doccomment">/// Load a document.
     </span><span class="kw">pub fn </span>load(data: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, AutomergeError&gt; {
-        <span class="self">Self</span>::load_with::&lt;()&gt;(data, OnPartialLoad::Error, VerificationMode::Check, <span class="prelude-val">None</span>)
+        <span class="self">Self</span>::load_with(
+            data,
+            OnPartialLoad::Error,
+            VerificationMode::Check,
+            <span class="kw-2">&amp;mut </span>PatchLog::inactive(TextRepresentation::default()),
+        )
     }
 
     <span class="doccomment">/// Load a document without verifying the head hashes
     ///
     /// This is useful for debugging as it allows you to examine a corrupted document.
     </span><span class="kw">pub fn </span>load_unverified_heads(data: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, AutomergeError&gt; {
-        <span class="self">Self</span>::load_with::&lt;()&gt;(
+        <span class="self">Self</span>::load_with(
             data,
             OnPartialLoad::Error,
             VerificationMode::DontCheck,
-            <span class="prelude-val">None</span>,
+            <span class="kw-2">&amp;mut </span>PatchLog::inactive(TextRepresentation::default()),
         )
     }
 
-    <span class="doccomment">/// Load a document with an observer
-    </span><span class="attr">#[tracing::instrument(skip(data, observer), err)]
-    </span><span class="kw">pub fn </span>load_with&lt;Obs: OpObserver&gt;(
+    <span class="doccomment">/// Load a document, with options
+    ///
+    /// # Arguments
+    /// * `data` - The data to load
+    /// * `on_error` - What to do if the document is only partially loaded. This can happen if some
+    ///                prefix of `data` contains valid data.
+    /// * `mode` - Whether to verify the head hashes after loading
+    /// * `patch_log` - A [`PatchLog`] to log the changes required to materialize the current state of
+    ///                 the document once loaded
+    </span><span class="attr">#[tracing::instrument(skip(data), err)]
+    </span><span class="kw">pub fn </span>load_with(
         data: <span class="kw-2">&amp;</span>[u8],
         on_error: OnPartialLoad,
         mode: VerificationMode,
-        <span class="kw-2">mut </span>observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, AutomergeError&gt; {
         <span class="kw">if </span>data.is_empty() {
             <span class="macro">tracing::trace!</span>(<span class="string">&quot;no data, initializing empty document&quot;</span>);
@@ -1921,9 +2182,11 @@
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>change: <span class="prelude-ty">Option</span>&lt;Change&gt; = <span class="prelude-val">None</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>first_chunk_was_doc = <span class="bool-val">false</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>am = <span class="kw">match </span>first_chunk {
             storage::Chunk::Document(d) =&gt; {
                 <span class="macro">tracing::trace!</span>(<span class="string">&quot;first chunk is document chunk, inflating&quot;</span>);
+                first_chunk_was_doc = <span class="bool-val">true</span>;
                 <span class="kw">let </span>storage::load::Reconstructed {
                     max_op,
                     result: op_set,
@@ -1951,7 +2214,6 @@
                     change_graph,
                     ops: op_set,
                     deps: heads.into_iter().collect(),
-                    saved: Default::default(),
                     actor: Actor::Unused(ActorId::random()),
                     max_op,
                 }
@@ -1980,7 +2242,9 @@
         <span class="kw">match </span>load::load_changes(remaining.reset()) {
             load::LoadedChanges::Complete(c) =&gt; {
                 am.apply_changes(change.into_iter().chain(c))<span class="question-mark">?</span>;
-                <span class="kw">if </span>!am.queue.is_empty() {
+                <span class="comment">// Only allow missing deps if the first chunk was a document chunk
+                // See https://github.com/automerge/automerge/pull/599#issuecomment-1549667472
+                </span><span class="kw">if </span>!am.queue.is_empty() &amp;&amp; !first_chunk_was_doc {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(AutomergeError::MissingDeps);
                 }
             }
@@ -1990,35 +2254,59 @@
                 }
             }
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(observer) = <span class="kw-2">&amp;mut </span>observer {
-            current_state::observe_current_state(<span class="kw-2">&amp;</span>am, <span class="kw-2">*</span>observer);
+        <span class="kw">if </span>patch_log.is_active() {
+            current_state::log_current_state_patches(<span class="kw-2">&amp;</span>am, patch_log);
         }
         <span class="prelude-val">Ok</span>(am)
+    }
+
+    <span class="doccomment">/// Create the patches from a [`PatchLog`]
+    ///
+    /// See the documentation for [`PatchLog`] for more details on this
+    </span><span class="kw">pub fn </span>make_patches(<span class="kw-2">&amp;</span><span class="self">self</span>, patch_log: <span class="kw-2">&amp;mut </span>PatchLog) -&gt; Vec&lt;Patch&gt; {
+        patch_log.make_patches(<span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Get a set of [`Patch`]es which materialize the current state of the document
+    ///
+    /// This is a convienence method for `doc.diff(&amp;[], current_heads)`
+    </span><span class="kw">pub fn </span>current_state(<span class="kw-2">&amp;</span><span class="self">self</span>, text_rep: TextRepresentation) -&gt; Vec&lt;Patch&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>patch_log = PatchLog::active(text_rep);
+        current_state::log_current_state_patches(<span class="self">self</span>, <span class="kw-2">&amp;mut </span>patch_log);
+        patch_log.make_patches(<span class="self">self</span>)
     }
 
     <span class="doccomment">/// Load an incremental save of a document.
     ///
     /// Unlike `load` this imports changes into an existing document. It will work with both the
-    /// output of [`Self::save`] and [`Self::save_incremental`]
+    /// output of [`Self::save`] and [`Self::save_after`]
     ///
     /// The return value is the number of ops which were applied, this is not useful and will
     /// change in future.
     </span><span class="kw">pub fn </span>load_incremental(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;usize, AutomergeError&gt; {
-        <span class="self">self</span>.load_incremental_with::&lt;()&gt;(data, <span class="prelude-val">None</span>)
+        <span class="self">self</span>.load_incremental_log_patches(
+            data,
+            <span class="kw-2">&amp;mut </span>PatchLog::inactive(TextRepresentation::default()),
+        )
     }
 
-    <span class="doccomment">/// Like [`Self::load_incremental`] but with an observer
-    </span><span class="kw">pub fn </span>load_incremental_with&lt;Obs: OpObserver&gt;(
+    <span class="doccomment">/// Like [`Self::load_incremental`] but log the changes to the current state of the document to
+    /// [`PatchLog`]
+    </span><span class="kw">pub fn </span>load_incremental_log_patches(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         data: <span class="kw-2">&amp;</span>[u8],
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;usize, AutomergeError&gt; {
         <span class="kw">if </span><span class="self">self</span>.is_empty() {
-            <span class="kw">let </span><span class="kw-2">mut </span>doc =
-                <span class="self">Self</span>::load_with::&lt;()&gt;(data, OnPartialLoad::Ignore, VerificationMode::Check, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>doc = <span class="self">Self</span>::load_with(
+                data,
+                OnPartialLoad::Ignore,
+                VerificationMode::Check,
+                <span class="kw-2">&amp;mut </span>PatchLog::inactive(TextRepresentation::default()),
+            )<span class="question-mark">?</span>;
             doc = doc.with_actor(<span class="self">self</span>.actor_id());
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(obs) = op_observer {
-                current_state::observe_current_state(<span class="kw-2">&amp;</span>doc, obs);
+            <span class="kw">if </span>patch_log.is_active() {
+                current_state::log_current_state_patches(<span class="kw-2">&amp;</span>doc, patch_log);
             }
             <span class="kw-2">*</span><span class="self">self </span>= doc;
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">self</span>.ops.len());
@@ -2031,7 +2319,7 @@
             }
         };
         <span class="kw">let </span>start = <span class="self">self</span>.ops.len();
-        <span class="self">self</span>.apply_changes_with(changes, op_observer)<span class="question-mark">?</span>;
+        <span class="self">self</span>.apply_changes_log_patches(changes, patch_log)<span class="question-mark">?</span>;
         <span class="kw">let </span>delta = <span class="self">self</span>.ops.len() - start;
         <span class="prelude-val">Ok</span>(delta)
     }
@@ -2054,21 +2342,24 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         changes: <span class="kw">impl </span>IntoIterator&lt;Item = Change&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
-        <span class="self">self</span>.apply_changes_with::&lt;<span class="kw">_</span>, ()&gt;(changes, <span class="prelude-val">None</span>)
+        <span class="self">self</span>.apply_changes_log_patches(
+            changes,
+            <span class="kw-2">&amp;mut </span>PatchLog::inactive(TextRepresentation::default()),
+        )
     }
 
-    <span class="doccomment">/// Like [`Self::apply_changes`] but with an observer
-    </span><span class="kw">pub fn </span>apply_changes_with&lt;I: IntoIterator&lt;Item = Change&gt;, Obs: OpObserver&gt;(
+    <span class="doccomment">/// Like [`Self::apply_changes`] but log the resulting changes to the current state of the
+    /// document to `patch_log`
+    </span><span class="kw">pub fn </span>apply_changes_log_patches&lt;I: IntoIterator&lt;Item = Change&gt;&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         changes: I,
-        <span class="kw-2">mut </span>op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
         <span class="comment">// Record this so we can avoid observing each individual change and instead just observe
         // the final state after all the changes have been applied. We can only do this for an
         // empty document right now, once we have logic to produce the diffs between arbitrary
         // states of the OpSet we can make this cleaner.
-        </span><span class="kw">let </span>empty_at_start = <span class="self">self</span>.is_empty();
-        <span class="kw">for </span>c <span class="kw">in </span>changes {
+        </span><span class="kw">for </span>c <span class="kw">in </span>changes {
             <span class="kw">if </span>!<span class="self">self</span>.history_index.contains_key(<span class="kw-2">&amp;</span>c.hash()) {
                 <span class="kw">if </span><span class="self">self</span>.duplicate_seq(<span class="kw-2">&amp;</span>c) {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(AutomergeError::DuplicateSeqNumber(
@@ -2077,11 +2368,7 @@
                     ));
                 }
                 <span class="kw">if </span><span class="self">self</span>.is_causally_ready(<span class="kw-2">&amp;</span>c) {
-                    <span class="kw">if </span>empty_at_start {
-                        <span class="self">self</span>.apply_change::&lt;()&gt;(c, <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>)<span class="question-mark">?</span>;
-                    } <span class="kw">else </span>{
-                        <span class="self">self</span>.apply_change(c, <span class="kw-2">&amp;mut </span>op_observer)<span class="question-mark">?</span>;
-                    }
+                    <span class="self">self</span>.apply_change(c, patch_log)<span class="question-mark">?</span>;
                 } <span class="kw">else </span>{
                     <span class="self">self</span>.queue.push(c);
                 }
@@ -2089,30 +2376,21 @@
         }
         <span class="kw">while let </span><span class="prelude-val">Some</span>(c) = <span class="self">self</span>.pop_next_causally_ready_change() {
             <span class="kw">if </span>!<span class="self">self</span>.history_index.contains_key(<span class="kw-2">&amp;</span>c.hash()) {
-                <span class="kw">if </span>empty_at_start {
-                    <span class="self">self</span>.apply_change::&lt;()&gt;(c, <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>)<span class="question-mark">?</span>;
-                } <span class="kw">else </span>{
-                    <span class="self">self</span>.apply_change(c, <span class="kw-2">&amp;mut </span>op_observer)<span class="question-mark">?</span>;
-                }
-            }
-        }
-        <span class="kw">if </span>empty_at_start {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(observer) = <span class="kw-2">&amp;mut </span>op_observer {
-                current_state::observe_current_state(<span class="self">self</span>, <span class="kw-2">*</span>observer);
+                <span class="self">self</span>.apply_change(c, patch_log)<span class="question-mark">?</span>;
             }
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>apply_change&lt;Obs: OpObserver&gt;(
+    <span class="kw">fn </span>apply_change(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         change: Change,
-        observer: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
         <span class="kw">let </span>ops = <span class="self">self</span>.import_ops(<span class="kw-2">&amp;</span>change);
         <span class="self">self</span>.update_history(change, ops.len());
         <span class="kw">for </span>(obj, op) <span class="kw">in </span>ops {
-            <span class="self">self</span>.insert_op(<span class="kw-2">&amp;</span>obj, op, observer)<span class="question-mark">?</span>;
+            <span class="self">self</span>.insert_op(<span class="kw-2">&amp;</span>obj, op, patch_log)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -2193,14 +2471,18 @@
 
     <span class="doccomment">/// Takes all the changes in `other` which are not in `self` and applies them
     </span><span class="kw">pub fn </span>merge(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="kw-2">&amp;mut </span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ChangeHash&gt;, AutomergeError&gt; {
-        <span class="self">self</span>.merge_with::&lt;()&gt;(other, <span class="prelude-val">None</span>)
+        <span class="self">self</span>.merge_and_log_patches(
+            other,
+            <span class="kw-2">&amp;mut </span>PatchLog::inactive(TextRepresentation::default()),
+        )
     }
 
-    <span class="doccomment">/// Takes all the changes in `other` which are not in `self` and applies them
-    </span><span class="kw">pub fn </span>merge_with&lt;Obs: OpObserver&gt;(
+    <span class="doccomment">/// Takes all the changes in `other` which are not in `self` and applies them whilst logging
+    /// the resulting changes to the current state of the document to `patch_log`
+    </span><span class="kw">pub fn </span>merge_and_log_patches(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         other: <span class="kw-2">&amp;mut </span><span class="self">Self</span>,
-        op_observer: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ChangeHash&gt;, AutomergeError&gt; {
         <span class="comment">// TODO: Make this fallible and figure out how to do this transactionally
         </span><span class="kw">let </span>changes = <span class="self">self
@@ -2209,69 +2491,66 @@
             .cloned()
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
         <span class="macro">tracing::trace!</span>(changes=<span class="question-mark">?</span>changes.iter().map(|c| c.hash()).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(), <span class="string">&quot;merging new changes&quot;</span>);
-        <span class="self">self</span>.apply_changes_with(changes, op_observer)<span class="question-mark">?</span>;
+        <span class="self">self</span>.apply_changes_log_patches(changes, patch_log)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.get_heads())
     }
 
     <span class="doccomment">/// Save the entirety of this document in a compact form.
-    ///
-    /// This takes a mutable reference to self because it saves the heads of the last save so that
-    /// `save_incremental` can be used to produce only the changes since the last `save`. This API
-    /// will be changing in future.
-    </span><span class="kw">pub fn </span>save(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
+    </span><span class="kw">pub fn </span>save_with_options(<span class="kw-2">&amp;</span><span class="self">self</span>, options: SaveOptions) -&gt; Vec&lt;u8&gt; {
         <span class="kw">let </span>heads = <span class="self">self</span>.get_heads();
         <span class="kw">let </span>c = <span class="self">self</span>.history.iter();
-        <span class="kw">let </span>bytes = <span class="kw">crate</span>::storage::save::save_document(
+        <span class="kw">let </span>compress = <span class="kw">if </span>options.deflate {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(CompressConfig::None)
+        };
+        <span class="kw">let </span><span class="kw-2">mut </span>bytes = <span class="kw">crate</span>::storage::save::save_document(
             c,
             <span class="self">self</span>.ops.iter().map(|(objid, <span class="kw">_</span>, op)| (objid, op)),
             <span class="kw-2">&amp;</span><span class="self">self</span>.ops.m.actors,
             <span class="kw-2">&amp;</span><span class="self">self</span>.ops.m.props,
             <span class="kw-2">&amp;</span>heads,
-            <span class="prelude-val">None</span>,
+            compress,
         );
-        <span class="self">self</span>.saved = <span class="self">self</span>.get_heads();
+        <span class="kw">if </span>options.retain_orphans {
+            <span class="kw">for </span>orphaned <span class="kw">in </span><span class="self">self</span>.queue.iter() {
+                bytes.extend(orphaned.raw_bytes());
+            }
+        }
         bytes
     }
 
+    <span class="doccomment">/// Save the entirety of this document in a compact form.
+    </span><span class="kw">pub fn </span>save(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
+        <span class="self">self</span>.save_with_options(SaveOptions::default())
+    }
+
     <span class="doccomment">/// Save the document and attempt to load it before returning - slow!
-    </span><span class="kw">pub fn </span>save_and_verify(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, AutomergeError&gt; {
+    </span><span class="kw">pub fn </span>save_and_verify(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, AutomergeError&gt; {
         <span class="kw">let </span>bytes = <span class="self">self</span>.save();
         <span class="self">Self</span>::load(<span class="kw-2">&amp;</span>bytes)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(bytes)
     }
 
     <span class="doccomment">/// Save this document, but don&#39;t run it through DEFLATE afterwards
-    </span><span class="kw">pub fn </span>save_nocompress(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
-        <span class="kw">let </span>heads = <span class="self">self</span>.get_heads();
-        <span class="kw">let </span>c = <span class="self">self</span>.history.iter();
-        <span class="kw">let </span>bytes = <span class="kw">crate</span>::storage::save::save_document(
-            c,
-            <span class="self">self</span>.ops.iter().map(|(objid, <span class="kw">_</span>, op)| (objid, op)),
-            <span class="kw-2">&amp;</span><span class="self">self</span>.ops.m.actors,
-            <span class="kw-2">&amp;</span><span class="self">self</span>.ops.m.props,
-            <span class="kw-2">&amp;</span>heads,
-            <span class="prelude-val">Some</span>(CompressConfig::None),
-        );
-        <span class="self">self</span>.saved = <span class="self">self</span>.get_heads();
-        bytes
+    </span><span class="kw">pub fn </span>save_nocompress(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
+        <span class="self">self</span>.save_with_options(SaveOptions {
+            deflate: <span class="bool-val">false</span>,
+            ..Default::default()
+        })
     }
 
-    <span class="doccomment">/// Save the changes since the last call to [Self::save`]
+    <span class="doccomment">/// Save the changes since the given heads
     ///
     /// The output of this will not be a compressed document format, but a series of individual
     /// changes. This is useful if you know you have only made a small change since the last `save`
     /// and you want to immediately send it somewhere (e.g. you&#39;ve inserted a single character in a
     /// text object).
-    </span><span class="kw">pub fn </span>save_incremental(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
-        <span class="kw">let </span>changes = <span class="self">self
-            </span>.get_changes(<span class="self">self</span>.saved.as_slice())
-            .expect(<span class="string">&quot;Should only be getting changes using previously saved heads&quot;</span>);
+    </span><span class="kw">pub fn </span>save_after(<span class="kw-2">&amp;</span><span class="self">self</span>, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Vec&lt;u8&gt; {
+        <span class="kw">let </span>changes = <span class="self">self</span>.get_changes(heads);
         <span class="kw">let </span><span class="kw-2">mut </span>bytes = <span class="macro">vec!</span>[];
         <span class="kw">for </span>c <span class="kw">in </span>changes {
             bytes.extend(c.raw_bytes());
-        }
-        <span class="kw">if </span>!bytes.is_empty() {
-            <span class="self">self</span>.saved = <span class="self">self</span>.get_heads()
         }
         bytes
     }
@@ -2296,7 +2575,7 @@
     }
 
     <span class="doccomment">/// Get the changes since `have_deps` in this document using a clock internally.
-    </span><span class="kw">fn </span>get_changes_clock(<span class="kw-2">&amp;</span><span class="self">self</span>, have_deps: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw-2">&amp;</span>Change&gt;, AutomergeError&gt; {
+    </span><span class="kw">fn </span>get_changes_clock(<span class="kw-2">&amp;</span><span class="self">self</span>, have_deps: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Vec&lt;<span class="kw-2">&amp;</span>Change&gt; {
         <span class="comment">// get the clock for the given deps
         </span><span class="kw">let </span>clock = <span class="self">self</span>.clock_at(have_deps);
 
@@ -2317,10 +2596,10 @@
         <span class="comment">// ensure the changes are still in sorted order
         </span>change_indexes.sort_unstable();
 
-        <span class="prelude-val">Ok</span>(change_indexes
+        change_indexes
             .into_iter()
             .map(|i| <span class="kw-2">&amp;</span><span class="self">self</span>.history[i])
-            .collect())
+            .collect()
     }
 
     <span class="doccomment">/// Get the last change this actor made to the document.
@@ -2332,8 +2611,40 @@
             .find(|c| c.actor_id() == <span class="self">self</span>.get_actor());
     }
 
-    <span class="kw">fn </span>clock_at(<span class="kw-2">&amp;</span><span class="self">self</span>, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Clock {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>clock_at(<span class="kw-2">&amp;</span><span class="self">self</span>, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Clock {
         <span class="self">self</span>.change_graph.clock_for_heads(heads)
+    }
+
+    <span class="kw">fn </span>get_isolated_actor_index(<span class="kw-2">&amp;mut </span><span class="self">self</span>, level: usize) -&gt; usize {
+        <span class="kw">if </span>level == <span class="number">0 </span>{
+            <span class="self">self</span>.get_actor_index()
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>base_actor = <span class="self">self</span>.get_actor();
+            <span class="kw">let </span>new_actor = base_actor.with_concurrency(level);
+            <span class="self">self</span>.ops.m.actors.cache(new_actor)
+        }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>isolate_actor(<span class="kw-2">&amp;mut </span><span class="self">self</span>, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Isolation {
+        <span class="kw">let </span><span class="kw-2">mut </span>clock = <span class="self">self</span>.clock_at(heads);
+        <span class="kw">let </span><span class="kw-2">mut </span>actor_index = <span class="self">self</span>.get_isolated_actor_index(<span class="number">0</span>);
+
+        <span class="kw">for </span>i <span class="kw">in </span><span class="number">1</span>.. {
+            <span class="kw">let </span>max_op = <span class="self">self</span>.max_op_for_actor(actor_index);
+            <span class="kw">if </span>max_op == <span class="number">0 </span>|| clock.covers(<span class="kw-2">&amp;</span>OpId::new(max_op, actor_index)) {
+                clock.isolate(actor_index);
+                <span class="kw">break</span>;
+            }
+            actor_index = <span class="self">self</span>.get_isolated_actor_index(i);
+        }
+
+        <span class="kw">let </span>seq = <span class="self">self</span>.states.get(<span class="kw-2">&amp;</span>actor_index).map_or(<span class="number">0</span>, |v| v.len()) <span class="kw">as </span>u64 + <span class="number">1</span>;
+
+        Isolation {
+            actor_index,
+            seq,
+            clock,
+        }
     }
 
     <span class="kw">fn </span>get_hash(<span class="kw-2">&amp;</span><span class="self">self</span>, actor: usize, seq: u64) -&gt; <span class="prelude-ty">Result</span>&lt;ChangeHash, AutomergeError&gt; {
@@ -2343,6 +2654,15 @@
             .and_then(|<span class="kw-2">&amp;</span>i| <span class="self">self</span>.history.get(i))
             .map(|c| c.hash())
             .ok_or(AutomergeError::InvalidSeq(seq))
+    }
+
+    <span class="kw">fn </span>max_op_for_actor(<span class="kw-2">&amp;mut </span><span class="self">self</span>, actor_index: usize) -&gt; u64 {
+        <span class="self">self</span>.states
+            .get(<span class="kw-2">&amp;</span>actor_index)
+            .and_then(|s| s.last())
+            .and_then(|index| <span class="self">self</span>.history.get(<span class="kw-2">*</span>index))
+            .map(|change| change.max_op())
+            .unwrap_or(<span class="number">0</span>)
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>update_history(<span class="kw-2">&amp;mut </span><span class="self">self</span>, change: Change, num_ops: usize) -&gt; usize {
@@ -2491,19 +2811,19 @@
         <span class="self">self</span>.ops.visualise(objects)
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>insert_op&lt;Obs: OpObserver&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>insert_op(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         obj: <span class="kw-2">&amp;</span>ObjId,
         op: Op,
-        observer: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Obs&gt;,
+        patch_log: <span class="kw-2">&amp;mut </span>PatchLog,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
-        <span class="kw">let </span>(pos, succ) = <span class="kw">if let </span><span class="prelude-val">Some</span>(observer) = observer {
+        <span class="kw">let </span>(pos, succ) = <span class="kw">if </span>patch_log.is_active() {
             <span class="kw">let </span>obj = <span class="self">self</span>.get_obj_meta(<span class="kw-2">*</span>obj)<span class="question-mark">?</span>;
-            <span class="kw">let </span>found = <span class="self">self</span>.ops.find_op_with_observer(<span class="kw-2">&amp;</span>obj, <span class="kw-2">&amp;</span>op);
-            found.observe(<span class="kw-2">&amp;</span>obj, <span class="kw-2">&amp;</span>op, <span class="self">self</span>, <span class="kw-2">*</span>observer);
+            <span class="kw">let </span>found = <span class="self">self</span>.ops.find_op_with_patch_log(<span class="kw-2">&amp;</span>obj, <span class="kw-2">&amp;</span>op);
+            found.log_patches(<span class="kw-2">&amp;</span>obj, <span class="kw-2">&amp;</span>op, <span class="self">self</span>, patch_log);
             (found.pos, found.succ)
         } <span class="kw">else </span>{
-            <span class="kw">let </span>found = <span class="self">self</span>.ops.find_op_without_observer(obj, <span class="kw-2">&amp;</span>op);
+            <span class="kw">let </span>found = <span class="self">self</span>.ops.find_op_without_patch_log(obj, <span class="kw-2">&amp;</span>op);
             (found.pos, found.succ)
         };
 
@@ -2515,17 +2835,21 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Observe changes in the document between the &#39;before&#39;
-    /// and &#39;after&#39; heads.  If the arguments are reverse it will
-    /// observe the same changes in the opposite order.
-    </span><span class="kw">pub fn </span>observe_diff&lt;Obs: OpObserver&gt;(
+    <span class="doccomment">/// Create patches representing the change in the current state of the document between the
+    /// &#39;before&#39; and &#39;after&#39; heads.  If the arguments are reverse it will observe the same changes
+    /// in the opposite order.
+    </span><span class="kw">pub fn </span>diff(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        before: <span class="kw-2">&amp;</span>[ChangeHash],
-        after: <span class="kw-2">&amp;</span>[ChangeHash],
-        observer: <span class="kw-2">&amp;mut </span>Obs,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), AutomergeError&gt; {
-        diff::observe_diff(<span class="self">self</span>, before, after, observer);
-        <span class="prelude-val">Ok</span>(())
+        before_heads: <span class="kw-2">&amp;</span>[ChangeHash],
+        after_heads: <span class="kw-2">&amp;</span>[ChangeHash],
+        text_rep: TextRepresentation,
+    ) -&gt; Vec&lt;Patch&gt; {
+        <span class="kw">let </span>before = <span class="self">self</span>.clock_at(before_heads);
+        <span class="kw">let </span>after = <span class="self">self</span>.clock_at(after_heads);
+        <span class="kw">let </span><span class="kw-2">mut </span>patch_log = PatchLog::active(text_rep);
+        diff::log_diff(<span class="self">self</span>, <span class="kw-2">&amp;</span>before, <span class="kw-2">&amp;</span>after, <span class="kw-2">&amp;mut </span>patch_log);
+        patch_log.heads = <span class="prelude-val">Some</span>(after_heads.to_vec());
+        patch_log.make_patches(<span class="self">self</span>)
     }
 
     <span class="doccomment">/// Get the heads of this document.
@@ -2535,7 +2859,7 @@
         deps
     }
 
-    <span class="kw">pub fn </span>get_changes(<span class="kw-2">&amp;</span><span class="self">self</span>, have_deps: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw-2">&amp;</span>Change&gt;, AutomergeError&gt; {
+    <span class="kw">pub fn </span>get_changes(<span class="kw-2">&amp;</span><span class="self">self</span>, have_deps: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Vec&lt;<span class="kw-2">&amp;</span>Change&gt; {
         <span class="self">self</span>.get_changes_clock(have_deps)
     }
 
@@ -2565,170 +2889,161 @@
             .collect()
     }
 
-    <span class="kw">fn </span>calculate_marks&lt;O: AsRef&lt;ExId&gt;&gt;(
+    <span class="doccomment">/// Get the hash of the change that contains the given opid.
+    ///
+    /// Returns none if the opid:
+    /// - is the root object id
+    /// - does not exist in this document
+    </span><span class="kw">pub fn </span>hash_for_opid(<span class="kw-2">&amp;</span><span class="self">self</span>, exid: <span class="kw-2">&amp;</span>ExId) -&gt; <span class="prelude-ty">Option</span>&lt;ChangeHash&gt; {
+        <span class="kw">match </span>exid {
+            ExId::Root =&gt; <span class="prelude-val">None</span>,
+            ExId::Id(..) =&gt; {
+                <span class="kw">let </span>opid = <span class="self">self</span>.exid_to_opid(exid).ok()<span class="question-mark">?</span>;
+                <span class="kw">let </span>actor_indices = <span class="self">self</span>.states.get(<span class="kw-2">&amp;</span>opid.actor())<span class="question-mark">?</span>;
+                <span class="kw">let </span>change_index_index = actor_indices
+                    .binary_search_by(|change_index| {
+                        <span class="kw">let </span>change = <span class="self">self
+                            </span>.history
+                            .get(<span class="kw-2">*</span>change_index)
+                            .expect(<span class="string">&quot;State index should refer to a valid change&quot;</span>);
+                        <span class="kw">let </span>start = change.start_op().get();
+                        <span class="kw">let </span>len = change.len() <span class="kw">as </span>u64;
+                        <span class="kw">if </span>opid.counter() &lt; start {
+                            Ordering::Greater
+                        } <span class="kw">else if </span>start + len &lt;= opid.counter() {
+                            Ordering::Less
+                        } <span class="kw">else </span>{
+                            Ordering::Equal
+                        }
+                    })
+                    .ok()<span class="question-mark">?</span>;
+                <span class="kw">let </span>change_index = actor_indices.get(change_index_index).unwrap();
+                <span class="prelude-val">Some</span>(<span class="self">self</span>.history.get(<span class="kw-2">*</span>change_index).unwrap().hash())
+            }
+        }
+    }
+
+    <span class="kw">fn </span>calculate_marks(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
-        heads: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[ChangeHash]&gt;,
+        obj: <span class="kw-2">&amp;</span>ExId,
+        clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Mark&lt;<span class="lifetime">&#39;_</span>&gt;&gt;, AutomergeError&gt; {
         <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="kw">let </span>clock = heads.map(|heads| <span class="self">self</span>.clock_at(heads));
         <span class="kw">let </span>ops_by_key = <span class="self">self</span>.ops().iter_ops(<span class="kw-2">&amp;</span>obj.id).group_by(|o| o.elemid_or_key());
         <span class="kw">let </span><span class="kw-2">mut </span>index = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>marks = MarkStateMachine::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>acc = MarkAccumulator::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>last_marks = <span class="prelude-val">None</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>mark_len = <span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>mark_index = <span class="number">0</span>;
+        <span class="kw">for </span>(_key, key_ops) <span class="kw">in </span>ops_by_key.into_iter() {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(o) = key_ops.filter(|o| o.visible_or_mark(clock.as_ref())).last() {
+                <span class="kw">match </span><span class="kw-2">&amp;</span>o.action {
+                    OpType::Make(<span class="kw">_</span>) | OpType::Put(<span class="kw">_</span>) =&gt; {
+                        <span class="kw">let </span>len = o.width(obj.encoding);
+                        <span class="kw">if </span>last_marks.as_ref() != marks.current() {
+                            <span class="kw">if </span>mark_len &gt; <span class="number">0 </span>&amp;&amp; last_marks.is_some() {
+                                acc.add(mark_index, mark_len, last_marks.as_ref().unwrap());
+                            }
+                            last_marks = marks.current().cloned();
+                            mark_index = index;
+                            mark_len = <span class="number">0</span>;
+                        }
+                        mark_len += len;
+                        index += len;
+                    }
+                    OpType::MarkBegin(<span class="kw">_</span>, data) =&gt; {
+                        marks.mark_begin(o.id, data, <span class="kw-2">&amp;</span><span class="self">self</span>.ops.m);
+                    }
+                    OpType::MarkEnd(<span class="kw">_</span>) =&gt; {
+                        marks.mark_end(o.id, <span class="kw-2">&amp;</span><span class="self">self</span>.ops.m);
+                    }
+                    OpType::Increment(<span class="kw">_</span>) | OpType::Delete =&gt; {}
+                }
+            }
+        }
+        <span class="kw">if </span>mark_len &gt; <span class="number">0 </span>&amp;&amp; last_marks.is_some() {
+            acc.add(mark_index, mark_len, last_marks.as_ref().unwrap());
+        }
+        <span class="prelude-val">Ok</span>(acc.into_iter_no_unmark().collect())
+    }
 
-        <span class="prelude-val">Ok</span>(ops_by_key
-            .into_iter()
-            .filter_map(|(_key, key_ops)| {
-                key_ops
-                    .filter(|o| o.visible_or_mark(clock.as_ref()))
-                    .last()
-                    .and_then(|o| <span class="kw">match </span><span class="kw-2">&amp;</span>o.action {
-                        OpType::Make(<span class="kw">_</span>) | OpType::Put(<span class="kw">_</span>) =&gt; {
-                            index += o.width(obj.encoding);
-                            <span class="prelude-val">None
-                        </span>}
-                        OpType::MarkBegin(<span class="kw">_</span>, data) =&gt; marks.mark_begin(o.id, index, data, <span class="self">self</span>),
-                        OpType::MarkEnd(<span class="kw">_</span>) =&gt; marks.mark_end(o.id, index, <span class="self">self</span>),
-                        OpType::Increment(<span class="kw">_</span>) | OpType::Delete =&gt; <span class="prelude-val">None</span>,
-                    })
-            })
-            .collect())
+    <span class="kw">pub fn </span>hydrate(<span class="kw-2">&amp;</span><span class="self">self</span>, heads: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[ChangeHash]&gt;) -&gt; hydrate::Value {
+        <span class="kw">let </span>clock = heads.map(|heads| <span class="self">self</span>.clock_at(heads));
+        <span class="self">self</span>.hydrate_map(<span class="kw-2">&amp;</span>ObjId::root(), clock.as_ref())
     }
 }
 
-<span class="kw">impl </span>ReadDoc <span class="kw">for </span>Automerge {
-    <span class="kw">fn </span>parents&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; <span class="prelude-ty">Result</span>&lt;Parents&lt;<span class="lifetime">&#39;_</span>&gt;, AutomergeError&gt; {
-        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.ops.parents(obj.id, <span class="prelude-val">None</span>))
-    }
-
-    <span class="kw">fn </span>parents_at&lt;O: AsRef&lt;ExId&gt;&gt;(
+<span class="kw">impl </span>Automerge {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parents_for(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
-        heads: <span class="kw-2">&amp;</span>[ChangeHash],
+        obj: <span class="kw-2">&amp;</span>ExId,
+        clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Parents&lt;<span class="lifetime">&#39;_</span>&gt;, AutomergeError&gt; {
-        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.ops.parents(obj.id, <span class="prelude-val">Some</span>(clock)))
+        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.ops.parents(obj.id, clock))
     }
 
-    <span class="kw">fn </span>keys&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; Keys&lt;<span class="lifetime">&#39;_</span>&gt; {
-        <span class="self">self</span>.exid_to_obj(obj.as_ref())
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>keys_for(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: <span class="kw-2">&amp;</span>ExId, clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;) -&gt; Keys&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="self">self</span>.exid_to_obj(obj)
             .ok()
-            .map(|obj| <span class="self">self</span>.ops.keys(<span class="kw-2">&amp;</span>obj.id, <span class="prelude-val">None</span>))
+            .map(|obj| <span class="self">self</span>.ops.keys(<span class="kw-2">&amp;</span>obj.id, clock))
             .unwrap_or_default()
     }
 
-    <span class="kw">fn </span>keys_at&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Keys&lt;<span class="lifetime">&#39;_</span>&gt; {
-        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
-        <span class="self">self</span>.exid_to_obj(obj.as_ref())
-            .ok()
-            .map(|obj| <span class="self">self</span>.ops.keys(<span class="kw-2">&amp;</span>obj.id, <span class="prelude-val">Some</span>(clock)))
-            .unwrap_or_default()
-    }
-
-    <span class="kw">fn </span>map_range&lt;<span class="lifetime">&#39;a</span>, O: AsRef&lt;ExId&gt;, R: RangeBounds&lt;String&gt; + <span class="lifetime">&#39;a</span>&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>map_range_for&lt;<span class="lifetime">&#39;a</span>, R: RangeBounds&lt;String&gt; + <span class="lifetime">&#39;a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
-        obj: O,
+        obj: <span class="kw-2">&amp;</span>ExId,
         range: R,
+        clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
     ) -&gt; MapRange&lt;<span class="lifetime">&#39;a</span>, R&gt; {
-        <span class="self">self</span>.exid_to_obj(obj.as_ref())
+        <span class="self">self</span>.exid_to_obj(obj)
             .ok()
-            .map(|obj| <span class="self">self</span>.ops.map_range(<span class="kw-2">&amp;</span>obj.id, range, <span class="prelude-val">None</span>))
+            .map(|obj| <span class="self">self</span>.ops.map_range(<span class="kw-2">&amp;</span>obj.id, range, clock))
             .unwrap_or_default()
     }
 
-    <span class="kw">fn </span>map_range_at&lt;<span class="lifetime">&#39;a</span>, O: AsRef&lt;ExId&gt;, R: RangeBounds&lt;String&gt; + <span class="lifetime">&#39;a</span>&gt;(
-        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
-        obj: O,
-        range: R,
-        heads: <span class="kw-2">&amp;</span>[ChangeHash],
-    ) -&gt; MapRange&lt;<span class="lifetime">&#39;a</span>, R&gt; {
-        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
-        <span class="self">self</span>.exid_to_obj(obj.as_ref())
-            .ok()
-            .map(|obj| <span class="self">self</span>.ops.map_range(<span class="kw-2">&amp;</span>obj.id, range, <span class="prelude-val">Some</span>(clock)))
-            .unwrap_or_default()
-    }
-
-    <span class="kw">fn </span>list_range&lt;O: AsRef&lt;ExId&gt;, R: RangeBounds&lt;usize&gt;&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>list_range_for&lt;R: RangeBounds&lt;usize&gt;&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
+        obj: <span class="kw-2">&amp;</span>ExId,
         range: R,
+        clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
     ) -&gt; ListRange&lt;<span class="lifetime">&#39;_</span>, R&gt; {
-        <span class="self">self</span>.exid_to_obj(obj.as_ref())
+        <span class="self">self</span>.exid_to_obj(obj)
             .ok()
-            .map(|obj| <span class="self">self</span>.ops.list_range(<span class="kw-2">&amp;</span>obj.id, range, obj.encoding, <span class="prelude-val">None</span>))
+            .map(|obj| <span class="self">self</span>.ops.list_range(<span class="kw-2">&amp;</span>obj.id, range, obj.encoding, clock))
             .unwrap_or_default()
     }
 
-    <span class="kw">fn </span>list_range_at&lt;O: AsRef&lt;ExId&gt;, R: RangeBounds&lt;usize&gt;&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
-        range: R,
-        heads: <span class="kw-2">&amp;</span>[ChangeHash],
-    ) -&gt; ListRange&lt;<span class="lifetime">&#39;_</span>, R&gt; {
-        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
-        <span class="self">self</span>.exid_to_obj(obj.as_ref())
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>values_for(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: <span class="kw-2">&amp;</span>ExId, clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;) -&gt; Values&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="self">self</span>.exid_to_obj(obj)
             .ok()
-            .map(|obj| {
-                <span class="self">self</span>.ops
-                    .list_range(<span class="kw-2">&amp;</span>obj.id, range, obj.encoding, <span class="prelude-val">Some</span>(clock))
-            })
+            .map(|obj| Values::new(<span class="self">self</span>.ops.top_ops(<span class="kw-2">&amp;</span>obj.id, clock.clone()), <span class="self">self</span>, clock))
             .unwrap_or_default()
     }
 
-    <span class="kw">fn </span>values&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; Values&lt;<span class="lifetime">&#39;_</span>&gt; {
-        <span class="self">self</span>.exid_to_obj(obj.as_ref())
-            .ok()
-            .map(|obj| Values::new(<span class="self">self</span>.ops.top_ops(<span class="kw-2">&amp;</span>obj.id, <span class="prelude-val">None</span>), <span class="self">self</span>, <span class="prelude-val">None</span>))
-            .unwrap_or_default()
-    }
-
-    <span class="kw">fn </span>values_at&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Values&lt;<span class="lifetime">&#39;_</span>&gt; {
-        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
-        <span class="self">self</span>.exid_to_obj(obj.as_ref())
-            .ok()
-            .map(|obj| {
-                Values::new(
-                    <span class="self">self</span>.ops.top_ops(<span class="kw-2">&amp;</span>obj.id, <span class="prelude-val">Some</span>(clock.clone())),
-                    <span class="self">self</span>,
-                    <span class="prelude-val">Some</span>(clock),
-                )
-            })
-            .unwrap_or_default()
-    }
-
-    <span class="kw">fn </span>length&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; usize {
-        <span class="self">self</span>.exid_to_obj(obj.as_ref())
-            .map(|obj| <span class="self">self</span>.ops.length(<span class="kw-2">&amp;</span>obj.id, obj.encoding, <span class="prelude-val">None</span>))
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>length_for(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: <span class="kw-2">&amp;</span>ExId, clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;) -&gt; usize {
+        <span class="self">self</span>.exid_to_obj(obj)
+            .map(|obj| <span class="self">self</span>.ops.length(<span class="kw-2">&amp;</span>obj.id, obj.encoding, clock))
             .unwrap_or(<span class="number">0</span>)
     }
 
-    <span class="kw">fn </span>length_at&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; usize {
-        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
-        <span class="self">self</span>.exid_to_obj(obj.as_ref())
-            .map(|obj| <span class="self">self</span>.ops.length(<span class="kw-2">&amp;</span>obj.id, obj.encoding, <span class="prelude-val">Some</span>(clock)))
-            .unwrap_or(<span class="number">0</span>)
-    }
-
-    <span class="kw">fn </span>object_type&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; <span class="prelude-ty">Result</span>&lt;ObjType, AutomergeError&gt; {
-        <span class="self">self</span>.exid_to_obj(obj.as_ref()).map(|obj| obj.typ)
-    }
-
-    <span class="kw">fn </span>text&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; <span class="prelude-ty">Result</span>&lt;String, AutomergeError&gt; {
-        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.ops.text(<span class="kw-2">&amp;</span>obj.id, <span class="prelude-val">None</span>))
-    }
-
-    <span class="kw">fn </span>get_cursor&lt;O: AsRef&lt;ExId&gt;&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>text_for(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
+        obj: <span class="kw-2">&amp;</span>ExId,
+        clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;String, AutomergeError&gt; {
+        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.ops.text(<span class="kw-2">&amp;</span>obj.id, clock))
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_cursor_for(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: <span class="kw-2">&amp;</span>ExId,
         position: usize,
-        at: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[ChangeHash]&gt;,
+        clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Cursor, AutomergeError&gt; {
-        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="kw">let </span>clock = at.map(|heads| <span class="self">self</span>.clock_at(heads));
+        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj)<span class="question-mark">?</span>;
         <span class="kw">if </span>!obj.typ.is_sequence() {
             <span class="prelude-val">Err</span>(AutomergeError::InvalidOp(obj.typ))
         } <span class="kw">else </span>{
@@ -2743,14 +3058,13 @@
         }
     }
 
-    <span class="kw">fn </span>get_cursor_position&lt;O: AsRef&lt;ExId&gt;&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_cursor_position_for(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
+        obj: <span class="kw-2">&amp;</span>ExId,
         cursor: <span class="kw-2">&amp;</span>Cursor,
-        at: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[ChangeHash]&gt;,
+        clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;usize, AutomergeError&gt; {
-        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="kw">let </span>clock = at.map(|heads| <span class="self">self</span>.clock_at(heads));
+        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj)<span class="question-mark">?</span>;
         <span class="kw">let </span>opid = <span class="self">self</span>.cursor_to_opid(cursor, clock.as_ref())<span class="question-mark">?</span>;
         <span class="kw">let </span>found = <span class="self">self
             </span>.ops
@@ -2759,92 +3073,38 @@
         <span class="prelude-val">Ok</span>(found.index)
     }
 
-    <span class="kw">fn </span>text_at&lt;O: AsRef&lt;ExId&gt;&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>marks_for(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
-        heads: <span class="kw-2">&amp;</span>[ChangeHash],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;String, AutomergeError&gt; {
-        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.ops.text(<span class="kw-2">&amp;</span>obj.id, <span class="prelude-val">Some</span>(clock)))
-    }
-
-    <span class="kw">fn </span>marks&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Mark&lt;<span class="lifetime">&#39;_</span>&gt;&gt;, AutomergeError&gt; {
-        <span class="self">self</span>.calculate_marks(obj, <span class="prelude-val">None</span>)
-    }
-
-    <span class="kw">fn </span>marks_at&lt;O: AsRef&lt;ExId&gt;&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
-        heads: <span class="kw-2">&amp;</span>[ChangeHash],
+        obj: <span class="kw-2">&amp;</span>ExId,
+        clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Mark&lt;<span class="lifetime">&#39;_</span>&gt;&gt;, AutomergeError&gt; {
-        <span class="self">self</span>.calculate_marks(obj, <span class="prelude-val">Some</span>(heads))
+        <span class="self">self</span>.calculate_marks(obj, clock)
     }
 
-    <span class="kw">fn </span>get&lt;O: AsRef&lt;ExId&gt;, P: Into&lt;Prop&gt;&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_for(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
-        prop: P,
+        obj: <span class="kw-2">&amp;</span>ExId,
+        prop: Prop,
+        clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(Value&lt;<span class="lifetime">&#39;_</span>&gt;, ExId)&gt;, AutomergeError&gt; {
-        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="kw">let </span>clock = <span class="prelude-val">None</span>;
+        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">self
             </span>.ops
-            .seek_ops_by_prop(<span class="kw-2">&amp;</span>obj.id, prop.into(), obj.encoding, clock)
-            .ops
-            .into_iter()
-            .last()
-            .map(|op| <span class="self">self</span>.export_value(op, clock)))
-    }
-
-    <span class="kw">fn </span>get_at&lt;O: AsRef&lt;ExId&gt;, P: Into&lt;Prop&gt;&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
-        prop: P,
-        heads: <span class="kw-2">&amp;</span>[ChangeHash],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(Value&lt;<span class="lifetime">&#39;_</span>&gt;, ExId)&gt;, AutomergeError&gt; {
-        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="kw">let </span>clock = <span class="prelude-val">Some</span>(<span class="self">self</span>.clock_at(heads));
-        <span class="prelude-val">Ok</span>(<span class="self">self
-            </span>.ops
-            .seek_ops_by_prop(<span class="kw-2">&amp;</span>obj.id, prop.into(), obj.encoding, clock.as_ref())
+            .seek_ops_by_prop(<span class="kw-2">&amp;</span>obj.id, prop, obj.encoding, clock.as_ref())
             .ops
             .into_iter()
             .last()
             .map(|op| <span class="self">self</span>.export_value(op, clock.as_ref())))
     }
 
-    <span class="kw">fn </span>get_all&lt;O: AsRef&lt;ExId&gt;, P: Into&lt;Prop&gt;&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_all_for&lt;O: AsRef&lt;ExId&gt;, P: Into&lt;Prop&gt;&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         obj: O,
         prop: P,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(Value&lt;<span class="lifetime">&#39;_</span>&gt;, ExId)&gt;, AutomergeError&gt; {
-        <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="kw">let </span>clock = <span class="prelude-val">None</span>;
-        <span class="kw">let </span>values = <span class="self">self
-            </span>.ops
-            .seek_ops_by_prop(<span class="kw-2">&amp;</span>obj.id, prop.into(), obj.encoding, clock)
-            .ops
-            .into_iter()
-            .map(|op| <span class="self">self</span>.export_value(op, clock))
-            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="comment">// this is a test to make sure opid and exid are always sorting the same way
-        </span><span class="macro">assert_eq!</span>(
-            values.iter().map(|v| <span class="kw-2">&amp;</span>v.<span class="number">1</span>).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
-            values.iter().map(|v| <span class="kw-2">&amp;</span>v.<span class="number">1</span>).sorted().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
-        );
-        <span class="prelude-val">Ok</span>(values)
-    }
-
-    <span class="kw">fn </span>get_all_at&lt;O: AsRef&lt;ExId&gt;, P: Into&lt;Prop&gt;&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        obj: O,
-        prop: P,
-        heads: <span class="kw-2">&amp;</span>[ChangeHash],
+        clock: <span class="prelude-ty">Option</span>&lt;Clock&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(Value&lt;<span class="lifetime">&#39;_</span>&gt;, ExId)&gt;, AutomergeError&gt; {
         <span class="kw">let </span>prop = prop.into();
         <span class="kw">let </span>obj = <span class="self">self</span>.exid_to_obj(obj.as_ref())<span class="question-mark">?</span>;
-        <span class="kw">let </span>clock = <span class="prelude-val">Some</span>(<span class="self">self</span>.clock_at(heads));
         <span class="kw">let </span>values = <span class="self">self
             </span>.ops
             .seek_ops_by_prop(<span class="kw-2">&amp;</span>obj.id, prop, obj.encoding, clock.as_ref())
@@ -2858,6 +3118,170 @@
             values.iter().map(|v| <span class="kw-2">&amp;</span>v.<span class="number">1</span>).sorted().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
         );
         <span class="prelude-val">Ok</span>(values)
+    }
+}
+
+<span class="kw">impl </span>ReadDoc <span class="kw">for </span>Automerge {
+    <span class="kw">fn </span>parents&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; <span class="prelude-ty">Result</span>&lt;Parents&lt;<span class="lifetime">&#39;_</span>&gt;, AutomergeError&gt; {
+        <span class="self">self</span>.parents_for(obj.as_ref(), <span class="prelude-val">None</span>)
+    }
+
+    <span class="kw">fn </span>parents_at&lt;O: AsRef&lt;ExId&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        heads: <span class="kw-2">&amp;</span>[ChangeHash],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Parents&lt;<span class="lifetime">&#39;_</span>&gt;, AutomergeError&gt; {
+        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
+        <span class="self">self</span>.parents_for(obj.as_ref(), <span class="prelude-val">Some</span>(clock))
+    }
+
+    <span class="kw">fn </span>keys&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; Keys&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="self">self</span>.keys_for(obj.as_ref(), <span class="prelude-val">None</span>)
+    }
+
+    <span class="kw">fn </span>keys_at&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Keys&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
+        <span class="self">self</span>.keys_for(obj.as_ref(), <span class="prelude-val">Some</span>(clock))
+    }
+
+    <span class="kw">fn </span>map_range&lt;<span class="lifetime">&#39;a</span>, O: AsRef&lt;ExId&gt;, R: RangeBounds&lt;String&gt; + <span class="lifetime">&#39;a</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
+        obj: O,
+        range: R,
+    ) -&gt; MapRange&lt;<span class="lifetime">&#39;a</span>, R&gt; {
+        <span class="self">self</span>.map_range_for(obj.as_ref(), range, <span class="prelude-val">None</span>)
+    }
+
+    <span class="kw">fn </span>map_range_at&lt;<span class="lifetime">&#39;a</span>, O: AsRef&lt;ExId&gt;, R: RangeBounds&lt;String&gt; + <span class="lifetime">&#39;a</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
+        obj: O,
+        range: R,
+        heads: <span class="kw-2">&amp;</span>[ChangeHash],
+    ) -&gt; MapRange&lt;<span class="lifetime">&#39;a</span>, R&gt; {
+        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
+        <span class="self">self</span>.map_range_for(obj.as_ref(), range, <span class="prelude-val">Some</span>(clock))
+    }
+
+    <span class="kw">fn </span>list_range&lt;O: AsRef&lt;ExId&gt;, R: RangeBounds&lt;usize&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        range: R,
+    ) -&gt; ListRange&lt;<span class="lifetime">&#39;_</span>, R&gt; {
+        <span class="self">self</span>.list_range_for(obj.as_ref(), range, <span class="prelude-val">None</span>)
+    }
+
+    <span class="kw">fn </span>list_range_at&lt;O: AsRef&lt;ExId&gt;, R: RangeBounds&lt;usize&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        range: R,
+        heads: <span class="kw-2">&amp;</span>[ChangeHash],
+    ) -&gt; ListRange&lt;<span class="lifetime">&#39;_</span>, R&gt; {
+        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
+        <span class="self">self</span>.list_range_for(obj.as_ref(), range, <span class="prelude-val">Some</span>(clock))
+    }
+
+    <span class="kw">fn </span>values&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; Values&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="self">self</span>.values_for(obj.as_ref(), <span class="prelude-val">None</span>)
+    }
+
+    <span class="kw">fn </span>values_at&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Values&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
+        <span class="self">self</span>.values_for(obj.as_ref(), <span class="prelude-val">Some</span>(clock))
+    }
+
+    <span class="kw">fn </span>length&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; usize {
+        <span class="self">self</span>.length_for(obj.as_ref(), <span class="prelude-val">None</span>)
+    }
+
+    <span class="kw">fn </span>length_at&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; usize {
+        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
+        <span class="self">self</span>.length_for(obj.as_ref(), <span class="prelude-val">Some</span>(clock))
+    }
+
+    <span class="kw">fn </span>text&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; <span class="prelude-ty">Result</span>&lt;String, AutomergeError&gt; {
+        <span class="self">self</span>.text_for(obj.as_ref(), <span class="prelude-val">None</span>)
+    }
+
+    <span class="kw">fn </span>get_cursor&lt;O: AsRef&lt;ExId&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        position: usize,
+        at: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[ChangeHash]&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Cursor, AutomergeError&gt; {
+        <span class="kw">let </span>clock = at.map(|heads| <span class="self">self</span>.clock_at(heads));
+        <span class="self">self</span>.get_cursor_for(obj.as_ref(), position, clock)
+    }
+
+    <span class="kw">fn </span>get_cursor_position&lt;O: AsRef&lt;ExId&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        cursor: <span class="kw-2">&amp;</span>Cursor,
+        at: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[ChangeHash]&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;usize, AutomergeError&gt; {
+        <span class="kw">let </span>clock = at.map(|heads| <span class="self">self</span>.clock_at(heads));
+        <span class="self">self</span>.get_cursor_position_for(obj.as_ref(), cursor, clock)
+    }
+
+    <span class="kw">fn </span>text_at&lt;O: AsRef&lt;ExId&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        heads: <span class="kw-2">&amp;</span>[ChangeHash],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;String, AutomergeError&gt; {
+        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
+        <span class="self">self</span>.text_for(obj.as_ref(), <span class="prelude-val">Some</span>(clock))
+    }
+
+    <span class="kw">fn </span>marks&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Mark&lt;<span class="lifetime">&#39;_</span>&gt;&gt;, AutomergeError&gt; {
+        <span class="self">self</span>.marks_for(obj.as_ref(), <span class="prelude-val">None</span>)
+    }
+
+    <span class="kw">fn </span>marks_at&lt;O: AsRef&lt;ExId&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        heads: <span class="kw-2">&amp;</span>[ChangeHash],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Mark&lt;<span class="lifetime">&#39;_</span>&gt;&gt;, AutomergeError&gt; {
+        <span class="kw">let </span>clock = <span class="self">self</span>.clock_at(heads);
+        <span class="self">self</span>.marks_for(obj.as_ref(), <span class="prelude-val">Some</span>(clock))
+    }
+
+    <span class="kw">fn </span>get&lt;O: AsRef&lt;ExId&gt;, P: Into&lt;Prop&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        prop: P,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(Value&lt;<span class="lifetime">&#39;_</span>&gt;, ExId)&gt;, AutomergeError&gt; {
+        <span class="self">self</span>.get_for(obj.as_ref(), prop.into(), <span class="prelude-val">None</span>)
+    }
+
+    <span class="kw">fn </span>get_at&lt;O: AsRef&lt;ExId&gt;, P: Into&lt;Prop&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        prop: P,
+        heads: <span class="kw-2">&amp;</span>[ChangeHash],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(Value&lt;<span class="lifetime">&#39;_</span>&gt;, ExId)&gt;, AutomergeError&gt; {
+        <span class="kw">let </span>clock = <span class="prelude-val">Some</span>(<span class="self">self</span>.clock_at(heads));
+        <span class="self">self</span>.get_for(obj.as_ref(), prop.into(), clock)
+    }
+
+    <span class="kw">fn </span>get_all&lt;O: AsRef&lt;ExId&gt;, P: Into&lt;Prop&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        prop: P,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(Value&lt;<span class="lifetime">&#39;_</span>&gt;, ExId)&gt;, AutomergeError&gt; {
+        <span class="self">self</span>.get_all_for(obj.as_ref(), prop.into(), <span class="prelude-val">None</span>)
+    }
+
+    <span class="kw">fn </span>get_all_at&lt;O: AsRef&lt;ExId&gt;, P: Into&lt;Prop&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        obj: O,
+        prop: P,
+        heads: <span class="kw-2">&amp;</span>[ChangeHash],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(Value&lt;<span class="lifetime">&#39;_</span>&gt;, ExId)&gt;, AutomergeError&gt; {
+        <span class="kw">let </span>clock = <span class="prelude-val">Some</span>(<span class="self">self</span>.clock_at(heads));
+        <span class="self">self</span>.get_all_for(obj.as_ref(), prop.into(), clock)
+    }
+
+    <span class="kw">fn </span>object_type&lt;O: AsRef&lt;ExId&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, obj: O) -&gt; <span class="prelude-ty">Result</span>&lt;ObjType, AutomergeError&gt; {
+        <span class="self">self</span>.exid_to_obj(obj.as_ref()).map(|obj| obj.typ)
     }
 
     <span class="kw">fn </span>get_missing_deps(<span class="kw-2">&amp;</span><span class="self">self</span>, heads: <span class="kw-2">&amp;</span>[ChangeHash]) -&gt; Vec&lt;ChangeHash&gt; {
@@ -2897,5 +3321,29 @@
         <span class="self">Self</span>::new()
     }
 }
-</code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="automerge" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
+
+<span class="doccomment">/// Options to pass to `[Automerge::save_with_options]` and [`crate::AutoCommit::save_with_options`]
+</span><span class="attr">#[derive(Debug)]
+</span><span class="kw">pub struct </span>SaveOptions {
+    <span class="doccomment">/// Whether to apply DEFLATE compression to the RLE encoded columns in the document
+    </span><span class="kw">pub </span>deflate: bool,
+    <span class="doccomment">/// Whether to save changes which we do not have the dependencies for
+    </span><span class="kw">pub </span>retain_orphans: bool,
+}
+
+<span class="kw">impl </span>std::default::Default <span class="kw">for </span>SaveOptions {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            deflate: <span class="bool-val">true</span>,
+            retain_orphans: <span class="bool-val">true</span>,
+        }
+    }
+}
+
+<span class="attr">#[derive(Debug)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Isolation {
+    actor_index: usize,
+    seq: u64,
+    clock: Clock,
+}
+</code></pre></div></section></main></body></html>
